@@ -1,5 +1,6 @@
-# MyJarvis 开源仓 CI：独立构建与测试是开源仓的硬性验收标准。
-# napi job 覆盖 GitHub 支持的全部平台 runner，逐平台真实构建 `.node` 并冒烟 `mj capabilities`。
+# CI for the MyJarvis open repository: standalone build and test are the acceptance bar.
+# The napi job covers every GitHub-hosted platform runner, builds the real `.node`
+# per platform and smoke-tests `mj capabilities`.
 name: CI
 
 on:
