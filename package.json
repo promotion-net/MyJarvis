@@ -7,8 +7,8 @@
   "scripts": {
     "build": "cargo build --workspace && pnpm -r build",
     "build:napi": "node scripts/build-napi.ts",
-    "build:desktop": "pnpm tauri build --config projects/packages/my-jarvis-desktop/src-tauri/tauri.conf.json",
-    "dev:desktop": "pnpm tauri dev --config projects/packages/my-jarvis-desktop/src-tauri/tauri.conf.json",
+    "build:desktop": "pnpm tauri build --config projects/crates/jarvis-desktop/tauri.conf.json",
+    "dev:desktop": "pnpm tauri dev --config projects/crates/jarvis-desktop/tauri.conf.json",
     "test": "cargo test --workspace && pnpm -r test"
   },
   "devDependencies": {

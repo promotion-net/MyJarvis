@@ -2,7 +2,7 @@
 resolver = "2"
 members = [
     "projects/crates/*",
-    "projects/packages/my-jarvis-desktop/src-tauri",
+    "projects/crates/jarvis-desktop",
     "projects/packages/my-jarvis-mobile/src-tauri",
 ]
 
