@@ -1,0 +1,44 @@
+[workspace]
+resolver = "2"
+members = [
+  "projects/crates/*",
+  "tools/xtask",
+  # 壳落地后追加：
+  # "projects/packages/desktop-shell/src-tauri",
+  # "projects/packages/mobile-shell/src-tauri",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+
+[workspace.dependencies]
+# internal crates
+jarvis-core = { path = "projects/crates/jarvis-core" }
+jarvis-runtime = { path = "projects/crates/jarvis-runtime" }
+jarvis-sandbox = { path = "projects/crates/jarvis-sandbox" }
+jarvis-provider = { path = "projects/crates/jarvis-provider" }
+jarvis-billing = { path = "projects/crates/jarvis-billing" }
+jarvis-mcp = { path = "projects/crates/jarvis-mcp" }
+jarvis-verify = { path = "projects/crates/jarvis-verify" }
+
+# external
+async-trait = "0.1"
+axum = "0.8"
+clap = { version = "4", features = ["derive"] }
+futures = "0.3"
+http = "1"
+napi = "3"
+napi-build = "2"
+napi-derive = "3"
+rusqlite = { version = "0.32", features = ["bundled", "functions"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tempfile = "3"
+thiserror = "2"
+tokio = { version = "1", features = ["full"] }
+tower-http = { version = "0.6", features = ["fs"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+uuid = { version = "1", features = ["v4", "serde"] }
