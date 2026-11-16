@@ -1747,6 +1747,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "jarvis-mobile-shell"
+version = "0.1.0"
+dependencies = [
+ "jarvis-core",
+ "serde_json",
+]
+
+[[package]]
 name = "jarvis-napi"
 version = "0.1.0"
 dependencies = [
@@ -2120,14 +2128,6 @@ dependencies = [
  "libc",
  "wasi",
  "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "mobile-shell"
-version = "0.1.0"
-dependencies = [
- "jarvis-core",
- "serde_json",
 ]
 
 [[package]]
