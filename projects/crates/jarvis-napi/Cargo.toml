@@ -9,8 +9,11 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 jarvis-core = { workspace = true }
+jarvis-mcp = { workspace = true }
+jarvis-sandbox = { workspace = true }
 napi = { workspace = true }
 napi-derive = { workspace = true }
+serde = { workspace = true }
 serde_json = { workspace = true }
 
 [build-dependencies]

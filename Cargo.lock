@@ -713,9 +713,12 @@ name = "jarvis-napi"
 version = "0.1.0"
 dependencies = [
  "jarvis-core",
+ "jarvis-mcp",
+ "jarvis-sandbox",
  "napi",
  "napi-build",
  "napi-derive",
+ "serde",
  "serde_json",
 ]
 
