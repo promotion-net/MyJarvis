@@ -1,7 +1,9 @@
-//! MCP server：把 `jarvis-core` 能力目录注册为 tool，供外部 coding agent 读取。
+//! MCP server: registers the `jarvis-core` capability catalog as tools so external
+//! coding agents can read them.
 //!
-//! 第一阶段暴露能力契约（`mj_capabilities` / `mj_schema`）；带 app 会话的
-//! 执行类 tool 在 runtime 会话接入后追加。`handle_request` 为纯函数，可确定性测试。
+//! This layer exposes the capability contract (`mj_capabilities` / `mj_schema`);
+//! execution tools bound to an app session are added once a host runtime session is
+//! wired in. `handle_request` is a pure function and deterministically testable.
 
 use jarvis_core::{CONTRACT_VERSION, capability_catalog};
 use serde_json::{Value, json};
@@ -12,7 +14,7 @@ fn tool_name(capability_id: &str) -> String {
     capability_id.replace(':', "_")
 }
 
-/// MCP `tools/list` 的 tool 定义。
+/// MCP `tools/list` tool definitions.
 pub fn tool_definitions() -> Vec<Value> {
     let mut tools: Vec<Value> = vec![json!({
         "name": "mj_capabilities",
@@ -29,7 +31,7 @@ pub fn tool_definitions() -> Vec<Value> {
     tools
 }
 
-/// 处理一条 JSON-RPC 请求；notification（无需应答）返回 None。
+/// Handles one JSON-RPC request; notifications (no response required) return None.
 pub fn handle_request(request: &Value) -> Option<Value> {
     let method = request.get("method")?.as_str()?;
     if method.starts_with("notifications/") {

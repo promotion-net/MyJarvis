@@ -1,8 +1,9 @@
-//! 参考实现：通用 webhook SMS provider。
+//! Reference implementation: a generic webhook SMS provider.
 //!
-//! 把 `{ to, text }` POST 到配置的端点，响应文本作为 `message_id`。
-//! 这是社区 provider 的模板（凭证管理属于宿主，不在本实现里）；
-//! 商业供应商实现与路由策略在闭源仓，走同一 `SmsProvider` trait。
+//! POSTs `{ to, text }` to the configured endpoint and uses the response text as `message_id`.
+//! This doubles as the template for community providers (credential management belongs to the
+//! host, not to this implementation); vendor-specific implementations satisfy the same
+//! `SmsProvider` trait.
 
 use async_trait::async_trait;
 

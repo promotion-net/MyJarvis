@@ -1,9 +1,10 @@
-//! 子进程沙箱执行器（第一阶段为 Node sidecar，V8 在 Node 内）。
+//! Subprocess sandbox executor (a Node sidecar in the current stage; V8 lives inside Node).
 //!
-//! 沙箱内只注入 `mj.*` 桩（`prelude/mj-prelude.mjs`），用户代码的每次能力调用
-//! 序列化为 stdio JSON-RPC 行，转发给宿主 `Dispatcher`（由 `jarvis-runtime` 实现）。
-//! 执行器持有子进程生命周期：超时即 kill，崩溃不波及宿主。后续可按平台替换为
-//! V8 isolate 或 OS 级资源限制子进程，`Dispatcher` 接口不变。
+//! The sandbox injects only `mj.*` stubs (`prelude/mj-prelude.mjs`); every capability call from
+//! user code is serialized as a stdio JSON-RPC line and forwarded to the host `Dispatcher`
+//! (implemented by the embedding runtime). The executor owns the child process lifecycle: a
+//! timeout kills the run, a crash never reaches the host. The implementation can be swapped per
+//! platform (V8 isolate, OS-level resource-limited subprocess) without changing `Dispatcher`.
 
 pub mod ipc;
 pub mod registry;
@@ -24,22 +25,22 @@ pub use registry::{default_host_registry, host_registry_from};
 const PRELUDE: &str = include_str!("../prelude/mj-prelude.mjs");
 const LOADER: &str = include_str!("../prelude/loader.mjs");
 
-/// 能力调用分发者：runtime 侧的真实实现。
+/// Capability call dispatcher: implemented by the embedding runtime.
 #[async_trait]
 pub trait Dispatcher: Send + Sync {
-    /// 处理一次 `mj.<ns>.<method>` 调用；返回 Err 时错误消息透传给沙箱内的 Promise reject。
+    /// Handles one `mj.<ns>.<method>` call; an `Err` message surfaces as a rejected Promise inside the sandbox.
     async fn dispatch(&self, app_id: &str, method: &str, params: Value) -> Result<Value, String>;
 }
 
 #[derive(Debug, Clone)]
 pub struct SandboxOptions {
-    /// 受管应用 id，经环境变量注入沙箱。
+    /// Managed app id, injected into the sandbox through an environment variable.
     pub app_id: String,
-    /// node 可执行文件；缺省用 PATH 上的 `node`。
+    /// Node executable; falls back to `node` on PATH.
     pub node_binary: Option<PathBuf>,
-    /// 整个脚本执行的超时；超时即 kill 子进程。
+    /// Whole-script execution timeout; the child is killed on expiry.
     pub timeout: Duration,
-    /// 宿主模块注册表覆盖（测试用）；缺省由 `default_host_registry()` 从能力目录派生。
+    /// Host module registry override (for tests); defaults to `default_host_registry()` derived from the capability catalog.
     pub host_registry: Option<Value>,
 }
 
@@ -66,8 +67,8 @@ pub enum SandboxError {
     Io(#[from] std::io::Error),
 }
 
-/// 在沙箱子进程中执行 `code`（ESM，作者面为 `jarvis:*` 宿主模块），
-/// 所有能力调用经 `dispatcher` 中介。
+/// Runs `code` (ESM, authoring surface `jarvis:*` host modules) in a sandboxed child
+/// process; every capability call goes through `dispatcher`.
 pub async fn run(
     code: &str,
     dispatcher: Arc<dyn Dispatcher>,
@@ -112,7 +113,7 @@ pub async fn run(
     let stderr = BufReader::new(child.stderr.take().expect("stderr piped"));
     let mut stdin = child.stdin.take().expect("stdin piped");
 
-    // stderr 收集为失败报告文本，不阻塞子进程。
+    // Collect stderr for the failure report without blocking the child.
     let stderr_task = tokio::spawn(async move {
         let mut buf = String::new();
         let mut lines = stderr.lines();
@@ -123,7 +124,7 @@ pub async fn run(
         buf
     });
 
-    // stdout 行协议：JSON-RPC 请求交给 dispatcher，非 JSON 行视为用户日志丢弃。
+    // stdout line protocol: JSON-RPC requests go to the dispatcher; non-JSON lines are user logs and dropped.
     let dispatch_task = {
         let app_id = opts.app_id.clone();
         tokio::spawn(async move {
@@ -168,7 +169,7 @@ async fn write_line(stdin: &mut ChildStdin, payload: &str) -> Result<(), std::io
     stdin.flush().await
 }
 
-/// 最小 file URL 转换（Windows 反斜杠归一；temp 路径为 ASCII）。
+/// Minimal file URL conversion (normalizes Windows backslashes; temp paths are ASCII).
 fn file_url(path: &std::path::Path) -> String {
     let joined = path.to_string_lossy().replace('\\', "/");
     format!("file:///{joined}")
