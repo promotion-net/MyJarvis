@@ -1,7 +1,8 @@
 /**
- * 宿主模块 `jarvis:*` 的作者面类型（合同见 `03-宿主模块命名空间.md`）。
- * 运行时由沙箱注入，类型由本包声明——不需要额外运行时包。
- * 注册表从能力目录派生：目录里没有的 specifier 一律 ERR_UNKNOWN_HOST_MODULE。
+ * Authoring-surface types for the `jarvis:*` host modules.
+ * The sandbox injects these at runtime; this package only declares the types —
+ * no extra runtime package is required. The registry derives from the capability
+ * catalog: any specifier absent from the catalog raises ERR_UNKNOWN_HOST_MODULE.
  */
 
 declare module "jarvis:backend" {
@@ -54,13 +55,13 @@ declare module "jarvis:sms" {
 }
 
 declare module "jarvis" {
-    /** 各 `jarvis:*` 域命名空间的冻结合并视图，不是独立能力来源。 */
+    /** A frozen merge of every `jarvis:*` domain namespace; not an independent capability source. */
     export const mj: import("./index.js").MjApi;
     const _default: import("./index.js").MjApi;
     export default _default;
 }
 
 declare module "jarvis:global" {
-    /** 副作用导入：把冻结的 `mj` 注入 globalThis。默认不注入。 */
+    /** Side-effect import: installs the frozen `mj` on globalThis. Never injected by default. */
     export {};
 }

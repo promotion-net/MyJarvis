@@ -1,8 +1,9 @@
 /**
- * `@my-jarvis/sdk` — 只包含代理桩，不包含任何实现。
+ * `@my-jarvis/sdk` — proxy stubs only, no implementation of any kind.
  *
- * 运行时由 `jarvis-runtime` 经 `installMjTransport` 注入真实通道；本包内
- * 不可能存在直连供应商的路径。semver 严格绑定 `@my-jarvis/types` 的能力契约。
+ * The host runtime injects the real channel through `installMjTransport`; no
+ * direct-to-vendor path can exist inside this package. semver binds strictly to
+ * the `@my-jarvis/types` capability contract.
  */
 import type {MjApi} from "@my-jarvis/types";
 
@@ -13,7 +14,7 @@ export type MjTransport = (
 
 let transport: MjTransport | null = null;
 
-/** runtime 注入点：宿主（沙箱 prelude / 测试）在加载用户代码前调用。 */
+/** Runtime injection point: hosts (sandbox prelude / tests) call this before loading user code. */
 export function installMjTransport(next: MjTransport | null): void {
     transport = next;
 }

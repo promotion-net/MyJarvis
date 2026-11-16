@@ -1,6 +1,6 @@
 /**
- * Zod schema 入口（可选依赖 zod）：与 `CAPABILITIES` 的 JSON Schema 同义，
- * 供 `mj verify` 与宿主侧运行时校验使用。
+ * Zod schema entry (optional `zod` dependency): the runtime-validation twin of
+ * the `CAPABILITIES` JSON Schemas, for host-side input checking.
  */
 import {z} from "zod";
 

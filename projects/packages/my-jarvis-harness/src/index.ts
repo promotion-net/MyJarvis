@@ -1,6 +1,6 @@
 /**
- * `@my-jarvis/testing` — mock `mj.*` 与确定性场景断言。
- * 只依赖 `@my-jarvis/types` 契约，不依赖 `@my-jarvis/sdk` 的运行时实现。
+ * `@my-jarvis/testing` — mock `mj.*` and deterministic scenario assertions.
+ * Depends only on the `@my-jarvis/types` contract, never on `@my-jarvis/sdk` runtime behavior.
  */
 import type {MjApi} from "@my-jarvis/types";
 
@@ -10,8 +10,9 @@ export interface MockCall {
 }
 
 /**
- * 构造 mock `mj`：`replies` 以完整方法名（如 `mj.db.query`）为键给出返回值；
- * 未配置的能力调用直接抛错，保证越界可见。
+ * Builds a mock `mj`: `replies` keys are full method names (e.g. `mj.db.query`)
+ * mapping to return values; unconfigured calls throw immediately so any
+ * out-of-band usage stays visible.
  */
 export function createMockMj(
     replies: Record<string, unknown> = {},
@@ -50,7 +51,7 @@ export function createMockMj(
     return {mj, calls};
 }
 
-/** 断言能力调用序列（完整方法名，按发生顺序精确匹配）。 */
+/** Asserts the capability call sequence (full method names, exact order match). */
 export function assertCallSequence(
     calls: readonly MockCall[],
     expected: readonly string[],
