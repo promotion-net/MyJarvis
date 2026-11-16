@@ -2,8 +2,36 @@
     "name": "my-jarvis",
     "version": "0.0.0",
     "type": "module",
-    "description": "MyJarvis capabilities / schema / verify — thin wrapper over the jarvis-cli native binary",
+    "description": "MyJarvis open capability surface — @vmz/commander CLI over the jarvis-napi Node-API bindings",
+    "engines": {
+        "node": ">=24.12.0"
+    },
     "bin": {
         "mj": "./bin/mj.mjs"
+    },
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+        }
+    },
+    "files": [
+        "bin",
+        "dist",
+        "locales"
+    ],
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@vmz/commander": "^0.2.0"
+    },
+    "optionalDependencies": {
+        "@my-jarvis/jarvis-win32-x64": "workspace:*"
+    },
+    "devDependencies": {
+        "@types/node": "^22.13.10",
+        "typescript": "^5.8.3"
     }
 }

@@ -2,8 +2,15 @@
     "name": "@my-jarvis/jarvis-win32-x64",
     "version": "0.0.0",
     "type": "module",
-    "description": "MyJarvis capabilities / schema / verify — thin wrapper over the jarvis-cli native binary",
-    "bin": {
-        "mj": "./bin/mj.mjs"
-    }
+    "description": "MyJarvis Node-API binary for Windows x64 (MSVC)",
+    "main": "./lib/index.win32-x64-msvc.node",
+    "files": [
+        "lib"
+    ],
+    "os": [
+        "win32"
+    ],
+    "cpu": [
+        "x64"
+    ]
 }

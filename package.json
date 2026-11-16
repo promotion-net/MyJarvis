@@ -4,9 +4,11 @@
   "version": "0.1.0",
   "scripts": {
     "build": "cargo build --workspace && pnpm -r build",
+    "build:napi": "node scripts/build-napi.ts",
     "test": "cargo test --workspace && pnpm -r test"
   },
   "devDependencies": {
+    "@napi-rs/cli": "^3.0.0",
     "typescript": "^5.6.0",
     "zod": "^3.23.0"
   }
