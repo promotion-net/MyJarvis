@@ -4,7 +4,7 @@ use crate::error::ProviderError;
 
 #[async_trait]
 pub trait CdnProvider: Send + Sync {
-    /// 按路径前缀刷新缓存；流量计量由 runtime 代理层发出。
+    /// Purge cached objects by path prefix; traffic metering is emitted by the runtime proxy layer.
     async fn purge(&self, paths: &[String]) -> Result<(), ProviderError>;
 }
 

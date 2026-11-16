@@ -1,5 +1,6 @@
-//! LLM Provider：trait 携带能力元数据，路由决策是闭源 runtime 的内部事。
-//! 社区 provider 与商业实现走同一接口；`LlmCapabilities` 让路由依赖元数据而非硬编码。
+//! LLM provider trait: the trait carries capability metadata so routing can
+//! depend on metadata instead of hard-coded vendor knowledge. Community and
+//! vendor-supplied implementations satisfy the same interface.
 
 use std::collections::BTreeSet;
 
@@ -8,11 +9,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::ProviderError;
 
-/// 内部 provider 标识——不出 runtime，不进入任何对外响应。
+/// Internal provider identifier — never leaves the runtime, never appears in any outward response.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ProviderId(pub String);
 
-/// L1 能力档位。用户可见，供应商不可见。
+/// L1 capability tier. Visible to users; the backing vendor is not.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum LlmProfile {
@@ -21,13 +22,13 @@ pub enum LlmProfile {
     Reasoning,
 }
 
-/// provider 的能力声明；路由层据此做硬约束筛选（闭源 runtime 内部消费）。
+/// A provider's capability declaration; the routing layer uses it for hard-constraint filtering.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LlmCapabilities {
     pub profiles: BTreeSet<LlmProfile>,
-    /// L2/L3 允许 pin 的模型族/版本标识（公开信息；空集 = 只支持 L0/L1）。
+    /// Model families/versions allowed for L2/L3 pins (public information; empty set = L0/L1 only).
     pub model_families: BTreeSet<String>,
-    /// 合规区域标识。
+    /// Compliance region identifiers.
     pub regions: BTreeSet<String>,
     pub max_context: usize,
 }
@@ -43,10 +44,10 @@ pub struct LlmMessage {
 #[serde(rename_all = "camelCase")]
 pub struct LlmRequest {
     pub messages: Vec<LlmMessage>,
-    /// L1 档位；与 `model` 互斥，缺省按 `balanced` 路由。
+    /// L1 tier; mutually exclusive with `model`, defaults to `balanced` routing.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub profile: Option<LlmProfile>,
-    /// L2/L3 pin：模型族或版本标识；需要 `llm:pin` / `llm:pin-exact` 授权。
+    /// L2/L3 pin: model family or version id; requires `llm:pin` / `llm:pin-exact` authorization.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub model: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -60,7 +61,8 @@ pub struct TokenUsage {
     pub output_tokens: u64,
 }
 
-/// 归一化响应：runtime 在返回前抹平供应商特有字段，生成代码永远看不到。
+/// Normalized response: the runtime flattens vendor-specific fields before returning,
+/// so generated code never observes them.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LlmResponse {

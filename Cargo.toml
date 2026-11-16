@@ -1,15 +1,14 @@
 [workspace]
 resolver = "2"
 members = [
-  "projects/crates/*",
+    "projects/crates/*",
     "projects/packages/my-jarvis-desktop/src-tauri",
-  "projects/packages/my-jarvis-mobile/src-tauri",
+    "projects/packages/my-jarvis-mobile/src-tauri",
 ]
 
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.85"
 
 [workspace.dependencies]
 # internal crates（开源面：runtime / billing / verify 在闭源 MJ-Cloud 仓）

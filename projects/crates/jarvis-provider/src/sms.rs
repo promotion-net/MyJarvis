@@ -3,7 +3,7 @@ use serde::Serialize;
 
 use crate::error::ProviderError;
 
-/// 一次发送的受理回执。
+/// Acceptance receipt for one send.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SmsReceipt {
@@ -13,11 +13,11 @@ pub struct SmsReceipt {
 
 #[async_trait]
 pub trait SmsProvider: Send + Sync {
-    /// 凭证注入与转发由 runtime 代理完成；实现不得把凭证暴露给调用方。
+    /// Credential injection and forwarding are mediated by the runtime; implementations must never expose credentials to callers.
     async fn send(&self, to: &str, text: &str) -> Result<SmsReceipt, ProviderError>;
 }
 
-/// 默认空实现：未配置供应商时显式失败，不静默丢弃。
+/// Default null implementation: fails explicitly when no vendor is configured, never drops silently.
 pub struct NullSmsProvider;
 
 #[async_trait]

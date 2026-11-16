@@ -1,4 +1,4 @@
-//! stdio MCP server：按行读 JSON-RPC，应答写 stdout。
+//! Line-delimited stdio MCP server: reads JSON-RPC from stdin, writes responses to stdout.
 
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 

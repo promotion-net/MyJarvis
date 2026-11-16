@@ -1,4 +1,4 @@
-//! 确定性 mock provider：记录调用序列，供 `jarvis-verify` 断言与测试。
+//! Deterministic mock providers: record the call sequence for verification and tests.
 
 use std::collections::BTreeSet;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -26,7 +26,7 @@ impl MockSmsProvider {
         Self { sent: Mutex::new(Vec::new()), counter: AtomicU64::new(0) }
     }
 
-    /// 已记录的 (to, text) 序列，按调用顺序。
+    /// Recorded (to, text) pairs in call order.
     pub fn messages(&self) -> Vec<(String, String)> {
         self.sent.lock().unwrap_or_else(PoisonError::into_inner).clone()
     }
@@ -44,7 +44,7 @@ impl SmsProvider for MockSmsProvider {
     }
 }
 
-/// 确定性 mock LLM：回显最后一条消息，固定 usage；无 `model_families`（只支持 L0/L1）。
+/// Deterministic mock LLM: echoes the last message with fixed usage; no `model_families` (L0/L1 only).
 pub struct MockLlmProvider {
     counter: AtomicU64,
 }
