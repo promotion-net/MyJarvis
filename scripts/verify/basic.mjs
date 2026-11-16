@@ -1,7 +1,7 @@
-// 示例用户代码（`jarvis:*` 规范形态）：migrate ×2 → query → sms。
-// 确定性验收引擎在闭源 MJ-Cloud（`mj-verify` 消费本场景并断言
-// db:migrate,db:migrate,db:query,sms:send 序列）；开源侧用 @my-jarvis/testing 的
-// mock 或 jarvis-sandbox 的 mock Dispatcher 即可跑同款代码。
+// Example user code (canonical `jarvis:*` form): migrate x2 -> query -> sms.
+// A deterministic verifier can consume this scenario and assert the exact
+// sequence db:migrate, db:migrate, db:query, sms:send; the same code runs
+// against @my-jarvis/testing mocks or a jarvis-sandbox mock Dispatcher.
 import {migrate, query} from "jarvis:db";
 import {send} from "jarvis:sms";
 

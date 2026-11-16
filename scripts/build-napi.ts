@@ -1,5 +1,6 @@
-// 构建 `jarvis-napi` 的 Node-API 产物并 staging 到宿主平台的 npm 分片包。
-// 平台分片清单是产物合同：`os` + `cpu` 标识目标平台，`main` 指名要发布的 `.node`。
+// Builds the `jarvis-napi` Node-API artifact and stages it into the host platform's npm shard.
+// Platform shard manifests are the artifact contract: `os` + `cpu` identify the target and
+// `main` names the `.node` that gets published.
 import { execFileSync, execSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, unlinkSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
@@ -57,7 +58,7 @@ function nodeFiles(dir: string): string[] {
     return existsSync(dir) ? readdirSync(dir).filter((name) => name.endsWith(".node")) : [];
 }
 
-/** 上一轮构建残留的 `.node` 绝不能被当作本轮产物 staging。 */
+/** A `.node` left behind by an earlier run must never be staged as this build's output. */
 function clearNodes(dir: string): void {
     for (const name of nodeFiles(dir)) {
         unlinkSync(join(dir, name));
@@ -76,8 +77,9 @@ if (host.length !== 1) {
 }
 const target = host[0];
 
-// `napi build` 自己会先跑一次不加锁的 `cargo metadata`，陈旧 `Cargo.lock` 会被静默改写。
-// 编译前先做 `--locked` 预检，漂移直接失败，与 CI 口径一致（`@napi-rs/cli` v3 无 `--cargo-flags`）。
+// `napi build` runs an unlocked `cargo metadata` of its own first, so a stale `Cargo.lock`
+// would be silently rewritten. The `--locked` pre-check fails loudly on drift instead,
+// matching CI (`@napi-rs/cli` v3 has no `--cargo-flags`).
 try {
     execFileSync("cargo", ["metadata", "--format-version", "1", "--locked"], {
         cwd: root,

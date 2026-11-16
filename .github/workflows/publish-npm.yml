@@ -1,5 +1,5 @@
-# 真实版本发布只走这条流水线：push tag vX.Y.Z 触发，npm Trusted Publisher（OIDC）。
-# 禁止任何本地 `npm publish` / token 旁路（工作区硬规则 8）。
+# Real npm versions are published only by this workflow: pushing tag vX.Y.Z triggers it
+# through npm Trusted Publisher (OIDC). No local `npm publish`, token or OTP path is allowed.
 name: Publish npm
 
 on:
@@ -69,7 +69,7 @@ jobs:
         with:
           pattern: napi-*
           merge-multiple: false
-      # 每个 artifact 落在 napi-<id>/ 目录，按分片清单把 `.node` 放回对应包目录。
+      # Each artifact lands in napi-<id>/; put every `.node` back into its shard package per manifest.
       - name: Stage platform binaries into shards
         run: |
           set -euo pipefail

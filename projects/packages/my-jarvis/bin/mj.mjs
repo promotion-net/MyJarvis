@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// `mj` 入口：加载构建后的 CLI（`@vmz/commander` 组装 `jarvis-napi` 导出），不 spawn 原生二进制。
+// `mj` entry: loads the built CLI (`@vmz/commander` over the napi exports); no native binary is spawned.
 const minimum = [24, 12, 0];
 const current = process.versions.node.split(".").map((part) => Number(part));
 const tooOld =

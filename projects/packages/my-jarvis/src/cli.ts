@@ -1,4 +1,4 @@
-// `mj` CLI：用 `@vmz/commander` 组装 `jarvis-napi` 的正交导出，不 spawn 任何原生二进制。
+// `mj` CLI: assembles the orthogonal `jarvis-napi` exports with `@vmz/commander`; spawns no native binary.
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";

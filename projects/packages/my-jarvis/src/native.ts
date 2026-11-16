@@ -1,8 +1,8 @@
-// `jarvis-napi` 的 JS 侧装载：平台分片包是 `.node` 产物的唯一配送通道。
+// JS-side loader for `jarvis-napi`: platform shard packages are the only delivery channel for `.node` artifacts.
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 
-/** `jarvis-napi` 的正交导出面（napi-derive 把 snake_case 转成 camelCase）。 */
+/** The orthogonal export surface of `jarvis-napi` (napi-derive maps snake_case to camelCase). */
 export type JarvisNative = {
     contractVersion(): string;
     capabilityCatalogJson(): string;
@@ -12,12 +12,13 @@ export type JarvisNative = {
     sandboxHostRegistryJson(): string;
 };
 
-/** 已安装平台分片的清单覆盖信息。 */
+/** Platform coverage declared by an installed shard. */
 export type PlatformShard = { name: string; os: string[]; cpu: string[] };
 
 /**
- * `optionalDependencies` 即平台分片；它们的清单（`os` + `cpu`）是平台覆盖的唯一真相源，
- * 与 `scripts/build-napi.ts` 的 staging 规则一致。npm 安装时跳过的分片不可解析，自然缺席。
+ * `optionalDependencies` are the platform shards; their manifests (`os` + `cpu`) are the single
+ * source of truth for platform coverage, the same rule `scripts/build-napi.ts` applies when
+ * staging. Shards npm skipped during install are not resolvable and therefore absent here.
  */
 export function listPlatformShards(): PlatformShard[] {
     const require = createRequire(import.meta.url);
@@ -41,7 +42,7 @@ export function listPlatformShards(): PlatformShard[] {
 
 let cached: JarvisNative | undefined;
 
-/** 从匹配当前平台的分片包装载 Node-API 绑定（分片包 `main` 即 `.node`，require 直接返回导出）。 */
+/** Loads the Node-API binding from the shard matching the current platform (the shard's `main` is the `.node`, so `require` returns the exports directly). */
 export function loadJarvisNative(): JarvisNative {
     if (cached) {
         return cached;
