@@ -1,5 +1,5 @@
 {
-  "name": "my-jarvis",
+  "name": "my-jarvis-workspace",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@12.15.0",

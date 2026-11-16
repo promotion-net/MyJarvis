@@ -182,18 +182,6 @@ importers:
         specifier: workspace:*
         version: link:../packages/my-jarvis-types
 
-  projects/packages/desktop-shell:
-    dependencies:
-      '@my-jarvis/sdk':
-        specifier: workspace:*
-        version: link:../my-jarvis-sdk
-
-  projects/packages/mobile-shell:
-    dependencies:
-      '@my-jarvis/sdk':
-        specifier: workspace:*
-        version: link:../my-jarvis-sdk
-
   projects/packages/my-jarvis:
     dependencies:
       '@vmz/commander':
@@ -227,6 +215,12 @@ importers:
 
   projects/packages/my-jarvis-darwin-x64: {}
 
+  projects/packages/my-jarvis-desktop:
+    dependencies:
+      '@my-jarvis/sdk':
+        specifier: workspace:*
+        version: link:../my-jarvis-sdk
+
   projects/packages/my-jarvis-harness:
     dependencies:
       '@my-jarvis/types':
@@ -236,6 +230,12 @@ importers:
   projects/packages/my-jarvis-linux-arm64: {}
 
   projects/packages/my-jarvis-linux-x64: {}
+
+  projects/packages/my-jarvis-mobile:
+    dependencies:
+      '@my-jarvis/sdk':
+        specifier: workspace:*
+        version: link:../my-jarvis-sdk
 
   projects/packages/my-jarvis-sdk:
     dependencies:
