@@ -5,7 +5,7 @@
     "description": "MyJarvis Node-API binary for Windows x64 (MSVC)",
     "main": "jarvis.win32-x64-msvc.node",
     "files": [
-        "lib"
+        "jarvis.win32-x64-msvc.node"
     ],
     "os": [
         "win32"

@@ -92,7 +92,7 @@ try {
 
 clearNodes(napiDir);
 
-execSync("pnpm exec napi build --platform --release", {
+execSync("pnpm exec napi build --platform --release --no-js", {
     cwd: napiDir,
     stdio: "inherit",
     shell: true,
