@@ -2,8 +2,8 @@
 resolver = "2"
 members = [
   "projects/crates/*",
-  "projects/packages/desktop-shell/src-tauri",
-  "projects/packages/mobile-shell/src-tauri",
+    "projects/packages/my-jarvis-desktop/src-tauri",
+  "projects/packages/my-jarvis-mobile/src-tauri",
 ]
 
 [workspace.package]
