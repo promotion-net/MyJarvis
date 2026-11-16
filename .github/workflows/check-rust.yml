@@ -1,7 +1,5 @@
-# CI for the MyJarvis open repository: standalone build and test are the acceptance bar.
-# The napi job covers every GitHub-hosted platform runner, builds the real `.node`
-# per platform and smoke-tests `mj capabilities`.
-name: CI
+# Rust acceptance for the MyJarvis open repository: standalone build and test are the bar.
+name: Rust
 
 on:
   push:
@@ -11,7 +9,7 @@ on:
 
 jobs:
   test:
-    name: test ${{ matrix.os }}
+    name: cargo test ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -27,50 +25,3 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: cargo test --workspace --all-features
-      - run: pnpm -r build
-      - run: pnpm -r test
-
-  napi:
-    name: napi ${{ matrix.id }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - id: win32-x64
-            os: windows-latest
-            artifact: jarvis.win32-x64-msvc.node
-            shard: my-jarvis-win32-x64
-          - id: linux-x64
-            os: ubuntu-24.04
-            artifact: jarvis.linux-x64-gnu.node
-            shard: my-jarvis-linux-x64
-          - id: linux-arm64
-            os: ubuntu-24.04-arm
-            artifact: jarvis.linux-arm64-gnu.node
-            shard: my-jarvis-linux-arm64
-          - id: darwin-x64
-            os: macos-15-intel
-            artifact: jarvis.darwin-x64.node
-            shard: my-jarvis-darwin-x64
-          - id: darwin-arm64
-            os: macos-15
-            artifact: jarvis.darwin-arm64.node
-            shard: my-jarvis-darwin-arm64
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm -r build
-      - run: pnpm run build:napi
-      - name: smoke mj capabilities
-        run: node projects/packages/my-jarvis/bin/mj.mjs capabilities
-      - uses: actions/upload-artifact@v4
-        with:
-          name: napi-${{ matrix.id }}
-          path: projects/packages/${{ matrix.shard }}/${{ matrix.artifact }}

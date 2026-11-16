@@ -1,7 +1,7 @@
-# CI for the MyJarvis open repository: standalone build and test are the acceptance bar.
-# The napi job covers every GitHub-hosted platform runner, builds the real `.node`
-# per platform and smoke-tests `mj capabilities`.
-name: CI
+# npm surface acceptance: contract packages build and test standalone, and the napi job
+# covers every GitHub-hosted platform runner — building the real `.node` per platform and
+# smoke-testing `mj capabilities`.
+name: TypeScript
 
 on:
   push:
@@ -10,8 +10,8 @@ on:
     branches: [dev]
 
 jobs:
-  test:
-    name: test ${{ matrix.os }}
+  pnpm:
+    name: pnpm ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -19,19 +19,18 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: cargo test --workspace --all-features
       - run: pnpm -r build
       - run: pnpm -r test
 
   napi:
     name: napi ${{ matrix.id }}
+    needs: pnpm
     strategy:
       fail-fast: false
       matrix:
