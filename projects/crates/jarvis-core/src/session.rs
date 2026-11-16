@@ -1,4 +1,7 @@
 //! Session domain model.
+//!
+//! Serde output is `snake_case` (language-neutral truth source); camelCase is a
+//! TypeScript-binding concern only.
 
 use serde::{Deserialize, Serialize};
 
@@ -13,7 +16,6 @@ pub enum Role {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct Message {
     pub role: Role,
     pub content: String,
@@ -29,7 +31,6 @@ pub enum TaskState {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct Task {
     pub id: String,
     pub title: String,
@@ -37,7 +38,6 @@ pub struct Task {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct Session {
     pub id: String,
     pub app_id: AppId,

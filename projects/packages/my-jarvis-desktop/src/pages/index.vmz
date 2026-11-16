@@ -1,0 +1,93 @@
+<template>
+  <div class="shell">
+    <CapabilityPanel
+      :entries="entries"
+      :selected="selected"
+      :app-id="appId"
+      :on-select="onSelect"
+    />
+    <CallWorkbench
+      :method="selected"
+      :params-json="paramsJson"
+      :busy="busy"
+      :error-text="errorText"
+      :on-params-change="onParamsChange"
+      :on-run="onRun"
+    />
+    <ResultInspector :result-text="resultText" :log="log" />
+  </div>
+</template>
+
+<style>
+.shell {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr) 360px;
+  height: 100vh;
+  background: #171d23;
+}
+</style>
+
+<script client>
+import { catalog } from "../lib/catalog.js";
+import type { CallLogRow } from "../lib/catalog.js";
+import { currentAppId } from "../lib/bridge.js";
+import { callMj } from "../lib/invoke.js";
+
+export default class IndexPage {
+  appId = currentAppId();
+  entries = catalog();
+  selected = catalog()[0]?.method ?? "";
+  paramsJson = JSON.stringify(catalog()[0]?.template ?? {}, null, 2);
+  resultText = "";
+  errorText = "";
+  busy = false;
+  log: CallLogRow[] = [];
+
+  onSelect(method: string) {
+    this.selected = method;
+    const entry = this.entries.find((item) => item.method === method);
+    this.paramsJson = JSON.stringify(entry?.template ?? {}, null, 2);
+    this.errorText = "";
+  }
+
+  onParamsChange(value: string) {
+    this.paramsJson = value;
+  }
+
+  async onRun() {
+    if (this.busy) return;
+    let params: Record<string, unknown>;
+    try {
+      params = JSON.parse(this.paramsJson) as Record<string, unknown>;
+    } catch (error) {
+      this.errorText = `invalid JSON: ${error instanceof Error ? error.message : error}`;
+      return;
+    }
+    this.busy = true;
+    this.errorText = "";
+    const started = Date.now();
+    try {
+      const result = await callMj(this.selected, params);
+      this.resultText = JSON.stringify(result, null, 2);
+      this.pushLog(true, `${Date.now() - started} ms`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.resultText = "";
+      this.errorText = message;
+      this.pushLog(false, message);
+    } finally {
+      this.busy = false;
+    }
+  }
+
+  pushLog(ok: boolean, message: string) {
+    const row: CallLogRow = {
+      time: new Date().toLocaleTimeString(),
+      method: this.selected,
+      ok,
+      message,
+    };
+    this.log = [row, ...this.log].slice(0, 50);
+  }
+}
+</script>

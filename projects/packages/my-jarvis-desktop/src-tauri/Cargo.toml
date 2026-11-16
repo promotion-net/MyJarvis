@@ -5,5 +5,15 @@ edition.workspace = true
 rust-version.workspace = true
 publish = false
 
+[lib]
+name = "desktop_shell_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { workspace = true }
+
 [dependencies]
-jarvis-core = { workspace = true }
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tauri = { workspace = true }

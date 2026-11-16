@@ -5,7 +5,6 @@ use crate::error::ProviderError;
 
 /// Acceptance receipt for one send.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-#[serde(rename_all = "camelCase")]
 pub struct SmsReceipt {
     pub provider: String,
     pub message_id: String,

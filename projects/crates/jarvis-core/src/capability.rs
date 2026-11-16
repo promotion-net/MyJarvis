@@ -9,14 +9,17 @@ use serde_json::json;
 pub const CONTRACT_VERSION: &str = "/v0";
 
 /// One `mj.*` capability contract entry.
+///
+/// Serde output is `snake_case` — the language-neutral source of truth shared by
+/// every host binding (napi, PyO3, …). camelCase renames happen only at the
+/// TypeScript binding boundary, never in the Rust wire shape.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct Capability {
     /// Capability id, e.g. `db:query` or `sms:send`.
     pub id: String,
     /// One-line semantic summary.
     pub summary: String,
-    /// JSON Schema of the input parameters.
+    /// JSON Schema of the input parameters (authoring surface is JS/TS, hence camelCase property names).
     pub input_schema: serde_json::Value,
     /// Whether this capability emits a metering event.
     pub metered: bool,
@@ -40,30 +43,30 @@ pub fn capability_catalog() -> Vec<Capability> {
         },
         Capability {
             id: "db:migrate".into(),
-            summary: "Run a migration against the app's dedicated database".into(),
+            summary: "Apply a VOS schema definition to the app's dedicated database".into(),
             input_schema: json!({
                 "type": "object",
                 "properties": {
-                    "sql": { "type": "string" }
+                    "vos": { "type": "string", "description": "VOS source text (`.vos` grammar); the host compiles it into a DDL transaction — no SQL" }
                 },
-                "required": ["sql"],
+                "required": ["vos"],
                 "additionalProperties": false
             }),
             metered: true,
         },
         Capability {
             id: "db:query".into(),
-            summary: "Run a read-only query against the app's dedicated database".into(),
+            summary: "Run a read-only VOS query against the app's dedicated database".into(),
             input_schema: json!({
                 "type": "object",
                 "properties": {
-                    "sql": { "type": "string" },
+                    "vos": { "type": "string", "description": "VOS query expression source text — no SQL" },
                     "params": {
                         "type": "array",
                         "items": { "type": ["string", "number", "boolean", "null"] }
                     }
                 },
-                "required": ["sql"],
+                "required": ["vos"],
                 "additionalProperties": false
             }),
             metered: true,

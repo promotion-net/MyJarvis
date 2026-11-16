@@ -36,8 +36,10 @@ pub enum DisclosureLevel {
 }
 
 /// A metering event for one controlled operation.
+///
+/// Serde output is `snake_case` (language-neutral truth source); camelCase is a
+/// TypeScript-binding concern only.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct MeterEvent {
     pub app_id: AppId,
     /// Capability id that produced the event, e.g. `db:query`.

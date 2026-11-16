@@ -1,0 +1,13 @@
+<template>
+  <slot />
+</template>
+
+<script client>
+import { installShellTransport } from "./lib/bridge.js";
+
+export default class Application {
+  onMount() {
+    installShellTransport();
+  }
+}
+</script>

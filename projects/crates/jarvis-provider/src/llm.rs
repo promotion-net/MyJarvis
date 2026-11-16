@@ -34,14 +34,12 @@ pub struct LlmCapabilities {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct LlmMessage {
     pub role: String,
     pub content: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct LlmRequest {
     pub messages: Vec<LlmMessage>,
     /// L1 tier; mutually exclusive with `model`, defaults to `balanced` routing.
@@ -55,7 +53,6 @@ pub struct LlmRequest {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct TokenUsage {
     pub input_tokens: u64,
     pub output_tokens: u64,
@@ -64,7 +61,6 @@ pub struct TokenUsage {
 /// Normalized response: the runtime flattens vendor-specific fields before returning,
 /// so generated code never observes them.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct LlmResponse {
     pub text: String,
     pub usage: TokenUsage,
