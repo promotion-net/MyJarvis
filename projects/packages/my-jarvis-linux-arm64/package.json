@@ -1,0 +1,19 @@
+{
+    "name": "@my-jarvis/jarvis-linux-arm64",
+    "version": "0.0.0",
+    "type": "module",
+    "description": "MyJarvis Node-API binary for Linux arm64 (GNU)",
+    "main": "jarvis.linux-arm64-gnu.node",
+    "files": [
+        "jarvis.linux-arm64-gnu.node"
+    ],
+    "os": [
+        "linux"
+    ],
+    "cpu": [
+        "arm64"
+    ],
+    "libc": [
+        "glibc"
+    ]
+}

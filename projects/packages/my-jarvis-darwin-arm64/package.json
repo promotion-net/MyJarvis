@@ -1,0 +1,16 @@
+{
+    "name": "@my-jarvis/jarvis-darwin-arm64",
+    "version": "0.0.0",
+    "type": "module",
+    "description": "MyJarvis Node-API binary for macOS arm64",
+    "main": "jarvis.darwin-arm64.node",
+    "files": [
+        "jarvis.darwin-arm64.node"
+    ],
+    "os": [
+        "darwin"
+    ],
+    "cpu": [
+        "arm64"
+    ]
+}

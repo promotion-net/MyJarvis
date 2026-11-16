@@ -28,6 +28,10 @@
         "@vmz/commander": "^0.2.0"
     },
     "optionalDependencies": {
+        "@my-jarvis/jarvis-darwin-arm64": "workspace:*",
+        "@my-jarvis/jarvis-darwin-x64": "workspace:*",
+        "@my-jarvis/jarvis-linux-arm64": "workspace:*",
+        "@my-jarvis/jarvis-linux-x64": "workspace:*",
         "@my-jarvis/jarvis-win32-x64": "workspace:*"
     },
     "devDependencies": {
