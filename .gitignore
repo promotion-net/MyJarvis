@@ -3,7 +3,7 @@ node_modules/
 dist/
 *.log
 *.node
-# `napi build` 生成的绑定面：JS 装载由 `my-jarvis` 包自己实现，不使用 crate 内生成物。
+# Generated binding surface of `napi build`; JS loading is implemented by the `my-jarvis` package itself.
 projects/crates/jarvis-napi/index.js
 projects/crates/jarvis-napi/index.d.ts
 .DS_Store

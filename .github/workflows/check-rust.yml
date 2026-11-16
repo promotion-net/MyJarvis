@@ -8,6 +8,27 @@ on:
     branches: [dev]
 
 jobs:
+  language:
+    name: language guard
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: English-only repository text
+        run: |
+          set -euo pipefail
+          # Repository policy: all shipped text is English and never references any
+          # companion distribution. The guard lives in CI infrastructure, so .github is excluded.
+          if grep -RInP \
+              --exclude-dir=node_modules --exclude-dir=target --exclude-dir=dist \
+              --exclude-dir=.git --exclude-dir=.github \
+              --exclude=pnpm-lock.yaml --exclude=Cargo.lock --exclude=package-lock.json \
+              --exclude='*.node' \
+              '[\x{4e00}-\x{9fff}]|[Cc]losed[- _][Ss]ource' .; then
+            echo "found CJK text or companion-distribution wording; fix the flagged files"
+            exit 1
+          fi
+          echo "language guard passed"
+
   test:
     name: cargo test ${{ matrix.os }}
     strategy:
