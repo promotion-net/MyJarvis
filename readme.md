@@ -4,11 +4,11 @@
 
 ## 布局
 
-- `projects/crates/` — Rust workspace：`jarvis-core`（领域模型与计量事件 schema）、`jarvis-sandbox`（子进程 sidecar 执行器，mock `Dispatcher` 即可独立测试）、`jarvis-provider`（SMS / CDN / LLM trait + `webhook` 参考实现，feature 门控）、`jarvis-mcp`（MCP 协议适配层）、`jarvis-cli`（`mj capabilities` / `mj schema`）、`jarvis-napi`（只读绑定）
-- `projects/packages/` — npm 包：`@my-jarvis/types`（能力契约，唯一类型源）、`@my-jarvis/sdk`（代理桩）、`@my-jarvis/cli`、`@my-jarvis/testing`（mock 与断言）、桌面 / 移动壳骨架
+- `projects/crates/` — Rust workspace：`jarvis-core`（领域模型与计量事件 schema）、`jarvis-sandbox`（子进程 sidecar 执行器，mock `Dispatcher` 即可独立测试）、`jarvis-provider`（SMS / CDN / LLM trait + `webhook` 参考实现，feature 门控）、`jarvis-mcp`（MCP 协议适配层）、`jarvis-napi`（开源接口能力的正交导出面，唯一 native 出口）
+- `projects/packages/` — npm 包：`@my-jarvis/types`（能力契约，唯一类型源）、`@my-jarvis/sdk`（代理桩）、`my-jarvis`（`mj` CLI，用 `@vmz/commander` 组装 napi 导出）、`@my-jarvis/testing`（mock 与断言）、`@my-jarvis/jarvis-<platform>`（Node-API 平台分片）、桌面 / 移动壳骨架
+- `scripts/build-napi.ts` — 构建 `jarvis-napi` 并按平台清单 staging `.node` 产物
 - `projects/homepage/` — Web 门户与文档站
 - `scripts` — 共享测试输入与示例用户代码
-- `tools/xtask/` — 仓库自动化入口
 
 依赖方向：闭源仓只依赖本仓的已发布版本（`git + rev` pin 或 registry），本仓绝不反向依赖闭源代码。
 

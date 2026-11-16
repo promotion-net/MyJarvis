@@ -1,6 +1,7 @@
 {
   "name": "my-jarvis",
   "private": true,
+  "type": "module",
   "version": "0.1.0",
   "scripts": {
     "build": "cargo build --workspace && pnpm -r build",

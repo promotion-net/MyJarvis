@@ -4,7 +4,6 @@ members = [
   "projects/crates/*",
   "projects/packages/desktop-shell/src-tauri",
   "projects/packages/mobile-shell/src-tauri",
-  "tools/xtask",
 ]
 
 [workspace.package]

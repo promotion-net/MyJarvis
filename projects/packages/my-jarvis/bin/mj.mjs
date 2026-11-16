@@ -1,13 +1,17 @@
 #!/usr/bin/env node
-// 薄封装：转发到 jarvis-cli 产出的原生 `mj` 二进制（MJ_NATIVE_BIN 可覆盖路径）。
-import {spawnSync} from "node:child_process";
+// `mj` 入口：加载构建后的 CLI（`@vmz/commander` 组装 `jarvis-napi` 导出），不 spawn 原生二进制。
+const minimum = [24, 12, 0];
+const current = process.versions.node.split(".").map((part) => Number(part));
+const tooOld =
+    current[0] < minimum[0] ||
+    (current[0] === minimum[0] &&
+        (current[1] < minimum[1] || (current[1] === minimum[1] && current[2] < minimum[2])));
 
-const binary = process.env.MJ_NATIVE_BIN ?? "mj";
-const result = spawnSync(binary, process.argv.slice(2), {stdio: "inherit"});
-
-if (result.error) {
-    console.error(`@my-jarvis/cli: cannot run native binary "${binary}": ${result.error.message}`);
-    console.error("build it first: cargo build -p jarvis-cli");
-    process.exit(127);
+if (tooOld) {
+    console.error(`my-jarvis requires Node.js >=24.12.0 (found ${process.versions.node})`);
+    process.exit(1);
 }
-process.exit(result.status ?? 1);
+
+const { runCli } = await import("../dist/cli.js");
+
+process.exitCode = await runCli(process.argv.slice(2));

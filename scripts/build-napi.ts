@@ -77,7 +77,7 @@ if (host.length !== 1) {
 const target = host[0];
 
 // `napi build` 自己会先跑一次不加锁的 `cargo metadata`，陈旧 `Cargo.lock` 会被静默改写。
-// 编译前先做 `--locked` 预检，漂移直接失败，与 CI 口径一致。
+// 编译前先做 `--locked` 预检，漂移直接失败，与 CI 口径一致（`@napi-rs/cli` v3 无 `--cargo-flags`）。
 try {
     execFileSync("cargo", ["metadata", "--format-version", "1", "--locked"], {
         cwd: root,
@@ -92,7 +92,7 @@ try {
 
 clearNodes(napiDir);
 
-execSync("pnpm exec napi build --platform --release --cargo-flags=--locked", {
+execSync("pnpm exec napi build --platform --release", {
     cwd: napiDir,
     stdio: "inherit",
     shell: true,
