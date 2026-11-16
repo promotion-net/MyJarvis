@@ -1,0 +1,19 @@
+{
+    "name": "@my-jarvis/testing",
+    "version": "0.1.0",
+    "type": "module",
+    "description": "mock mj.* and deterministic call-sequence assertions (no sdk runtime implementation involved)",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+        }
+    },
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "test": "node --test test/index.test.mjs"
+    },
+    "dependencies": {
+        "@my-jarvis/types": "workspace:*"
+    }
+}

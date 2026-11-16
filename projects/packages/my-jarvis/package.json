@@ -1,0 +1,9 @@
+{
+    "name": "my-jarvis",
+    "version": "0.0.0",
+    "type": "module",
+    "description": "MyJarvis capabilities / schema / verify — thin wrapper over the jarvis-cli native binary",
+    "bin": {
+        "mj": "./bin/mj.mjs"
+    }
+}

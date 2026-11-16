@@ -1,0 +1,22 @@
+[package]
+name = "jarvis-provider"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[features]
+default = []
+# 确定性 mock provider：供测试与验收场景消费，不触达任何真实供应商
+mock = []
+# 参考实现：通用 webhook（社区插件作者的模板；商业供应商实现在闭源仓）
+webhook = ["dep:reqwest"]
+
+[dependencies]
+async-trait = { workspace = true }
+reqwest = { workspace = true, optional = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true }

@@ -3,7 +3,11 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "build": "cargo build --workspace",
-    "test": "cargo test --workspace"
+    "build": "cargo build --workspace && pnpm -r build",
+    "test": "cargo test --workspace && pnpm -r test"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "zod": "^3.23.0"
   }
 }

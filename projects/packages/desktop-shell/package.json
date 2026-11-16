@@ -1,0 +1,10 @@
+{
+    "name": "@my-jarvis/desktop-shell",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "description": "Desktop shell: mounts the three-column surface and bridges Tauri commands to jarvis-runtime",
+    "dependencies": {
+        "@my-jarvis/sdk": "workspace:*"
+    }
+}

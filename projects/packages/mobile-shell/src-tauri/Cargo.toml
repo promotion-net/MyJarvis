@@ -1,0 +1,10 @@
+[package]
+name = "mobile-shell"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+jarvis-core = { workspace = true }
+serde_json = { workspace = true }

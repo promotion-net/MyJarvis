@@ -1,0 +1,10 @@
+{
+    "name": "@my-jarvis/mobile-shell",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "description": "Mobile shell: bottom-tab surface, Tauri commands straight to jarvis-runtime",
+    "dependencies": {
+        "@my-jarvis/sdk": "workspace:*"
+    }
+}

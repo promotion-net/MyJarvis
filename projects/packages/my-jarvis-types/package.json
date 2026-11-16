@@ -1,0 +1,27 @@
+{
+    "name": "@my-jarvis/types",
+    "version": "0.1.0",
+    "type": "module",
+    "description": "MyJarvis capability contract: mj.* signatures, schemas and the /v0 catalog (single type source)",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+        },
+        "./schemas": {
+            "types": "./dist/schemas.d.ts",
+            "default": "./dist/schemas.js"
+        }
+    },
+    "scripts": {
+        "build": "tsc -p tsconfig.json"
+    },
+    "peerDependencies": {
+        "zod": ">=3.22"
+    },
+    "peerDependenciesMeta": {
+        "zod": {
+            "optional": true
+        }
+    }
+}

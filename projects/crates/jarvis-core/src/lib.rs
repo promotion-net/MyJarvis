@@ -10,5 +10,5 @@ pub mod session;
 
 pub use app::AppId;
 pub use capability::{CONTRACT_VERSION, Capability, capability_catalog};
-pub use meter::{MeterEvent, MeterUnit};
+pub use meter::{DisclosureLevel, MeterEvent, MeterUnit};
 pub use session::{Message, Role, Session, Task, TaskState};

@@ -82,6 +82,36 @@ pub fn capability_catalog() -> Vec<Capability> {
             metered: true,
         },
         Capability {
+            id: "llm:complete".into(),
+            summary: "经 Provider 代理完成一次 LLM 调用；默认 L0/L1（档位），L2/L3（pin 模型族/版本）需授权".into(),
+            input_schema: json!({
+                "type": "object",
+                "properties": {
+                    "messages": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "role": { "type": "string", "enum": ["system", "user", "assistant"] },
+                                "content": { "type": "string" }
+                            },
+                            "required": ["role", "content"],
+                            "additionalProperties": false
+                        }
+                    },
+                    "profile": { "type": "string", "enum": ["fast", "balanced", "reasoning"] },
+                    "model": {
+                        "type": "string",
+                        "description": "L2/L3 pin：封闭模型族或版本标识，由 runtime 能力目录驱动；未授权 llm:pin 时调用被拒绝"
+                    },
+                    "maxTokens": { "type": "integer", "minimum": 1 }
+                },
+                "required": ["messages"],
+                "additionalProperties": false
+            }),
+            metered: true,
+        },
+        Capability {
             id: "sms:send".into(),
             summary: "经 Provider 代理发送一条短信".into(),
             input_schema: json!({

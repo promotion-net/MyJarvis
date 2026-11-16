@@ -1,0 +1,72 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    devDependencies:
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
+      zod:
+        specifier: ^3.23.0
+        version: 3.25.76
+
+  projects/homepage:
+    dependencies:
+      '@my-jarvis/types':
+        specifier: workspace:*
+        version: link:../packages/my-jarvis-types
+
+  projects/packages/desktop-shell:
+    dependencies:
+      '@my-jarvis/sdk':
+        specifier: workspace:*
+        version: link:../my-jarvis-sdk
+
+  projects/packages/mobile-shell:
+    dependencies:
+      '@my-jarvis/sdk':
+        specifier: workspace:*
+        version: link:../my-jarvis-sdk
+
+  projects/packages/my-jarvis: {}
+
+  projects/packages/my-jarvis-harness:
+    dependencies:
+      '@my-jarvis/types':
+        specifier: workspace:*
+        version: link:../my-jarvis-types
+
+  projects/packages/my-jarvis-sdk:
+    dependencies:
+      '@my-jarvis/types':
+        specifier: workspace:*
+        version: link:../my-jarvis-types
+
+  projects/packages/my-jarvis-types:
+    dependencies:
+      zod:
+        specifier: '>=3.22'
+        version: 3.25.76
+
+  projects/packages/my-jarvis-win32-x64: {}
+
+packages:
+
+  typescript@5.9.3:
+    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+
+snapshots:
+
+  typescript@5.9.3: {}
+
+  zod@3.25.76: {}

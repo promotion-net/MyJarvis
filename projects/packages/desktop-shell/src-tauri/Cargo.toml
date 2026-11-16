@@ -1,0 +1,9 @@
+[package]
+name = "desktop-shell"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+jarvis-core = { workspace = true }

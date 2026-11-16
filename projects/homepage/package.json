@@ -1,0 +1,10 @@
+{
+    "name": "@my-jarvis/homepage",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "description": "Web portal: landing, SDK docs generated from @my-jarvis/types, read-only playground",
+    "dependencies": {
+        "@my-jarvis/types": "workspace:*"
+    }
+}

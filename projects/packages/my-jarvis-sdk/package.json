@@ -1,0 +1,19 @@
+{
+    "name": "@my-jarvis/sdk",
+    "version": "0.1.0",
+    "type": "module",
+    "description": "mj.* authoring surface: proxy stubs only, real behavior is injected by jarvis-runtime",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+        }
+    },
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "test": "node --test test/index.test.mjs"
+    },
+    "dependencies": {
+        "@my-jarvis/types": "workspace:*"
+    }
+}
