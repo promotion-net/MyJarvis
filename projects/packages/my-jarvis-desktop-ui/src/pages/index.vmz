@@ -1,0 +1,144 @@
+<template>
+  <div class="shell">
+    <header class="topbar glass">
+      <span class="topbar__search">⌘K Search · Commands</span>
+      <span class="topbar__ws">{{ workspaceLabel }}</span>
+      <span class="topbar__dot"></span>
+    </header>
+    <div class="body">
+      <NavRail
+        :active="activeId"
+        :accounts="accounts"
+        :account="currentAccount"
+        :account-id="currentAccount.id"
+        :show-admin="isAdmin"
+        :on-select="selectModule"
+        :on-pick-account="pickAccount"
+      />
+      <main class="stage">
+        <AssistantView v-if="activeId === 'assistant'" />
+        <EmptyState
+          v-else
+          :title="activeTitle"
+          :glyph="activeGlyph"
+          :note="activeNote"
+          :capability="activeCapability"
+        />
+      </main>
+    </div>
+  </div>
+</template>
+
+<style>
+.shell {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  box-sizing: border-box;
+  color: #17171a;
+  font-family: "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  font-size: 14px;
+  background:
+    radial-gradient(720px 420px at 8% 6%, rgba(15, 220, 120, 0.2), transparent 62%),
+    radial-gradient(820px 520px at 92% 94%, rgba(128, 193, 255, 0.26), transparent 62%),
+    radial-gradient(520px 360px at 70% 10%, rgba(39, 210, 191, 0.14), transparent 58%),
+    #e6ebf1;
+}
+.glass {
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+}
+.topbar {
+  flex: none;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+}
+.topbar__search {
+  height: 24px;
+  line-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  color: #52525b;
+  font-size: 12px;
+}
+.topbar__ws {
+  margin-left: auto;
+  font-size: 12px;
+  color: #52525b;
+}
+.topbar__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #0fdc78;
+}
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 8px;
+}
+.stage {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+</style>
+
+<script client>
+import { defaultAccounts, firstAccount } from "../lib/shell.js";
+import { defaultModules } from "../lib/shell.js";
+import type { AccountDef, ModuleDef } from "../lib/shell.js";
+
+const NOTES: Record<string, string> = {
+    messages: "Conversations will appear here once a channel is connected.",
+    mail: "Your inbox will appear here once a mail account is connected.",
+    docs: "Documents live in the local database once the contract lands.",
+    space: "Asset hosting exists in the runtime; the public contract is pending.",
+    calendar: "Events and reminders appear here once the contract lands.",
+    meetings: "Meeting details and minutes appear here once the contract lands.",
+    contacts: "People resolve through contacts once the contract lands.",
+    admin: "Admin console is role-gated and lands with vault/policy (D5).",
+    settings: "Settings (scenario presets, navigation, layout reset) land with D1 polish.",
+};
+
+export default class IndexPage {
+  accounts = defaultAccounts();
+  activeId = "assistant";
+  accountId = firstAccount().id;
+  currentAccount = firstAccount();
+  workspaceLabel = firstAccount().workspace;
+  isAdmin = firstAccount().role === "admin";
+  activeTitle = "Assistant";
+  activeGlyph = "A";
+  activeCapability = "mj.llm.complete";
+  activeNote = "";
+
+  selectModule(id: string) {
+    this.activeId = id;
+    const mod: ModuleDef | null = defaultModules().find((m) => m.id === id) ?? null;
+    this.activeTitle = mod ? mod.label : id === "admin" ? "Admin" : "Settings";
+    this.activeGlyph = mod ? mod.glyph : id === "admin" ? "G" : "S";
+    this.activeCapability = mod ? mod.capability : "mj.*";
+    this.activeNote = NOTES[id] ?? "Not connected yet.";
+  }
+
+  pickAccount(id: string) {
+    const acc = this.accounts.find((a) => a.id === id);
+    if (!acc) return;
+    this.accountId = acc.id;
+    this.currentAccount = acc;
+    this.workspaceLabel = acc.workspace;
+    this.isAdmin = acc.role === "admin";
+  }
+}
+</script>

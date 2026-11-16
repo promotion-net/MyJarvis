@@ -1,0 +1,6 @@
+{
+  "cli.intro": "mj — MyJarvis open capability surface (Node-API bindings assembled with @vmz/commander)",
+  "cli.cmd.capabilities": "Print the /v0 capability catalog as JSON",
+  "cli.cmd.schema": "Print the capability contract as JSON",
+  "cli.opt.mcp": "Emit MCP tools/list definitions instead of the raw catalog"
+}

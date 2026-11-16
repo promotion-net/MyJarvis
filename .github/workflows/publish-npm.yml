@@ -1,0 +1,84 @@
+# Real npm versions are published only by this workflow: pushing tag vX.Y.Z triggers it
+# through npm Trusted Publisher (OIDC). No local `npm publish`, token or OTP path is allowed.
+name: Publish npm
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-napi:
+    name: napi ${{ matrix.id }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: win32-x64
+            os: windows-latest
+            artifact: jarvis.win32-x64-msvc.node
+            shard: my-jarvis-win32-x64
+          - id: linux-x64
+            os: ubuntu-24.04
+            artifact: jarvis.linux-x64-gnu.node
+            shard: my-jarvis-linux-x64
+          - id: linux-arm64
+            os: ubuntu-24.04-arm
+            artifact: jarvis.linux-arm64-gnu.node
+            shard: my-jarvis-linux-arm64
+          - id: darwin-x64
+            os: macos-15-intel
+            artifact: jarvis.darwin-x64.node
+            shard: my-jarvis-darwin-x64
+          - id: darwin-arm64
+            os: macos-15
+            artifact: jarvis.darwin-arm64.node
+            shard: my-jarvis-darwin-arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:napi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: napi-${{ matrix.id }}
+          path: projects/packages/${{ matrix.shard }}/${{ matrix.artifact }}
+
+  publish:
+    needs: build-napi
+    runs-on: ubuntu-24.04
+    environment: NPM_PUBLISH
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: "https://registry.npmjs.org"
+      - name: Download platform binaries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: napi-*
+          merge-multiple: false
+      # Each artifact lands in napi-<id>/; put every `.node` back into its shard package per manifest.
+      - name: Stage platform binaries into shards
+        run: |
+          set -euo pipefail
+          for id in win32-x64 linux-x64 linux-arm64 darwin-x64 darwin-arm64; do
+            shard="projects/packages/my-jarvis-${id}"
+            main=$(node -p "require('./${shard}/package.json').main")
+            file=$(basename "$main")
+            mv "napi-${id}/${file}" "${shard}/${main}"
+          done
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -r build
+      - run: pnpm -r publish --access public --no-git-checks

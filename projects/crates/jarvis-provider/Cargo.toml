@@ -1,0 +1,22 @@
+[package]
+name = "jarvis-provider"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[features]
+default = []
+# Deterministic mock providers for tests and verification scenarios; never touches a real vendor.
+mock = []
+# Reference implementation: generic webhook (template for community provider authors).
+webhook = ["dep:reqwest"]
+
+[dependencies]
+async-trait = { workspace = true }
+reqwest = { workspace = true, optional = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true }

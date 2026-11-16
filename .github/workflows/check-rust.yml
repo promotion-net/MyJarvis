@@ -1,0 +1,51 @@
+# Rust acceptance for the MyJarvis open repository: standalone build and test are the bar.
+name: Rust
+
+on:
+  push:
+    branches: [dev]
+  pull_request:
+    branches: [dev]
+
+jobs:
+  language:
+    name: language guard
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: English-only repository text
+        run: |
+          set -euo pipefail
+          # Repository policy: all shipped text is English and never references any
+          # companion distribution. The guard lives in CI infrastructure, so .github is excluded.
+          if grep -RInP \
+              --exclude-dir=node_modules --exclude-dir=target --exclude-dir=dist \
+              --exclude-dir=.git --exclude-dir=.github \
+              --exclude=pnpm-lock.yaml --exclude=Cargo.lock --exclude=package-lock.json \
+              --exclude='*.node' \
+              '[\x{4e00}-\x{9fff}]|[Cc]losed[- _][Ss]ource' .; then
+            echo "found CJK text or companion-distribution wording; fix the flagged files"
+            exit 1
+          fi
+          echo "language guard passed"
+
+  test:
+    name: cargo test ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest, macos-15]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Install Tauri system deps (Linux)
+        if: matrix.os == 'ubuntu-24.04'
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev
+      - run: pnpm install --frozen-lockfile
+      - run: cargo test --workspace --all-features

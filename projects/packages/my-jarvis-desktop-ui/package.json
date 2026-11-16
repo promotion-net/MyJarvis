@@ -1,0 +1,20 @@
+{
+    "name": "@my-jarvis/desktop",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "description": "Desktop shell: scenario rail with account switching, assistant surface and the Tauri bridge to the host runtime",
+    "scripts": {
+        "dev": "vmz dev . --port 5178",
+        "build:desktop": "vmz build . --release --profile desktop"
+    },
+    "dependencies": {
+        "@my-jarvis/sdk": "workspace:*",
+        "@my-jarvis/types": "workspace:*"
+    },
+    "devDependencies": {
+        "@vmz/core": "0.3.16",
+        "@vmz/plugin": "0.3.16",
+        "@vmz/vmz": "0.3.16"
+    }
+}

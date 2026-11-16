@@ -1,0 +1,268 @@
+<template>
+  <div class="assistant">
+    <aside class="assistant__sessions glass">
+      <div class="assistant__group">Chief</div>
+      <div class="assistant__item assistant__item--on">Quarterly report &amp; reply draft</div>
+      <div class="assistant__item">SMS bridge smoke</div>
+      <div class="assistant__item">Weekly digest</div>
+      <div class="assistant__group">Project A · agent</div>
+      <div class="assistant__item">Release notes review</div>
+    </aside>
+    <section class="assistant__chat glass">
+      <div
+        v-for="m in messages"
+        :key="m.id"
+        :class="bubbleClass(m.role)"
+      >{{ m.text }}</div>
+      <div class="assistant__timeline">
+        Chief → mj.llm.complete done → mj.mail.send pending approval
+      </div>
+      <div class="assistant__composer">
+        <input
+          class="assistant__input"
+          type="text"
+          placeholder="Ask the Chief…"
+          :value="draft"
+          @input="onDraft"
+          @keyup.enter="send"
+        />
+        <button class="assistant__send" type="button" @click="send">Send</button>
+      </div>
+    </section>
+    <aside class="assistant__ctx glass">
+      <div class="assistant__ctxtitle">This reply · Chief</div>
+      <div class="assistant__model">model <b>fast</b></div>
+      <div class="assistant__list">allowlist: <code>fast</code> <code>balanced</code> <code>pin:gpt-x</code> (llm:pin)</div>
+      <div class="assistant__approval">
+        <div class="assistant__method">mj.mail.send</div>
+        <div class="assistant__detail">To: zhangming@example.com · 1 attachment · a meter event will be recorded</div>
+        <div class="assistant__btns">
+          <button class="assistant__decline" type="button" @click="decline">Decline</button>
+          <button class="assistant__approve" type="button" @click="approve">Approve</button>
+        </div>
+        <p v-if="decision" class="assistant__decision">{{ decision }} (mock — runtime lands in D2)</p>
+      </div>
+    </aside>
+  </div>
+</template>
+
+<style>
+.assistant {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: 8px;
+}
+.assistant__sessions {
+  flex: none;
+  width: 178px;
+  padding: 8px;
+  overflow-y: auto;
+}
+.assistant__group {
+  padding: 6px 8px 2px;
+  font-size: 12px;
+  color: #52525b;
+}
+.assistant__item {
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #17171a;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.assistant__item--on {
+  background: #e5fff2;
+  color: #004d26;
+}
+.assistant__chat {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  overflow-y: auto;
+}
+.bubble {
+  max-width: 72%;
+  padding: 8px 12px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.bubble--user {
+  align-self: flex-end;
+  background: #e5fff2;
+  border: 1px solid #0fdc78;
+  color: #004d26;
+}
+.bubble--assistant {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  color: #17171a;
+}
+.assistant__timeline {
+  align-self: flex-start;
+  padding: 4px 8px;
+  border: 1px dashed rgba(23, 23, 26, 0.25);
+  border-radius: 8px;
+  font-size: 12px;
+  color: #52525b;
+}
+.assistant__composer {
+  margin-top: auto;
+  display: flex;
+  gap: 8px;
+}
+.assistant__input {
+  flex: 1;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.75);
+  color: #17171a;
+  font-size: 14px;
+  outline: none;
+}
+.assistant__send {
+  height: 34px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 999px;
+  background: #0fdc78;
+  color: #004d26;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.assistant__ctx {
+  flex: none;
+  width: 224px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+}
+.assistant__ctxtitle {
+  font-size: 12px;
+  color: #52525b;
+}
+.assistant__model {
+  font-size: 14px;
+  color: #17171a;
+}
+.assistant__model b {
+  font-family: ui-monospace, monospace;
+  font-weight: 500;
+  color: #004d26;
+}
+.assistant__list {
+  font-size: 12px;
+  color: #52525b;
+}
+.assistant__list code {
+  font-family: ui-monospace, monospace;
+  color: #17171a;
+}
+.assistant__approval {
+  margin-top: 6px;
+  padding: 10px;
+  border: 1px solid #0fdc78;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.78);
+}
+.assistant__method {
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+  color: #17171a;
+}
+.assistant__detail {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #52525b;
+}
+.assistant__btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.assistant__decline,
+.assistant__approve {
+  flex: 1;
+  height: 28px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.assistant__decline {
+  border: 1px solid rgba(23, 23, 26, 0.18);
+  background: transparent;
+  color: #52525b;
+}
+.assistant__approve {
+  border: 1px solid #0fdc78;
+  background: #0fdc78;
+  color: #004d26;
+  font-weight: 600;
+}
+.assistant__decision {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #004d26;
+}
+</style>
+
+<script client>
+interface ChatMessage {
+  id: number;
+  role: "user" | "assistant";
+  text: string;
+}
+
+let nextId = 3;
+
+export default class AssistantView {
+  public messages: ChatMessage[] = [
+    { id: 1, role: "user", text: "Summarize the quarterly report and draft a reply to Zhang Ming." },
+    { id: 2, role: "assistant", text: "Summary done, draft ready. Sending needs your approval." },
+  ];
+  public draft = "";
+  public decision = "";
+
+  bubbleClass(role: string): string {
+    return "bubble bubble--" + role;
+  }
+
+  onDraft(event: Event) {
+    const target = event.target as HTMLInputElement | null;
+    this.draft = target?.value ?? "";
+  }
+
+  send() {
+    const text = this.draft.trim();
+    if (!text) return;
+    this.messages = [
+      ...this.messages,
+      { id: nextId++, role: "user", text },
+      { id: nextId++, role: "assistant", text: "Assistant replies need a connected runtime (D2). This is the D1 mock surface." },
+    ];
+    this.draft = "";
+  }
+
+  approve() {
+    this.decision = "Approved";
+  }
+
+  decline() {
+    this.decision = "Declined";
+  }
+}
+</script>
