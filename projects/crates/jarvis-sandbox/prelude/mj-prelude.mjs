@@ -1,6 +1,6 @@
-// MyJarvis 沙箱 prelude：宿主模块 `jarvis:*` 的受控桩底座。
-// 每个具名导出序列化为一条 JSON-RPC 请求写入 stdout，由宿主 runtime 应答。
-// 全局 `mj` 默认不注入；`import "jarvis:global"` 显式注入冻结视图。
+// MyJarvis sandbox prelude: the controlled stub substrate behind the `jarvis:*` host modules.
+// Every named export serializes to one JSON-RPC request on stdout; the host runtime answers it.
+// The global `mj` is not injected by default; `import "jarvis:global"` installs the frozen view explicitly.
 import readline from "node:readline";
 
 const pending = new Map();
@@ -33,15 +33,15 @@ lines.on("line", (line) => {
   }
 });
 
-/// 一次宿主能力调用：wire 方法名（`mj.<ns>.<method>`）由注册表决定。
+// One host capability call: the wire method name (`mj.<ns>.<method>`) comes from the registry.
 export function hostCall(method, params = {}) {
   return send(method, params);
 }
 
 const registry = JSON.parse(process.env.MJ_HOST_REGISTRY ?? "[]");
 
-/// `jarvis` 聚合入口的 `mj`：各 `jarvis:*` 域命名空间的冻结合并视图，
-/// 不是独立能力来源——只暴露注册表内的方法。
+// The `mj` aggregate of the `jarvis` entry: a frozen merge of every `jarvis:*` domain namespace.
+// It is not an independent capability source — only registry-listed methods are exposed.
 export function makeMj() {
   const domains = {};
   for (const mod of registry) {
@@ -56,7 +56,7 @@ export function makeMj() {
   return Object.freeze(domains);
 }
 
-/// `jarvis:global` 的副作用：注入不可写、不可重定义的全局 `mj`。
+// Side effect of `jarvis:global`: installs a non-writable, non-redefinable global `mj`.
 export function installGlobalMj() {
   Object.defineProperty(globalThis, "mj", {
     value: makeMj(),
@@ -65,7 +65,7 @@ export function installGlobalMj() {
   });
 }
 
-/// 脚本正常结束后由入口调用：释放 stdin，让事件循环自然退出。
+// Called by the entry after the script finishes: releases stdin so the event loop drains naturally.
 export function finish() {
   lines.close();
   process.stdin.destroy();

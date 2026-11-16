@@ -1,6 +1,7 @@
-//! 移动壳入口：同一 workspace、不同 target。
-//! 移动端直接走 Tauri command → `jarvis-runtime`，不经过 napi-rs；
-//! 完整 Tauri 依赖在壳联调阶段引入，当前先输出 `/v0` 能力目录验证装配。
+//! Mobile shell entry: same workspace, different target.
+//! Mobile goes straight from Tauri commands to the host runtime without napi-rs;
+//! full Tauri dependencies land with shell integration. For now this prints the
+//! `/v0` capability catalog to verify assembly.
 
 fn main() {
     let catalog = jarvis_core::capability_catalog();

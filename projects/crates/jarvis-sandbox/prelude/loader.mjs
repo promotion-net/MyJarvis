@@ -1,5 +1,6 @@
-// 沙箱 ESM 解析钩子：只放行注册表内的 `jarvis*` specifier，其余一律
-// ERR_UNKNOWN_HOST_MODULE。`node:*` 仅 prelude 自身可用；npm bare specifier 拒绝。
+// Sandbox ESM resolution hooks: only `jarvis*` specifiers present in the registry pass;
+// everything else raises ERR_UNKNOWN_HOST_MODULE. `node:*` is reserved for the prelude
+// itself; bare npm specifiers are rejected.
 let cfg = { prelude: "", modules: [] };
 
 export function initialize(data) {

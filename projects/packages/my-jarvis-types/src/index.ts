@@ -1,9 +1,10 @@
 /**
- * `@my-jarvis/types` — MyJarvis 能力契约的唯一类型源。
+ * `@my-jarvis/types` — the single type source of the MyJarvis capability contract.
  *
- * 主入口零运行时依赖：Agent 生成代码只读这里；`mj schema` / `mj verify`
- * 与 MCP tool 定义都从本契约派生。合同命名空间固定 `/v0`。
- * 沙箱作者面 `jarvis:*` 的宿主模块类型见 `jarvis.d.ts`（ambient）。
+ * The main entry has zero runtime dependencies: agent-generated code reads only
+ * from here; `mj schema`, verification reports and MCP tool definitions all
+ * derive from this contract. The contract namespace is fixed at `/v0`.
+ * Ambient `jarvis:*` host-module types for the sandbox authoring surface live in `jarvis.d.ts`.
  */
 /// <reference path="./jarvis.d.ts" />
 
@@ -17,12 +18,13 @@ export type CapabilityId =
     | "llm:complete"
     | "sms:send";
 
-/** L1 能力档位：用户可见，供应商不可见。 */
+/** L1 capability tier: visible to users, the backing vendor is not. */
 export type LlmProfile = "fast" | "balanced" | "reasoning";
 
 /**
- * 披露层级：L0 完全保密（默认；SMS/CDN 永远 L0）、L1 档位、L2 模型族、L3 精确版本。
- * 任何层级都不暴露供应商身份、凭证与单价。
+ * Disclosure levels: L0 fully opaque (default; SMS/CDN are always L0), L1 tier,
+ * L2 model family, L3 exact version. No level ever exposes vendor identity,
+ * credentials or unit prices.
  */
 export type DisclosureLevel = "l0" | "l1" | "l2" | "l3";
 
@@ -33,11 +35,11 @@ export interface Capability {
     metered: boolean;
 }
 
-/** 当前 `/v0` 能力目录（与 jarvis-core 保持一致）。 */
+/** The current `/v0` capability catalog (kept in lockstep with `jarvis-core`). */
 export const CAPABILITIES: readonly Capability[] = [
     {
         id: "backend:provision",
-        summary: "为应用分配 loopback 端口与专属 SQLite 文件",
+        summary: "Provision a loopback port and a dedicated SQLite file for an app",
         inputSchema: {
             type: "object",
             properties: {name: {type: "string"}},
@@ -48,7 +50,7 @@ export const CAPABILITIES: readonly Capability[] = [
     },
     {
         id: "db:migrate",
-        summary: "在应用专属数据库上执行迁移",
+        summary: "Run a migration against the app's dedicated database",
         inputSchema: {
             type: "object",
             properties: {sql: {type: "string"}},
@@ -59,7 +61,7 @@ export const CAPABILITIES: readonly Capability[] = [
     },
     {
         id: "db:query",
-        summary: "在应用专属数据库上执行只读查询",
+        summary: "Run a read-only query against the app's dedicated database",
         inputSchema: {
             type: "object",
             properties: {
@@ -73,7 +75,7 @@ export const CAPABILITIES: readonly Capability[] = [
     },
     {
         id: "server:route",
-        summary: "在 runtime 反向代理上注册应用路由",
+        summary: "Register an app route on the runtime reverse proxy",
         inputSchema: {
             type: "object",
             properties: {
@@ -88,7 +90,7 @@ export const CAPABILITIES: readonly Capability[] = [
     {
         id: "llm:complete",
         summary:
-            "经 Provider 代理完成一次 LLM 调用；默认 L0/L1（档位），L2/L3（pin 模型族/版本）需授权",
+            "Complete one LLM call through the provider proxy; defaults to L0/L1 (tier), L2/L3 (pinned model family/version) require authorization",
         inputSchema: {
             type: "object",
             properties: {
@@ -108,7 +110,7 @@ export const CAPABILITIES: readonly Capability[] = [
                 model: {
                     type: "string",
                     description:
-                        "L2/L3 pin：封闭模型族或版本标识，由 runtime 能力目录驱动；未授权 llm:pin 时调用被拒绝",
+                        "L2/L3 pin: a closed model family or version id, driven by the runtime capability catalog; calls are rejected without llm:pin authorization",
                 },
                 maxTokens: {type: "integer", minimum: 1},
             },
@@ -119,7 +121,7 @@ export const CAPABILITIES: readonly Capability[] = [
     },
     {
         id: "sms:send",
-        summary: "经 Provider 代理发送一条短信",
+        summary: "Send one SMS message through the provider proxy",
         inputSchema: {
             type: "object",
             properties: {to: {type: "string"}, text: {type: "string"}},
@@ -181,9 +183,10 @@ export interface LlmMessage {
 }
 
 /**
- * `mj.llm.complete` 输入：L0/L1 用 `profile`（缺省 balanced）；L2/L3 用 `model`
- * pin 模型族/版本（封闭枚举由 runtime 能力目录驱动，需要 `llm:pin` 授权）。
- * 两者互斥；任何形态都不出现供应商词汇。
+ * `mj.llm.complete` input: L0/L1 use `profile` (defaults to balanced); L2/L3 use
+ * `model` to pin a model family/version (a closed enum driven by the runtime
+ * capability catalog, requiring `llm:pin` authorization). The two are mutually
+ * exclusive and no vendor vocabulary ever appears in any shape.
  */
 export interface LlmCompleteInput {
     messages: LlmMessage[];
@@ -197,7 +200,7 @@ export interface LlmCompleteResult {
     usage: { input: number; output: number };
 }
 
-/** 沙箱内可见的完整 `mj.*` 表面。 */
+/** The full `mj.*` surface visible inside the sandbox. */
 export interface MjApi {
     backend: {
         provision(input: ProvisionInput): Promise<ProvisionResult>;
@@ -217,7 +220,7 @@ export interface MjApi {
     };
 }
 
-/** 一次受控操作的计量事件（schema 开源；定价折算在闭源 billing）。 */
+/** A metering event for one controlled operation (schema only; pricing lives in the host). */
 export interface MeterEvent {
     appId: string;
     capability: CapabilityId;

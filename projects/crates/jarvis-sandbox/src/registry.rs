@@ -1,6 +1,6 @@
-//! 宿主模块注册表：从 `jarvis-core` 能力目录派生，单一真相源。
-//! capability id `db:query` → specifier `jarvis:db` 的具名导出 `query`，
-//! wire 方法 `mj.db.query`；目录里没有的 specifier 一律拒绝。
+//! Host module registry: derived from the `jarvis-core` capability catalog — the single source of truth.
+//! Capability id `db:query` → specifier `jarvis:db` named export `query`, wire method `mj.db.query`;
+//! any specifier absent from the catalog is rejected.
 
 use std::collections::BTreeMap;
 
@@ -8,7 +8,7 @@ use serde_json::{Value, json};
 
 use jarvis_core::Capability;
 
-/// 默认注册表：当前 `/v0` 能力目录的模块视图。
+/// Default registry: the module view of the current `/v0` capability catalog.
 pub fn default_host_registry() -> Value {
     host_registry_from(&jarvis_core::capability_catalog())
 }

@@ -1,5 +1,5 @@
-// 桌面壳前端入口：安装 transport 适配器。
-// Tauri 命令桥接入前，transport 显式失败，不伪造任何本地执行。
+// Desktop shell frontend entry: installs the transport adapter.
+// Until the Tauri command bridge lands, the transport fails explicitly and never fakes local execution.
 import {installMjTransport} from "@my-jarvis/sdk";
 
 installMjTransport(async (method, params) => {

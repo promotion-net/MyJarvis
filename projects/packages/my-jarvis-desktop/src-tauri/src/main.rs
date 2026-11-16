@@ -1,5 +1,5 @@
-//! 桌面壳骨架（开源）：只做挂载与能力自检，不组装 runtime。
-//! runtime 治理在闭源 MJ-Cloud，经 runtime-bridge 注入本壳；Tauri 完整依赖在壳联调阶段引入。
+//! Desktop shell skeleton (open source): mounting and capability self-check only, no runtime assembly.
+//! The shell receives its runtime through an injected bridge; full Tauri wiring lands with shell integration.
 
 fn main() {
     println!(

@@ -1,9 +1,9 @@
-//! 沙箱 ↔ runtime 的 stdio JSON-RPC 行协议。
+//! Line-delimited stdio JSON-RPC between the sandbox and the host.
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-/// 沙箱子进程发出的调用请求。
+/// Call request emitted by the sandboxed child process.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Request {
     pub jsonrpc: String,
@@ -13,7 +13,7 @@ pub struct Request {
     pub params: Value,
 }
 
-/// 宿主应答：`result` 与 `error` 二选一。
+/// Host response: exactly one of `result` or `error`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Response {
     pub jsonrpc: String,

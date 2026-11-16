@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "type": "module",
-    "description": "Desktop shell: mounts the three-column surface and bridges Tauri commands to jarvis-runtime",
+    "description": "Desktop shell: mounts the three-column surface and bridges Tauri commands to the host runtime",
     "dependencies": {
         "@my-jarvis/sdk": "workspace:*"
     }

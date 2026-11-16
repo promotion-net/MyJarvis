@@ -9,9 +9,10 @@ members = [
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.85"
 
 [workspace.dependencies]
-# internal crates（开源面：runtime / billing / verify 在闭源 MJ-Cloud 仓）
+# internal crates (open contract surface only; execution governance lives in embedding hosts)
 jarvis-core = { path = "projects/crates/jarvis-core" }
 jarvis-sandbox = { path = "projects/crates/jarvis-sandbox" }
 jarvis-provider = { path = "projects/crates/jarvis-provider" }
@@ -19,7 +20,6 @@ jarvis-mcp = { path = "projects/crates/jarvis-mcp" }
 
 # external
 async-trait = "0.1"
-clap = { version = "4", features = ["derive"] }
 napi = "3"
 napi-build = "2"
 napi-derive = "3"

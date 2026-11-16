@@ -1,5 +1,6 @@
-//! 开源仓独立验收：沙箱不依赖闭源 runtime，用 mock `Dispatcher` 跑通
-//! `jarvis:*` 宿主模块的请求/应答、错误透传、聚合与全局注入、白名单拒绝与超时 kill。
+//! Standalone acceptance for the open repo: the sandbox runs without any host runtime —
+//! a mock `Dispatcher` exercises the `jarvis:*` host modules' request/response, error
+//! propagation, aggregate and global injection, whitelist rejection and timeout kill.
 
 use std::sync::Arc;
 use std::time::Duration;
@@ -78,7 +79,7 @@ async fn aggregate_mj_is_a_frozen_view_of_the_registry() {
         import { mj } from "jarvis";
         const r = await mj.echo.pong({ via: "aggregate" });
         if (!r.pong) throw new Error("aggregate call failed");
-        // 冻结：写入被拒，且不能引入注册表之外的能力
+        // frozen: writes are rejected and no capability outside the registry can be introduced
         let rejected = false;
         try {
             mj.echo.hacked = () => {};

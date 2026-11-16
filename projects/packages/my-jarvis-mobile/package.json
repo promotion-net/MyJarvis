@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "type": "module",
-    "description": "Mobile shell: bottom-tab surface, Tauri commands straight to jarvis-runtime",
+    "description": "Mobile shell: bottom-tab surface, Tauri commands straight to the host runtime",
     "dependencies": {
         "@my-jarvis/sdk": "workspace:*"
     }
