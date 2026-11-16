@@ -1,8 +1,8 @@
-//! 应用标识。
+//! Application identity.
 
 use serde::{Deserialize, Serialize};
 
-/// runtime 中介的每个受管应用的唯一 id。
+/// Unique id of a managed application; the runtime mediates everything it does.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct AppId(pub String);

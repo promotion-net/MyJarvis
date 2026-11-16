@@ -1,11 +1,12 @@
-//! 计量事件：runtime 各受控模块在操作完成时发出，由闭源 billing 消费。
-//! 本 schema 开源；定价折算、ledger 与结算在闭源仓。
+//! Metering events: emitted by controlled runtime modules when an operation
+//! completes. This crate defines the event schema only; pricing, ledgers and
+//! settlement are the host application's responsibility.
 
 use serde::{Deserialize, Serialize};
 
 use crate::app::AppId;
 
-/// 计量单位。
+/// Metering unit.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum MeterUnit {
@@ -20,9 +21,10 @@ pub enum MeterUnit {
     Delivery,
 }
 
-/// 披露层级（L0–L3）：用户在该次调用中能感知到什么。
-/// L0 完全保密（默认；SMS/CDN 永远 L0）；L1 档位披露；L2 模型族披露；L3 精确版本。
-/// 任何层级都不暴露供应商身份、凭证与单价。
+/// Disclosure level (L0–L3): what the user may perceive for a given call.
+/// L0 fully opaque (default; SMS/CDN are always L0); L1 discloses the tier;
+/// L2 discloses the model family; L3 discloses the exact version.
+/// No level ever exposes vendor identity, credentials or unit prices.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum DisclosureLevel {
@@ -33,17 +35,18 @@ pub enum DisclosureLevel {
     L3,
 }
 
-/// 一次受控操作的计量事件。
+/// A metering event for one controlled operation.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MeterEvent {
     pub app_id: AppId,
-    /// 触发事件的能力 id，例如 `db:query`。
+    /// Capability id that produced the event, e.g. `db:query`.
     pub capability: String,
     pub quantity: u64,
     pub unit: MeterUnit,
-    /// 用户可见的披露层级；闭源 ledger 据此区分"按能力计费"与"按所选模型计费"。
+    /// User-facing disclosure level; hosts use it to separate
+    /// "billed by capability" from "billed by the selected model".
     pub disclosure_level: DisclosureLevel,
-    /// Unix 毫秒时间戳。
+    /// Unix timestamp in milliseconds.
     pub timestamp_ms: u64,
 }

@@ -1,7 +1,8 @@
-//! MyJarvis 领域模型：Session、Message、Task、Capability、AppId 与计量事件。
+//! MyJarvis domain model: Session, Message, Task, Capability, AppId and metering events.
 //!
-//! 这里是所有 crate 与 `@my-jarvis/types` 契约的共同真相源；wire/serde 命名以
-//! Rust 字段为准（结构体 camelCase，枚举 tag kebab-case）。
+//! This crate is the shared source of truth for every crate and the
+//! `@my-jarvis/types` contract; wire/serde naming follows the Rust fields
+//! (structs `camelCase`, enum tags `kebab-case`).
 
 pub mod app;
 pub mod capability;

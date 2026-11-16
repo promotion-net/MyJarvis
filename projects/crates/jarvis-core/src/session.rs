@@ -1,4 +1,4 @@
-//! 会话领域模型。
+//! Session domain model.
 
 use serde::{Deserialize, Serialize};
 
