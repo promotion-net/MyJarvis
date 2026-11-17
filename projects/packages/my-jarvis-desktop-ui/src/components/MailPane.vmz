@@ -1,0 +1,433 @@
+<template>
+  <div class="pane">
+    <aside class="folders">
+      <div class="folders__head">
+        <b>Mail</b>
+        <button class="folders__new" type="button" @click="compose">＋ New</button>
+      </div>
+      <button
+        v-for="f in folders"
+        :key="f.id"
+        type="button"
+        :class="folderClass(f.id)"
+        @click="pickFolder(f.id)"
+      >
+        <span>{{ f.label }}</span>
+        <span v-if="f.unread > 0" class="folders__badge">{{ f.unread }}</span>
+      </button>
+      <p class="folders__note">Mail account connect needs `mj.mail.*` (gap). Inbox shown is local preview.</p>
+    </aside>
+    <section class="list">
+      <header class="list__head">
+        <b>{{ folderLabel }}</b>
+        <span class="list__count">{{ visible.length }} items</span>
+      </header>
+      <div class="list__scroll">
+        <button
+          v-for="m in visible"
+          :key="m.id"
+          type="button"
+          :class="rowClass(m.id)"
+          @click="pickMail(m.id)"
+        >
+          <span :class="'avatar avatar--md avatar--' + m.tone">{{ m.initials }}</span>
+          <span class="list__body">
+            <span class="list__top"><b>{{ m.sender }}</b><i>{{ m.time }}</i></span>
+            <span class="list__subject">{{ m.subject }}</span>
+            <span class="list__preview">{{ m.preview }}</span>
+          </span>
+        </button>
+        <p v-if="visible.length === 0" class="list__empty">Nothing here yet.</p>
+      </div>
+      <article v-if="activeMail" class="read">
+        <h3>{{ activeMail.subject }}</h3>
+        <p class="read__meta">From {{ activeMail.sender }} · {{ activeMail.time }}</p>
+        <p v-for="(line, i) in activeMail.body" :key="i" class="read__line">{{ line }}</p>
+        <div class="read__actions">
+          <button type="button" @click="reply">Reply</button>
+          <button type="button" @click="archive">Archive</button>
+        </div>
+      </article>
+    </section>
+    <aside v-if="composing" class="compose">
+      <div class="compose__head">
+        <b>New mail</b>
+        <button type="button" class="compose__x" @click="composing = false">✕</button>
+      </div>
+      <input class="compose__to" type="text" placeholder="To" :value="to" @input="onTo" />
+      <input class="compose__subject" type="text" placeholder="Subject" :value="subject" @input="onSubject" />
+      <textarea class="compose__body" placeholder="Message…" :value="body" @input="onBody"></textarea>
+      <div class="compose__tools">
+        <button type="button" :disabled="drafting" @click="draftWithAssistant">
+          {{ drafting ? "Drafting…" : "Draft with assistant" }}
+        </button>
+        <button type="button" class="compose__send" disabled title="mj.mail.send not available yet">Send</button>
+      </div>
+      <p v-if="status" class="compose__status">{{ status }}</p>
+    </aside>
+  </div>
+</template>
+
+<style>
+.pane {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+}
+.folders {
+  flex: none;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 10px;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+}
+.folders__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 10px;
+}
+.folders__head b {
+  font-size: 15px;
+}
+.folders__new {
+  border: 0;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  border-radius: 8px;
+  padding: 4px 9px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.folders__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 13px;
+  color: var(--text-2);
+  cursor: pointer;
+  text-align: left;
+}
+.folders__item:hover {
+  background: var(--hover);
+}
+.folders__item--on {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+.folders__badge {
+  min-width: 18px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 10.5px;
+  text-align: center;
+  padding: 1px 5px;
+}
+.folders__note {
+  margin: auto 6px 4px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-3);
+}
+.list {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--chat);
+}
+.list__head {
+  flex: none;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+.list__count {
+  color: var(--text-3);
+  font-size: 12px;
+}
+.list__scroll {
+  flex: none;
+  max-height: 46%;
+  overflow-y: auto;
+  border-bottom: 1px solid var(--line);
+}
+.list__row {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+  padding: 10px 16px;
+  cursor: pointer;
+  text-align: left;
+}
+.list__row:hover {
+  background: var(--soft);
+}
+.list__row--on {
+  background: var(--accent-soft);
+}
+.list__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.list__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.list__top b {
+  font-size: 13px;
+}
+.list__top i {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--text-3);
+}
+.list__subject {
+  font-size: 12.5px;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.list__preview {
+  font-size: 11.5px;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.list__empty {
+  padding: 20px;
+  color: var(--text-3);
+  font-size: 12.5px;
+}
+.read {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 22px;
+  background: var(--panel);
+}
+.read h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+.read__meta {
+  color: var(--text-3);
+  font-size: 12px;
+  margin: 0 0 14px;
+}
+.read__line {
+  margin: 0 0 10px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-1);
+}
+.read__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.read__actions button {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12.5px;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.read__actions button:hover {
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.compose {
+  flex: none;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+}
+.compose__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.compose__x {
+  border: 0;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+}
+.compose input,
+.compose textarea {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--field);
+  padding: 8px 10px;
+  font: 400 13px/1.5 var(--font);
+  color: var(--text-1);
+  outline: none;
+}
+.compose textarea {
+  flex: 1;
+  min-height: 120px;
+  resize: none;
+}
+.compose input:focus,
+.compose textarea:focus {
+  border-color: var(--accent);
+}
+.compose__tools {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.compose__tools button {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 12.5px;
+  cursor: pointer;
+  color: var(--text-2);
+}
+.compose__tools button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.compose__send {
+  background: var(--accent) !important;
+  color: #fff;
+}
+.compose__status {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+</style>
+
+<script client>
+import { mj } from "@my-jarvis/sdk";
+import { defaultMailFolders, defaultMails } from "../lib/shell.js";
+import type { MailFolder, MailItem } from "../lib/shell.js";
+
+export default class MailPane {
+  static __vmzHostBox = "contents";
+  public folders: MailFolder[] = defaultMailFolders();
+  public mails: MailItem[] = defaultMails();
+  public folder = "inbox";
+  public active = "m1";
+  public composing = false;
+  public drafting = false;
+  public to = "";
+  public subject = "";
+  public body = "";
+  public status = "";
+
+  get visible(): MailItem[] {
+    return this.mails.filter((m) => m.folder === this.folder);
+  }
+
+  get activeMail(): MailItem | null {
+    return this.visible.find((m) => m.id === this.active) ?? null;
+  }
+
+  get folderLabel(): string {
+    return this.folders.find((f) => f.id === this.folder)?.label ?? "Mail";
+  }
+
+  folderClass(id: string): string {
+    return id === this.folder ? "folders__item folders__item--on" : "folders__item";
+  }
+
+  rowClass(id: string): string {
+    return id === this.active ? "list__row list__row--on" : "list__row";
+  }
+
+  pickFolder(id: string) {
+    this.folder = id;
+    const first = this.mails.find((m) => m.folder === id);
+    this.active = first ? first.id : "";
+  }
+
+  pickMail(id: string) {
+    this.active = id;
+  }
+
+  compose() {
+    this.composing = true;
+    this.status = "";
+  }
+
+  reply() {
+    const mail = this.activeMail;
+    if (!mail) return;
+    this.composing = true;
+    this.to = mail.sender;
+    this.subject = "Re: " + mail.subject;
+    this.body = "";
+    this.status = "";
+  }
+
+  archive() {
+    const mail = this.activeMail;
+    if (!mail) return;
+    this.mails = this.mails.map((m) => (m.id === mail.id ? { ...m, folder: "archive" } : m));
+    this.pickFolder(this.folder);
+  }
+
+  onTo(event: Event) {
+    this.to = (event.target as HTMLInputElement).value;
+  }
+
+  onSubject(event: Event) {
+    this.subject = (event.target as HTMLInputElement).value;
+  }
+
+  onBody(event: Event) {
+    this.body = (event.target as HTMLTextAreaElement).value;
+  }
+
+  /** Real round trip: the assistant drafts through `mj.llm.complete` via dispatch. */
+  async draftWithAssistant() {
+    if (this.drafting) return;
+    this.drafting = true;
+    this.status = "Drafting through the runtime…";
+    try {
+      const prompt = "Draft a short professional reply. To: " + this.to + ". Subject: " + this.subject + ". Context: " + this.body;
+      const done = await mj.llm.complete({ messages: [{ role: "user", content: prompt }], profile: "fast" });
+      this.body = done.text;
+      this.status = "Draft ready — sending stays disabled until `mj.mail.send` lands.";
+    } catch (err) {
+      this.status = "mj.llm.complete failed · " + String(err);
+    } finally {
+      this.drafting = false;
+    }
+  }
+}
+</script>

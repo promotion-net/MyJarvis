@@ -1,0 +1,258 @@
+<template>
+  <div class="pane">
+    <aside class="meetings">
+      <div class="meetings__head"><b>Meetings</b></div>
+      <button
+        v-for="m in meetings"
+        :key="m.id"
+        type="button"
+        :class="rowClass(m.id)"
+        @click="pick(m.id)"
+      >
+        <span>{{ m.title }}</span>
+        <i>{{ m.when }}</i>
+      </button>
+      <p class="meetings__note">Real-time AV is out of first scope; the join slot is reserved.</p>
+    </aside>
+    <section v-if="activeMeeting" class="detail">
+      <header class="detail__head">
+        <div>
+          <h3>{{ activeMeeting.title }}</h3>
+          <p>{{ activeMeeting.when }} · hosted by {{ activeMeeting.organizer }} · {{ activeMeeting.attendees }} people</p>
+        </div>
+        <button type="button" class="detail__join" disabled title="RTC provider contract is not built yet">Join</button>
+      </header>
+      <h4>Agenda</h4>
+      <ul class="detail__agenda">
+        <li v-for="(a, i) in activeMeeting.agenda" :key="i">{{ a }}</li>
+      </ul>
+      <h4>Related calendar event</h4>
+      <p class="detail__line">Linked once `mj.calendar.*` lands.</p>
+    </section>
+    <aside v-if="activeMeeting" class="minutes">
+      <div class="minutes__head">
+        <b>Minutes</b>
+        <button type="button" :disabled="busy" @click="draftMinutes">
+          {{ busy ? "Drafting…" : "Draft with assistant" }}
+        </button>
+      </div>
+      <textarea class="minutes__area" :value="minutes" @input="onMinutes" placeholder="Minutes appear here; the assistant can draft from the agenda."></textarea>
+      <p v-if="status" class="minutes__status">{{ status }}</p>
+      <p class="minutes__note">Minutes save into Docs when the doc contract lands.</p>
+    </aside>
+  </div>
+</template>
+
+<style>
+.pane {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+}
+.meetings {
+  flex: none;
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 10px;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+}
+.meetings__head b {
+  font-size: 15px;
+  padding: 0 8px 10px;
+}
+.meetings__row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  text-align: left;
+}
+.meetings__row:hover {
+  background: var(--hover);
+}
+.meetings__row--on {
+  background: var(--accent-soft);
+}
+.meetings__row span {
+  font-size: 13px;
+  color: var(--text-1);
+}
+.meetings__row i {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--text-3);
+}
+.meetings__note {
+  margin: auto 8px 4px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-3);
+}
+.detail {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 18px 22px;
+  background: var(--chat);
+}
+.detail__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.detail__head h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+.detail__head p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.detail__join {
+  margin-left: auto;
+  border: 1px solid var(--line);
+  background: var(--soft);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12.5px;
+  color: var(--text-3);
+  cursor: default;
+}
+.detail h4 {
+  margin: 18px 0 6px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.detail__agenda {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--text-1);
+}
+.detail__line {
+  font-size: 13px;
+  color: var(--text-2);
+}
+.minutes {
+  flex: none;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+}
+.minutes__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.minutes__head button {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 8px;
+  padding: 5px 9px;
+  font-size: 12px;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.minutes__head button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.minutes__area {
+  flex: 1;
+  min-height: 140px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--field);
+  padding: 8px 10px;
+  font: 400 13px/1.6 var(--font);
+  color: var(--text-1);
+  resize: none;
+  outline: none;
+}
+.minutes__area:focus {
+  border-color: var(--accent);
+}
+.minutes__status {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+.minutes__note {
+  margin-top: auto;
+  font-size: 11px;
+  color: var(--text-3);
+}
+</style>
+
+<script client>
+import { mj } from "@my-jarvis/sdk";
+import { defaultMeetings } from "../lib/shell.js";
+import type { MeetingItem } from "../lib/shell.js";
+
+export default class MeetingsPane {
+  static __vmzHostBox = "contents";
+  public meetings: MeetingItem[] = defaultMeetings();
+  public active = "mt1";
+  public minutes = "";
+  public busy = false;
+  public status = "";
+
+  get activeMeeting(): MeetingItem | null {
+    return this.meetings.find((m) => m.id === this.active) ?? null;
+  }
+
+  rowClass(id: string): string {
+    return id === this.active ? "meetings__row meetings__row--on" : "meetings__row";
+  }
+
+  pick(id: string) {
+    this.active = id;
+    const meeting = this.meetings.find((m) => m.id === id);
+    this.minutes = meeting ? meeting.minutes : "";
+    this.status = "";
+  }
+
+  onMinutes(event: Event) {
+    this.minutes = (event.target as HTMLTextAreaElement).value;
+  }
+
+  /** Assistant minutes draft through the real dispatch path. */
+  async draftMinutes() {
+    const meeting = this.activeMeeting;
+    if (!meeting || this.busy) return;
+    this.busy = true;
+    this.status = "Drafting from the agenda…";
+    try {
+      const done = await mj.llm.complete({
+        messages: [{ role: "user", content: "Draft short meeting minutes for: " + meeting.title + ". Agenda: " + meeting.agenda.join("; ") }],
+        profile: "fast",
+      });
+      this.minutes = done.text;
+      this.status = "Draft ready — saving into Docs waits for the doc contract.";
+    } catch (err) {
+      this.status = "mj.llm.complete failed · " + String(err);
+    } finally {
+      this.busy = false;
+    }
+  }
+}
+</script>

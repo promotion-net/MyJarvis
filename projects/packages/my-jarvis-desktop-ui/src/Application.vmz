@@ -1,5 +1,5 @@
 <template>
-  <div class="app-frame">
+  <div class="app-frame" :data-theme="theme">
     <TitleBar />
     <slot />
     <ContextMenu
@@ -31,17 +31,38 @@
   --accent-soft: #e8f2ff;
   --accent-ink: #0a6ad6;
   --danger: #ff3b30;
+  --rail-bg: rgba(255, 255, 255, 0.72);
+  --shell-bg: #eef1f5;
 
   height: 100%;
   display: flex;
   flex-direction: column;
   min-height: 0;
-  background: #eef1f5;
+  background: var(--shell-bg);
+}
+.app-frame[data-theme="dark"] {
+  --panel: #232733;
+  --chat: #1a1e26;
+  --soft: #2b303b;
+  --field: #262b36;
+  --hover: rgba(255, 255, 255, 0.06);
+  --line: #333a48;
+  --text-1: #e7ebf2;
+  --text-2: #a6afc0;
+  --text-3: #6f7889;
+  --accent: #0a84ff;
+  --accent-hover: #409cff;
+  --accent-soft: #1c2a42;
+  --accent-ink: #7ab8ff;
+  --danger: #ff453a;
+  --rail-bg: rgba(30, 34, 44, 0.8);
+  --shell-bg: #14171d;
 }
 </style>
 
 <script client>
 import { installShellTransport } from "./lib/bridge.js";
+import { loadShellTheme } from "./lib/shell.js";
 
 interface MenuItem {
   id: string;
@@ -89,12 +110,21 @@ export default class Application {
   public menuItems: MenuItem[] = [];
   public menuX = 0;
   public menuY = 0;
+  public theme = "light";
   public detachMenu: (() => void) | null = null;
+  public detachTheme: (() => void) | null = null;
 
   onMount() {
     installShellTransport();
     // `onMount` also runs during SSR (server render has no window).
     if (typeof window === "undefined") return;
+    this.theme = loadShellTheme();
+    const onTheme = (event: Event) => {
+      const detail = (event as CustomEvent<string>).detail;
+      this.theme = detail === "dark" ? "dark" : "light";
+    };
+    window.addEventListener("mj:theme", onTheme);
+    this.detachTheme = () => window.removeEventListener("mj:theme", onTheme);
     // DOM listeners need bound closures: class methods are not auto-bound here.
     const onContextMenu = (event: Event) => this.openMenu(event);
     const onPointerDown = (event: Event) => this.dismissOnOutside(event);
@@ -111,7 +141,9 @@ export default class Application {
 
   onDestroy() {
     if (this.detachMenu) this.detachMenu();
+    if (this.detachTheme) this.detachTheme();
     this.detachMenu = null;
+    this.detachTheme = null;
   }
 
   openMenu(event: Event) {

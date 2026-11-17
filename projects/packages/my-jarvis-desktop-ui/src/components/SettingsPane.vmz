@@ -1,0 +1,305 @@
+<template>
+  <div class="pane">
+    <section class="form">
+      <header class="form__head">
+        <h3>Settings</h3>
+        <p>Shell preferences are stored locally on this device.</p>
+      </header>
+
+      <div class="group">
+        <h4>Scenario</h4>
+        <p class="group__hint">Switching a scenario changes which modules the rail shows.</p>
+        <div class="choices">
+          <label v-for="s in scenarios" :key="s.id" :class="choiceClass(s.id)">
+            <input type="radio" name="scenario" :value="s.id" :checked="scenario === s.id" @change="pickScenario(s.id)" />
+            <span>
+              <b>{{ s.label }}</b>
+              <i>{{ s.modules.length }} modules</i>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="group">
+        <h4>Navigation</h4>
+        <p class="group__hint">Show or hide modules and set their rail order.</p>
+        <div class="nav">
+          <div v-for="(m, i) in sortedModules" :key="m.id" class="nav__row">
+            <label class="nav__pick">
+              <input type="checkbox" :checked="!hidden.includes(m.id)" @change="toggle(m.id)" />
+              <span>{{ m.label }}</span>
+            </label>
+            <span class="nav__cap">{{ m.capability }}</span>
+            <span class="nav__move">
+              <button type="button" :disabled="i === 0" title="Move up" @click="move(m.id, -1)">↑</button>
+              <button type="button" :disabled="i === sortedModules.length - 1" title="Move down" @click="move(m.id, 1)">↓</button>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <h4>Appearance</h4>
+        <div class="choices">
+          <label class="choices__item" :class="{ 'choices__item--on': theme === 'light' }">
+            <input type="radio" name="theme" value="light" :checked="theme === 'light'" @change="setTheme('light')" />
+            <span>Light</span>
+          </label>
+          <label class="choices__item" :class="{ 'choices__item--on': theme === 'dark' }">
+            <input type="radio" name="theme" value="dark" :checked="theme === 'dark'" @change="setTheme('dark')" />
+            <span>Dark</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="group">
+        <h4>Layout</h4>
+        <div class="group__row">
+          <button type="button" class="group__danger" @click="resetAll">Reset navigation and scenario</button>
+          <p v-if="status" class="group__status">{{ status }}</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</template>
+
+<style>
+.pane {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-y: auto;
+  background: var(--chat);
+}
+.form {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 26px 24px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.form__head h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+}
+.form__head p {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text-3);
+}
+.group h4 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+.group__hint {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.choices {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.choices label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  color: var(--text-1);
+  cursor: pointer;
+}
+.choices label:hover {
+  background: var(--hover);
+}
+.choices__on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.choices label span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.choices label i {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--text-3);
+}
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+.nav__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0;
+}
+.nav__pick {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-1);
+  cursor: pointer;
+}
+.nav__cap {
+  font: 400 11px var(--font-mono);
+  color: var(--text-3);
+}
+.nav__move {
+  display: flex;
+  gap: 4px;
+}
+.nav__move button {
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--field);
+  color: var(--text-2);
+  font-size: 11px;
+  cursor: pointer;
+}
+.nav__move button:hover {
+  background: var(--hover);
+}
+.nav__move button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.group__row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.group__danger {
+  border: 1px solid var(--danger);
+  background: transparent;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12.5px;
+  color: var(--danger);
+  cursor: pointer;
+}
+.group__danger:hover {
+  background: var(--hover);
+}
+.group__status {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-3);
+}
+</style>
+
+<script client>
+import {
+  applyNav,
+  defaultModules,
+  defaultScenarios,
+  loadShellNav,
+  loadShellTheme,
+  saveShellNav,
+  saveShellTheme,
+} from "../lib/shell.js";
+import type { ModuleDef, ScenarioDef } from "../lib/shell.js";
+
+export default class SettingsPane {
+  static __vmzHostBox = "contents";
+  public scenarios: ScenarioDef[] = defaultScenarios();
+  public all: ModuleDef[] = defaultModules();
+  public hidden: string[] = [];
+  public order: string[] = [];
+  public theme = "light";
+  public status = "";
+  public scenario = "personal";
+  public onScenario: ((id: string) => void) | null = null;
+
+  onMount() {
+    const nav = loadShellNav();
+    this.hidden = nav.hidden;
+    this.order = nav.order;
+    this.theme = loadShellTheme();
+  }
+
+  // All known modules in the saved order, so hidden ones stay manageable.
+  get sortedModules(): ModuleDef[] {
+    const out: ModuleDef[] = [];
+    for (const id of this.order) {
+      const found = this.all.find((m) => m.id === id);
+      if (found && !out.includes(found)) out.push(found);
+    }
+    for (const m of this.all) {
+      if (!out.includes(m)) out.push(m);
+    }
+    return out;
+  }
+
+  choiceClass(id: string): string {
+    return id === this.scenario ? "choices__on" : "";
+  }
+
+  pickScenario(id: string) {
+    this.scenario = id;
+    this.status = "";
+    this.onScenario?.(id);
+  }
+
+  toggle(id: string) {
+    this.hidden = this.hidden.includes(id) ? this.hidden.filter((x) => x !== id) : [...this.hidden, id];
+    this.persist();
+  }
+
+  move(id: string, delta: number) {
+    const list = this.sortedModules.map((m) => m.id);
+    const i = list.indexOf(id);
+    const j = i + delta;
+    if (i < 0 || j < 0 || j >= list.length) return;
+    const swapped = [...list];
+    const tmp = swapped[i]!;
+    swapped[i] = swapped[j]!;
+    swapped[j] = tmp;
+    this.order = swapped;
+    this.persist();
+  }
+
+  persist() {
+    saveShellNav({ hidden: this.hidden, order: this.order });
+    if (typeof window !== "undefined") {
+      // The shell recomputes the rail from storage; the scenario set is applied there.
+      window.dispatchEvent(new CustomEvent("mj:navigation", { detail: applyNav(this.scenario, { hidden: this.hidden, order: this.order }) }));
+    }
+    this.status = "Saved on this device.";
+  }
+
+  setTheme(t: string) {
+    this.theme = t;
+    saveShellTheme(t);
+    if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("mj:theme", { detail: t }));
+  }
+
+  resetAll() {
+    this.hidden = [];
+    this.order = [];
+    saveShellNav({ hidden: [], order: [] });
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("mj:navigation", { detail: applyNav(this.scenario, { hidden: [], order: [] }) }));
+    }
+    this.status = "Navigation reset to the scenario defaults.";
+  }
+}
+</script>

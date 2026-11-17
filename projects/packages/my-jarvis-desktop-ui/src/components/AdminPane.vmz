@@ -1,0 +1,392 @@
+<template>
+  <div class="pane">
+    <aside class="tree">
+      <div class="tree__head"><b>Admin</b></div>
+      <button
+        v-for="s in sections"
+        :key="s.id"
+        type="button"
+        :class="rowClass(s.id)"
+        @click="pick(s.id)"
+      >
+        <Icon :name="s.icon" size="md" />
+        <span>{{ s.label }}</span>
+      </button>
+      <div class="tree__spacer"></div>
+      <button type="button" class="tree__dev" @click="openDev">
+        <Icon name="develop.terminal" size="md" />
+        <span>Developer mode</span>
+      </button>
+    </aside>
+    <section class="body">
+      <header class="body__head">
+        <h3>{{ activeSection ? activeSection.label : "" }}</h3>
+        <p class="body__gate">Prototype console — mutating admin actions are disabled by the safety gate.</p>
+      </header>
+
+      <p v-if="activeSection" class="body__note">{{ activeSection.note }}</p>
+
+      <div v-if="section === 'devices'" class="table">
+        <div class="table__head">
+          <span></span>
+          <span>Device</span>
+          <span>Last active</span>
+          <span>Quota</span>
+          <span>Today</span>
+        </div>
+        <label v-for="d in devices" :key="d.id" class="table__row">
+          <input type="checkbox" :checked="selected.includes(d.id)" @change="toggleDevice(d.id)" />
+          <span :class="d.flagged ? 'table__flag' : ''">{{ d.name }}</span>
+          <span>{{ d.lastActive }}</span>
+          <span>{{ d.points }}</span>
+          <span>{{ d.today }}</span>
+        </label>
+        <div class="table__foot">
+          <p v-if="selected.length" class="table__confirm">Kick list: {{ selectedNames }} — confirmation dialog would appear here.</p>
+          <p v-else class="table__confirm">Select devices to prepare a bulk kick.</p>
+          <button type="button" disabled title="D5 safety gate: admin mutations stay behind the policy plane (not built)">Bulk kick</button>
+        </div>
+      </div>
+
+      <div v-else-if="section === 'billing'" class="cards">
+        <div v-for="a in accounts" :key="a.id" class="cards__item">
+          <b>{{ a.name }}</b>
+          <i>{{ a.plan }}</i>
+          <span>{{ a.quota }}</span>
+          <em>pending the ledger endpoint</em>
+        </div>
+      </div>
+
+      <div v-else-if="section === 'approvals'" class="rows">
+        <div v-for="a in approvalAgents" :key="a.id" class="rows__item">
+          <span :class="'avatar avatar--md avatar--' + a.tone">{{ a.initials }}</span>
+          <span class="rows__who">
+            <b>{{ a.name }}</b>
+            <i>{{ a.pendingApprovals }} capability request(s) awaiting review</i>
+          </span>
+          <button type="button" disabled title="Approval writes need the policy plane (not built)">Review</button>
+        </div>
+        <p v-if="approvalAgents.length === 0" class="rows__empty">No pending approvals in the local view.</p>
+      </div>
+
+      <div v-else-if="section === 'org'" class="rows">
+        <div v-for="d in depts" :key="d" class="rows__item">
+          <Icon name="nav.contacts" size="md" />
+          <span class="rows__who">
+            <b>{{ d }}</b>
+            <i>{{ countDept(d) }} member(s) in the local view</i>
+          </span>
+        </div>
+      </div>
+
+      <div v-else class="placeholder">
+        <Icon :name="activeSection ? activeSection.icon : 'action.sidebar'" size="lg" />
+        <p>{{ activeSection ? activeSection.note : "" }}</p>
+      </div>
+    </section>
+  </div>
+</template>
+
+<style>
+.pane {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+}
+.tree {
+  flex: none;
+  width: 210px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 10px;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+}
+.tree__head b {
+  font-size: 15px;
+  padding: 0 8px 10px;
+}
+.tree__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 12.5px;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.tree__row:hover {
+  background: var(--hover);
+}
+.tree__row--on {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+.tree__spacer {
+  flex: 1;
+}
+.tree__dev {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px dashed var(--line);
+  background: transparent;
+  border-radius: 8px;
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 12px;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.tree__dev:hover {
+  background: var(--hover);
+}
+.body {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 18px 22px;
+  background: var(--chat);
+}
+.body__head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.body__head h3 {
+  margin: 0;
+  font-size: 16px;
+}
+.body__gate {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--danger);
+}
+.body__note {
+  margin: 8px 0 16px;
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+.table {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.table__head {
+  display: grid;
+  grid-template-columns: 26px 1.4fr 1fr 1fr 0.8fr;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.table__row {
+  display: grid;
+  grid-template-columns: 26px 1.4fr 1fr 1fr 0.8fr;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--text-1);
+  cursor: pointer;
+}
+.table__row:hover {
+  background: var(--hover);
+}
+.table__flag {
+  color: var(--danger);
+  font-weight: 600;
+}
+.table__foot {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+}
+.table__confirm {
+  margin: 0;
+  flex: 1;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.table__foot button {
+  border: 1px solid var(--line);
+  background: var(--soft);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12.5px;
+  color: var(--text-3);
+  cursor: default;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+.cards__item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.cards__item b {
+  font-size: 13.5px;
+}
+.cards__item i {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--accent-ink);
+}
+.cards__item span {
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+.cards__item em {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--text-3);
+}
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rows__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+.rows__who {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.rows__who b {
+  font-size: 13px;
+}
+.rows__who i {
+  font-style: normal;
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+.rows__item button {
+  border: 1px solid var(--line);
+  background: var(--soft);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--text-3);
+  cursor: default;
+}
+.rows__empty {
+  font-size: 12.5px;
+  color: var(--text-3);
+}
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 60px 20px;
+  color: var(--text-3);
+}
+.placeholder p {
+  margin: 0;
+  max-width: 420px;
+  text-align: center;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+</style>
+
+<script client>
+import { defaultAdminDevices, defaultAdminSections, defaultAccounts, defaultAgents, defaultContacts } from "../lib/shell.js";
+import type { AdminSection, ContactItem } from "../lib/shell.js";
+
+interface DeviceRow {
+  id: string;
+  name: string;
+  lastActive: string;
+  points: string;
+  today: string;
+  flagged: boolean;
+}
+
+export default class AdminPane {
+  static __vmzHostBox = "contents";
+  public sections: AdminSection[] = defaultAdminSections();
+  public devices: DeviceRow[] = defaultAdminDevices();
+  public accounts = defaultAccounts();
+  public agents = defaultAgents();
+  public contacts: ContactItem[] = defaultContacts();
+  public section = "org";
+  public selected: string[] = [];
+  public onOpenDev: (() => void) | null = null;
+
+  get activeSection(): AdminSection | null {
+    return this.sections.find((s) => s.id === this.section) ?? null;
+  }
+
+  get selectedNames(): string {
+    return this.devices
+      .filter((d) => this.selected.includes(d.id))
+      .map((d) => d.name)
+      .join(", ");
+  }
+
+  get approvalAgents() {
+    return this.agents.filter((a) => a.pendingApprovals > 0);
+  }
+
+  get depts(): string[] {
+    const seen: string[] = [];
+    for (const c of this.contacts) {
+      if (!seen.includes(c.dept)) seen.push(c.dept);
+    }
+    return seen.sort();
+  }
+
+  countDept(dept: string): number {
+    return this.contacts.filter((c) => c.dept === dept).length;
+  }
+
+  rowClass(id: string): string {
+    return id === this.section ? "tree__row tree__row--on" : "tree__row";
+  }
+
+  pick(id: string) {
+    this.section = id;
+  }
+
+  toggleDevice(id: string) {
+    if (this.selected.includes(id)) {
+      this.selected = this.selected.filter((x) => x !== id);
+    } else {
+      this.selected = [...this.selected, id];
+    }
+  }
+
+  openDev() {
+    this.onOpenDev?.();
+  }
+}
+</script>

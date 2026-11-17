@@ -1,0 +1,335 @@
+<template>
+  <div class="pane">
+    <aside class="calendars">
+      <div class="calendars__head"><b>Calendar</b></div>
+      <label v-for="c in calendars" :key="c.id" class="calendars__row">
+        <input type="checkbox" :checked="c.on" @change="toggleCalendar(c.id)" />
+        <span :class="'dot dot--' + c.tone"></span>
+        <span>{{ c.label }}</span>
+      </label>
+      <p class="calendars__note">Events are local preview until `mj.calendar.*` lands.</p>
+    </aside>
+    <section class="week">
+      <header class="week__head">
+        <b>This week</b>
+        <div class="week__modes">
+          <button type="button" :class="viewClass('day')" @click="view = 'day'">Day</button>
+          <button type="button" :class="viewClass('week')" @click="view = 'week'">Week</button>
+          <button type="button" :class="viewClass('month')" @click="view = 'month'">Month</button>
+        </div>
+      </header>
+      <div v-if="view === 'week'" class="week__grid">
+        <div v-for="(d, i) in days" :key="i" class="week__col">
+          <p class="week__dayname">{{ d }}</p>
+          <button
+            v-for="e in eventsOn(i)"
+            :key="e.id"
+            type="button"
+            :class="eventClass(e)"
+            @click="pickEvent(e.id)"
+          >
+            <b>{{ e.start }}</b>
+            <span>{{ e.title }}</span>
+          </button>
+        </div>
+      </div>
+      <div v-else-if="view === 'day'" class="week__day">
+        <button
+          v-for="e in eventsOn(selectedDay)"
+          :key="e.id"
+          type="button"
+          :class="eventClass(e)"
+          @click="pickEvent(e.id)"
+        >
+          <b>{{ e.start }}–{{ e.end }}</b>
+          <span>{{ e.title }} · {{ e.where }}</span>
+        </button>
+        <p v-if="eventsOn(selectedDay).length === 0" class="week__empty">Free day.</p>
+      </div>
+      <div v-else class="week__month">
+        <div v-for="i in 30" :key="i" class="week__cell">
+          <i>{{ i }}</i>
+          <span v-for="e in monthEvents(i)" :key="e.id" class="week__chip">•</span>
+        </div>
+      </div>
+    </section>
+    <aside v-if="activeEvent" class="detail">
+      <b>{{ activeEvent.title }}</b>
+      <p class="detail__time">{{ days[activeEvent.day] }} · {{ activeEvent.start }}–{{ activeEvent.end }}</p>
+      <p class="detail__line">Where: {{ activeEvent.where }}</p>
+      <p class="detail__line">Attendees: {{ activeEvent.attendees }}</p>
+      <button type="button" class="detail__meeting" @click="openMeeting">Open meeting details</button>
+      <p class="detail__note">Event CRUD and reminders need the calendar contract; assistant scheduling will draft events for confirmation.</p>
+    </aside>
+  </div>
+</template>
+
+<style>
+.pane {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+}
+.calendars {
+  flex: none;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 12px;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+}
+.calendars__head b {
+  font-size: 15px;
+}
+.calendars__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-2);
+  padding: 4px 2px;
+  cursor: pointer;
+}
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+}
+.dot--blue {
+  background: var(--accent);
+}
+.dot--green {
+  background: #067647;
+}
+.dot--violet {
+  background: #6941c6;
+}
+.calendars__note {
+  margin: auto 2px 4px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-3);
+}
+.week {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--chat);
+}
+.week__head {
+  flex: none;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+.week__modes {
+  margin-left: auto;
+  display: flex;
+  gap: 2px;
+  background: var(--soft);
+  border-radius: 8px;
+  padding: 2px;
+}
+.week__modes button {
+  border: 0;
+  background: transparent;
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 12.5px;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.week__modes button.on {
+  background: var(--panel);
+  color: var(--text-1);
+  font-weight: 600;
+}
+.week__grid {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  padding: 14px 16px;
+}
+.week__col {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 160px;
+}
+.week__dayname {
+  margin: 0 0 4px;
+  font-size: 11.5px;
+  color: var(--text-3);
+  text-transform: uppercase;
+}
+.week__day {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.week__empty {
+  color: var(--text-3);
+  font-size: 12.5px;
+}
+.event {
+  border: 0;
+  border-left: 3px solid var(--accent);
+  background: var(--soft);
+  border-radius: 6px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  cursor: pointer;
+  text-align: left;
+}
+.event b {
+  font-size: 11px;
+  color: var(--text-2);
+}
+.event span {
+  font-size: 12px;
+  color: var(--text-1);
+}
+.event--on {
+  outline: 2px solid var(--accent);
+}
+.week__month {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  padding: 14px 16px;
+}
+.week__cell {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-height: 56px;
+  padding: 5px 7px;
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  align-content: start;
+}
+.week__cell i {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--text-3);
+  width: 100%;
+}
+.week__chip {
+  color: var(--accent);
+  font-size: 12px;
+}
+.detail {
+  flex: none;
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+}
+.detail__time {
+  margin: 0;
+  font-size: 12px;
+  color: var(--accent-ink);
+}
+.detail__line {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.detail__meeting {
+  margin-top: 6px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 12.5px;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.detail__meeting:hover {
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.detail__note {
+  margin-top: auto;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-3);
+}
+</style>
+
+<script client>
+import { defaultCalendarEvents } from "../lib/shell.js";
+import type { CalendarEvent } from "../lib/shell.js";
+
+export default class CalendarPane {
+  static __vmzHostBox = "contents";
+  public days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+  public events: CalendarEvent[] = defaultCalendarEvents();
+  public view = "week";
+  public selectedDay = 2;
+  public active = "e2";
+  public calendars = [
+    { id: "work", label: "Work", tone: "blue", on: true },
+    { id: "personal", label: "Personal", tone: "green", on: true },
+    { id: "birthdays", label: "Birthdays", tone: "violet", on: false },
+  ];
+  public onOpenMeeting: (() => void) | null = null;
+
+  get activeEvent(): CalendarEvent | null {
+    return this.events.find((e) => e.id === this.active) ?? null;
+  }
+
+  viewClass(v: string): string {
+    return this.view === v ? "on" : "";
+  }
+
+  eventsOn(day: number): CalendarEvent[] {
+    return this.events.filter((e) => e.day === day);
+  }
+
+  monthEvents(dayOfMonth: number): CalendarEvent[] {
+    return this.events.filter((e) => e.day + 1 === dayOfMonth % 5);
+  }
+
+  eventClass(e: CalendarEvent): string {
+    return e.id === this.active ? "event event--on" : "event";
+  }
+
+  pickEvent(id: string) {
+    this.active = id;
+  }
+
+  toggleCalendar(id: string) {
+    this.calendars = this.calendars.map((c) => (c.id === id ? { ...c, on: !c.on } : c));
+  }
+
+  openMeeting() {
+    this.onOpenMeeting?.();
+  }
+}
+</script>

@@ -20,8 +20,16 @@
       :on-toggle-detail="toggleDetail"
       :on-close-detail="closeDetail"
     />
+    <MailPane v-if="isMail" />
+    <DocsPane v-if="isDocs" />
+    <SpacePane v-if="isSpace" />
     <AgentSettings v-if="isAgents" :on-open-messages="showMessages" />
+    <CalendarPane v-if="isCalendar" :on-open-meeting="showMeetings" />
+    <MeetingsPane v-if="isMeetings" />
+    <ContactsPane v-if="isContacts" />
     <DevConsole v-if="isDev" />
+    <AdminPane v-if="isAdminView" :on-open-dev="showDev" />
+    <SettingsPane v-if="isSettings" :scenario="scenario" :on-scenario="applyScenario" />
     <EmptyState
       v-if="isEmpty"
       :title="emptyTitle"
@@ -49,7 +57,7 @@ body,
   color: var(--text-1);
   font-family: var(--font);
   font-size: 13px;
-  background: #eef1f5;
+  background: var(--shell-bg, #eef1f5);
 }
 /* Narrow windows drop the context panel first, matching the layout contract. */
 .shell .detail {
@@ -113,66 +121,113 @@ body,
 </style>
 
 <script client>
-import { defaultAccounts, defaultConversations, defaultMessages, defaultModules, firstAccount, moduleNote } from "../lib/shell.js";
+import {
+  applyNav,
+  defaultAccounts,
+  defaultConversations,
+  defaultMessages,
+  firstAccount,
+  loadShellNav,
+  loadShellScenario,
+  moduleNote,
+  saveShellScenario,
+} from "../lib/shell.js";
+
+const VIEWS = ["messages", "mail", "docs", "space", "agents", "calendar", "meetings", "contacts", "dev", "admin", "settings"];
 
 export default class IndexPage {
-  modules = defaultModules();
+  scenario = loadShellScenario();
+  modules = applyNav(loadShellScenario(), loadShellNav());
   accounts = defaultAccounts();
   conversations = defaultConversations();
   messages = defaultMessages();
   activeId = "messages";
   activeConversation = "c1";
   currentAccount = firstAccount();
-  isMessages = true;
-  isAgents = false;
-  isDev = false;
-  isEmpty = false;
+  view = "messages";
   detailOpen = true;
   isAdmin = firstAccount().role === "admin";
   emptyTitle = "Messages";
   emptyIcon = "nav.chat";
   emptyNote = "";
   emptyCapability = "mj.llm.complete";
+  detachNav: (() => void) | null = null;
+
+  get isMessages() {
+    return this.view === "messages";
+  }
+  get isMail() {
+    return this.view === "mail";
+  }
+  get isDocs() {
+    return this.view === "docs";
+  }
+  get isSpace() {
+    return this.view === "space";
+  }
+  get isAgents() {
+    return this.view === "agents";
+  }
+  get isCalendar() {
+    return this.view === "calendar";
+  }
+  get isMeetings() {
+    return this.view === "meetings";
+  }
+  get isContacts() {
+    return this.view === "contacts";
+  }
+  get isDev() {
+    return this.view === "dev";
+  }
+  get isAdminView() {
+    return this.view === "admin";
+  }
+  get isSettings() {
+    return this.view === "settings";
+  }
+  get isEmpty() {
+    return !VIEWS.includes(this.view);
+  }
+
+  onMount() {
+    if (typeof window === "undefined") return;
+    // Bound closure: class methods are not auto-bound, and listeners need cleanup.
+    const onNav = () => {
+      this.modules = applyNav(this.scenario, loadShellNav());
+    };
+    window.addEventListener("mj:navigation", onNav);
+    this.detachNav = () => window.removeEventListener("mj:navigation", onNav);
+  }
+
+  onDestroy() {
+    if (this.detachNav) this.detachNav();
+    this.detachNav = null;
+  }
 
   selectModule(id: string) {
     this.activeId = id;
-    if (id === "messages") {
-      this.isMessages = true;
-      this.isAgents = false;
-      this.isDev = false;
-      this.isEmpty = false;
-      return;
+    this.view = id;
+    if (!VIEWS.includes(id)) {
+      const found = this.modules.find((m: { id: string }) => m.id === id);
+      if (found) {
+        this.emptyTitle = found.label;
+        this.emptyIcon = found.icon;
+        this.emptyCapability = found.capability;
+        this.emptyNote = moduleNote(id);
+        return;
+      }
+      this.emptyTitle = id;
+      this.emptyIcon = "action.sidebar";
+      this.emptyCapability = "mj.*";
+      this.emptyNote = "Not connected yet.";
     }
-    if (id === "agents") {
-      this.isMessages = false;
-      this.isAgents = true;
-      this.isDev = false;
-      this.isEmpty = false;
-      return;
-    }
-    if (id === "dev") {
-      this.isMessages = false;
-      this.isAgents = false;
-      this.isDev = true;
-      this.isEmpty = false;
-      return;
-    }
-    this.isMessages = false;
-    this.isAgents = false;
-    this.isDev = false;
-    this.isEmpty = true;
-    const found = this.modules.find((m: { id: string }) => m.id === id);
-    if (found) {
-      this.emptyTitle = found.label;
-      this.emptyIcon = found.icon;
-      this.emptyCapability = found.capability;
-      this.emptyNote = moduleNote(id);
-      return;
-    }
-    this.emptyTitle = id === "admin" ? "Admin" : "Settings";
-    this.emptyIcon = id === "admin" ? "action.sidebar" : "action.settings";
-    this.emptyCapability = "mj.*";
-    this.emptyNote = "Not connected yet.";
+  }
+
+  applyScenario(id: string) {
+    saveShellScenario(id);
+    this.scenario = id;
+    this.modules = applyNav(id, loadShellNav());
   }
 
   pickConversation(id: string) {
@@ -181,6 +236,14 @@ export default class IndexPage {
 
   showMessages() {
     this.selectModule("messages");
+  }
+
+  showMeetings() {
+    this.selectModule("meetings");
+  }
+
+  showDev() {
+    this.selectModule("dev");
   }
 
   toggleDetail() {
@@ -196,6 +259,7 @@ export default class IndexPage {
     if (!acc) return;
     this.currentAccount = acc;
     this.isAdmin = acc.role === "admin";
+    if (this.view === "admin" && !this.isAdmin) this.selectModule("messages");
   }
 }
 </script>

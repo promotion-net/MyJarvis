@@ -1,0 +1,392 @@
+<template>
+  <div class="pane">
+    <aside class="tree">
+      <div class="tree__head">
+        <b>Docs</b>
+        <button class="tree__new" type="button" @click="createDoc">＋ New</button>
+      </div>
+      <template v-for="group in groups" :key="group">
+        <p class="tree__group">{{ group }}</p>
+        <button
+          v-for="d in docsOf(group)"
+          :key="d.id"
+          type="button"
+          :class="docClass(d.id)"
+          @click="pickDoc(d.id)"
+        >
+          <span>{{ d.title }}</span>
+          <i>{{ d.updated }}</i>
+        </button>
+      </template>
+      <p class="tree__note">Editing is local until `mj.doc.*` lands; versions are session-only.</p>
+    </aside>
+    <section class="editor">
+      <header class="editor__head">
+        <input
+          class="editor__title"
+          type="text"
+          :value="activeDoc ? activeDoc.title : ''"
+          :disabled="!activeDoc"
+          @input="rename"
+        />
+        <div class="editor__modes">
+          <button type="button" :class="modeClass('edit')" @click="mode = 'edit'">Edit</button>
+          <button type="button" :class="modeClass('preview')" @click="mode = 'preview'">Preview</button>
+        </div>
+      </header>
+      <textarea
+        v-if="mode === 'edit'"
+        class="editor__area"
+        :value="activeDoc ? activeDoc.body : ''"
+        :disabled="!activeDoc"
+        @input="editBody"
+      ></textarea>
+      <div v-else class="editor__preview">
+        <p v-for="(line, i) in previewLines" :key="i" :class="previewClass(line)">{{ plainLine(line) }}</p>
+      </div>
+      <footer class="editor__foot">
+        <button type="button" :disabled="!activeDoc || working" @click="continueDoc">
+          {{ working ? "Assistant…" : "Continue with assistant" }}
+        </button>
+        <button type="button" :disabled="!activeDoc || working" @click="summarizeDoc">Summarize</button>
+        <span v-if="status" class="editor__status">{{ status }}</span>
+      </footer>
+    </section>
+    <aside v-if="activeDoc" class="versions">
+      <b>Versions</b>
+      <div v-for="v in activeDoc.versions" :key="v.label" class="versions__row">
+        <span>{{ v.label }}</span>
+        <i>{{ v.time }} · {{ v.author }}</i>
+      </div>
+      <p class="versions__note">Rollback needs the doc contract.</p>
+    </aside>
+  </div>
+</template>
+
+<style>
+.pane {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+}
+.tree {
+  flex: none;
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 10px;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  overflow-y: auto;
+}
+.tree__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 10px;
+}
+.tree__head b {
+  font-size: 15px;
+}
+.tree__new {
+  border: 0;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  border-radius: 8px;
+  padding: 4px 9px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.tree__group {
+  margin: 10px 8px 4px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.tree__item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  padding: 7px 10px;
+  cursor: pointer;
+  text-align: left;
+}
+.tree__item:hover {
+  background: var(--hover);
+}
+.tree__item--on {
+  background: var(--accent-soft);
+}
+.tree__item span {
+  font-size: 13px;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tree__item i {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--text-3);
+}
+.tree__note {
+  margin: auto 8px 4px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-3);
+}
+.editor {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+}
+.editor__head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.editor__title {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font: 600 16px/1.3 var(--font);
+  color: var(--text-1);
+  outline: none;
+}
+.editor__modes {
+  display: flex;
+  gap: 2px;
+  background: var(--soft);
+  border-radius: 8px;
+  padding: 2px;
+}
+.editor__modes button {
+  border: 0;
+  background: transparent;
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 12.5px;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.editor__modes button.on {
+  background: var(--panel);
+  color: var(--text-1);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+}
+.editor__area {
+  flex: 1;
+  min-height: 0;
+  border: 0;
+  outline: none;
+  resize: none;
+  padding: 18px 22px;
+  font: 400 13.5px/1.7 var(--font-mono);
+  color: var(--text-1);
+  background: var(--panel);
+}
+.editor__preview {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 22px;
+}
+.editor__preview p {
+  margin: 0 0 10px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text-1);
+}
+.editor__preview .pv--h {
+  font-size: 17px;
+  font-weight: 700;
+}
+.editor__preview .pv--li {
+  padding-left: 18px;
+  list-style: disc;
+}
+.editor__foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-top: 1px solid var(--line);
+}
+.editor__foot button {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12.5px;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.editor__foot button:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.editor__foot button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.editor__status {
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+.versions {
+  flex: none;
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+  overflow-y: auto;
+}
+.versions__row {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.versions__row span {
+  font-size: 12.5px;
+  color: var(--text-1);
+}
+.versions__row i {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--text-3);
+}
+.versions__note {
+  margin-top: auto;
+  font-size: 11px;
+  color: var(--text-3);
+}
+</style>
+
+<script client>
+import { mj } from "@my-jarvis/sdk";
+import { defaultDocs } from "../lib/shell.js";
+import type { DocItem } from "../lib/shell.js";
+
+let nextDoc = 1;
+
+export default class DocsPane {
+  static __vmzHostBox = "contents";
+  public docs: DocItem[] = defaultDocs();
+  public active = "doc1";
+  public mode = "edit";
+  public working = false;
+  public status = "";
+
+  get groups(): string[] {
+    const seen: string[] = [];
+    for (const d of this.docs) if (!seen.includes(d.group)) seen.push(d.group);
+    return seen;
+  }
+
+  get activeDoc(): DocItem | null {
+    return this.docs.find((d) => d.id === this.active) ?? null;
+  }
+
+  get previewLines(): string[] {
+    return this.activeDoc ? this.activeDoc.body.split("\n") : [];
+  }
+
+  docsOf(group: string): DocItem[] {
+    return this.docs.filter((d) => d.group === group);
+  }
+
+  docClass(id: string): string {
+    return id === this.active ? "tree__item tree__item--on" : "tree__item";
+  }
+
+  modeClass(mode: string): string {
+    return this.mode === mode ? "on" : "";
+  }
+
+  previewClass(line: string): string {
+    if (line.startsWith("#")) return "pv--h";
+    if (line.startsWith("- ")) return "pv--li";
+    return "";
+  }
+
+  plainLine(line: string): string {
+    if (!line.startsWith("#")) return line;
+    let i = 0;
+    while (i < line.length && line[i] === "#") i++;
+    if (line[i] === " ") i++;
+    return line.slice(i);
+  }
+
+  pickDoc(id: string) {
+    this.active = id;
+    this.status = "";
+  }
+
+  createDoc() {
+    const id = "new" + nextDoc++;
+    this.docs = [...this.docs, { id, title: "Untitled", group: "Recent", updated: "now", body: "# Untitled\n", versions: [{ label: "v1 · created", time: "now", author: "me" }] }];
+    this.active = id;
+    this.mode = "edit";
+  }
+
+  rename(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.docs = this.docs.map((d) => (d.id === this.active ? { ...d, title: value } : d));
+  }
+
+  editBody(event: Event) {
+    const value = (event.target as HTMLTextAreaElement).value;
+    this.docs = this.docs.map((d) => (d.id === this.active ? { ...d, body: value, updated: "now" } : d));
+  }
+
+  /** Assistant continuation through the real dispatch path. */
+  async continueDoc() {
+    const doc = this.activeDoc;
+    if (!doc || this.working) return;
+    this.working = true;
+    this.status = "Asking the assistant to continue…";
+    try {
+      const done = await mj.llm.complete({ messages: [{ role: "user", content: "Continue this document in the same style, adding two sentences:\n\n" + doc.body }], profile: "fast" });
+      this.docs = this.docs.map((d) => (d.id === doc.id ? { ...d, body: d.body + "\n" + done.text, updated: "now", versions: [{ label: "v· assistant continue", time: "now", author: "Chief" }, ...d.versions] } : d));
+      this.status = "Continuation appended (local until the doc contract lands).";
+    } catch (err) {
+      this.status = "mj.llm.complete failed · " + String(err);
+    } finally {
+      this.working = false;
+    }
+  }
+
+  async summarizeDoc() {
+    const doc = this.activeDoc;
+    if (!doc || this.working) return;
+    this.working = true;
+    this.status = "Summarizing…";
+    try {
+      const done = await mj.llm.complete({ messages: [{ role: "user", content: "Summarize in one sentence:\n\n" + doc.body }], profile: "fast" });
+      this.status = done.text;
+    } catch (err) {
+      this.status = "mj.llm.complete failed · " + String(err);
+    } finally {
+      this.working = false;
+    }
+  }
+}
+</script>

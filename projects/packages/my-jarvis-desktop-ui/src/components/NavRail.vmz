@@ -47,7 +47,7 @@
   padding: 12px 0 10px;
   gap: 4px;
   border-right: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--rail-bg, rgba(255, 255, 255, 0.72));
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
 }

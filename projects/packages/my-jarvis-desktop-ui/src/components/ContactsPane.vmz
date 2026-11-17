@@ -1,0 +1,304 @@
+<template>
+  <div class="pane">
+    <aside class="index">
+      <div class="index__head"><b>Contacts</b></div>
+      <div class="index__depts">
+        <button type="button" :class="deptClass('')" @click="pickDept('')">All people</button>
+        <button v-for="d in depts" :key="d" type="button" :class="deptClass(d)" @click="pickDept(d)">{{ d }}</button>
+      </div>
+      <div class="index__letters">
+        <button
+          v-for="l in letters"
+          :key="l"
+          type="button"
+          :class="letterClass(l)"
+          @click="pickLetter(l)"
+        >{{ l }}</button>
+      </div>
+      <p class="index__note">People directory sync needs `mj.contact.*` (gap).</p>
+    </aside>
+    <section class="list">
+      <button
+        v-for="p in visible"
+        :key="p.id"
+        type="button"
+        :class="rowClass(p.id)"
+        data-ctx="default"
+        @click="pick(p.id)"
+      >
+        <span :class="'avatar avatar--md avatar--' + p.tone">{{ p.initials }}</span>
+        <span class="list__who">
+          <b>{{ p.name }}</b>
+          <i>{{ p.title }} · {{ p.dept }}</i>
+        </span>
+      </button>
+      <p v-if="visible.length === 0" class="list__empty">No people match this filter.</p>
+    </section>
+    <aside v-if="activeContact" class="card">
+      <div class="card__top">
+        <span :class="'avatar avatar--lg avatar--' + activeContact.tone">{{ activeContact.initials }}</span>
+        <div>
+          <h3>{{ activeContact.name }}</h3>
+          <p>{{ activeContact.title }} · {{ activeContact.dept }}</p>
+        </div>
+      </div>
+      <dl class="card__fields">
+        <dt>Email</dt>
+        <dd>{{ activeContact.email }}</dd>
+        <dt>Phone</dt>
+        <dd>{{ activeContact.phone }}</dd>
+      </dl>
+      <div class="card__actions">
+        <button type="button" disabled title="Direct messaging needs a connected channel (mj.im.* gap)">Message</button>
+        <button type="button" disabled title="Composing mail needs mj.mail.* (gap)">Email</button>
+      </div>
+      <p class="card__note">Contact records are local until the directory contract lands.</p>
+    </aside>
+  </div>
+</template>
+
+<style>
+.pane {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+}
+.index {
+  flex: none;
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 10px;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+}
+.index__head b {
+  font-size: 15px;
+  padding: 0 8px;
+}
+.index__depts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.index__depts button {
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  padding: 6px 10px;
+  text-align: left;
+  font-size: 12.5px;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.index__depts button:hover {
+  background: var(--hover);
+}
+.index__depts--on {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+.index__letters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0 8px;
+}
+.index__letters button {
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--field);
+  color: var(--text-2);
+  font-size: 11px;
+  cursor: pointer;
+}
+.index__letters button:hover {
+  background: var(--hover);
+}
+.index__letters--on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.index__note {
+  margin: auto 8px 4px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-3);
+}
+.list {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--chat);
+}
+.list__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  text-align: left;
+}
+.list__row:hover {
+  background: var(--hover);
+}
+.list__row--on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.list__who {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.list__who b {
+  font-size: 13.5px;
+  color: var(--text-1);
+}
+.list__who i {
+  font-style: normal;
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+.list__empty {
+  margin: 30px auto;
+  font-size: 12.5px;
+  color: var(--text-3);
+}
+.card {
+  flex: none;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+}
+.card__top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.card__top h3 {
+  margin: 0 0 2px;
+  font-size: 15px;
+}
+.card__top p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.card__fields {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 8px 10px;
+  font-size: 12.5px;
+}
+.card__fields dt {
+  color: var(--text-3);
+}
+.card__fields dd {
+  margin: 0;
+  color: var(--text-1);
+  word-break: break-all;
+}
+.card__actions {
+  display: flex;
+  gap: 8px;
+}
+.card__actions button {
+  flex: 1;
+  border: 1px solid var(--line);
+  background: var(--soft);
+  border-radius: 8px;
+  padding: 8px 0;
+  font-size: 12.5px;
+  color: var(--text-3);
+  cursor: default;
+}
+.card__note {
+  margin: auto 0 0;
+  font-size: 11px;
+  color: var(--text-3);
+}
+</style>
+
+<script client>
+import { defaultContacts } from "../lib/shell.js";
+import type { ContactItem } from "../lib/shell.js";
+
+export default class ContactsPane {
+  static __vmzHostBox = "contents";
+  public contacts: ContactItem[] = defaultContacts();
+  public active = "p1";
+  public dept = "";
+  public letter = "";
+
+  get depts(): string[] {
+    const seen: string[] = [];
+    for (const c of this.contacts) {
+      if (!seen.includes(c.dept)) seen.push(c.dept);
+    }
+    return seen.sort();
+  }
+
+  get letters(): string[] {
+    const seen: string[] = [];
+    for (const c of this.contacts) {
+      const l = c.initials.toUpperCase();
+      if (!seen.includes(l)) seen.push(l);
+    }
+    return seen.sort();
+  }
+
+  get visible(): ContactItem[] {
+    return this.contacts.filter((c) => {
+      if (this.dept && c.dept !== this.dept) return false;
+      if (this.letter && c.initials.toUpperCase() !== this.letter) return false;
+      return true;
+    });
+  }
+
+  get activeContact(): ContactItem | null {
+    return this.contacts.find((c) => c.id === this.active) ?? null;
+  }
+
+  deptClass(id: string): string {
+    return id === this.dept ? "index__depts--on" : "";
+  }
+
+  letterClass(id: string): string {
+    return id === this.letter ? "index__letters--on" : "";
+  }
+
+  rowClass(id: string): string {
+    return id === this.active ? "list__row list__row--on" : "list__row";
+  }
+
+  pickDept(id: string) {
+    this.dept = id;
+  }
+
+  pickLetter(id: string) {
+    this.letter = this.letter === id ? "" : id;
+  }
+
+  pick(id: string) {
+    this.active = id;
+  }
+}
+</script>
