@@ -69,7 +69,7 @@ jobs:
       - run: pnpm run build:napi
       - name: smoke mj capabilities
         run: node projects/packages/my-jarvis/bin/mj.mjs capabilities
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: napi-${{ matrix.id }}
           path: projects/packages/${{ matrix.shard }}/${{ matrix.artifact }}
