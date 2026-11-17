@@ -12,9 +12,13 @@
     "app": {
         "windows": [
             {
+                "label": "main",
                 "title": "MyJarvis",
-                "width": 1280,
-                "height": 900,
+                "width": 1240,
+                "height": 780,
+                "minWidth": 1024,
+                "minHeight": 680,
+                "center": true,
                 "resizable": true
             }
         ],

@@ -1,143 +1,193 @@
 <template>
   <div class="shell">
-    <header class="topbar glass">
-      <span class="topbar__search">⌘K Search · Commands</span>
-      <span class="topbar__ws">{{ workspaceLabel }}</span>
-      <span class="topbar__dot"></span>
-    </header>
-    <div class="body">
-      <NavRail
-        :active="activeId"
-        :accounts="accounts"
-        :account="currentAccount"
-        :account-id="currentAccount.id"
-        :show-admin="isAdmin"
-        :on-select="selectModule"
-        :on-pick-account="pickAccount"
+    <NavRail
+      :modules="modules"
+      :accounts="accounts"
+      :active="activeId"
+      :account="currentAccount"
+      :account-id="currentAccount.id"
+      :show-admin="isAdmin"
+      :on-select="selectModule"
+      :on-pick-account="pickAccount"
+    />
+    <template v-if="isAssistant">
+      <ConversationList
+        :conversations="conversations"
+        :active-id="activeConversation"
+        :on-select="pickConversation"
       />
-      <main class="stage">
-        <AssistantView v-if="activeId === 'assistant'" />
-        <EmptyState
-          v-else
-          :title="activeTitle"
-          :glyph="activeGlyph"
-          :note="activeNote"
-          :capability="activeCapability"
-        />
-      </main>
-    </div>
+      <ChatView
+        :messages="messages"
+        :on-toggle-detail="toggleDetail"
+      />
+      <DetailPanel
+        v-if="detailOpen"
+        :on-close="closeDetail"
+      />
+    </template>
+    <EmptyState
+      v-else
+      :title="emptyTitle"
+      :icon="emptyIcon"
+      :note="emptyNote"
+      :capability="emptyCapability"
+    />
   </div>
 </template>
 
 <style>
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
 .shell {
-  height: 100vh;
+  --font: "Segoe UI", "PingFang SC", system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, "JetBrains Mono", "SF Mono", Consolas, monospace;
+  --panel: #ffffff;
+  --chat: #f6f7f9;
+  --soft: #f2f4f7;
+  --field: #eef1f5;
+  --hover: rgba(15, 23, 42, 0.05);
+  --line: #e8eaef;
+  --text-1: #101828;
+  --text-2: #475467;
+  --text-3: #98a2b3;
+  --accent: #0a84ff;
+  --accent-hover: #0071e3;
+  --accent-soft: #e8f2ff;
+  --accent-ink: #0a6ad6;
+  --danger: #ff3b30;
+
+  height: 100%;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 8px;
-  box-sizing: border-box;
-  color: #17171a;
-  font-family: "SF Pro Text", "Segoe UI", system-ui, sans-serif;
-  font-size: 14px;
-  background:
-    radial-gradient(720px 420px at 8% 6%, rgba(15, 220, 120, 0.2), transparent 62%),
-    radial-gradient(820px 520px at 92% 94%, rgba(128, 193, 255, 0.26), transparent 62%),
-    radial-gradient(520px 360px at 70% 10%, rgba(39, 210, 191, 0.14), transparent 58%),
-    #e6ebf1;
+  overflow: hidden;
+  color: var(--text-1);
+  font-family: var(--font);
+  font-size: 13px;
+  background: #eef1f5;
 }
-.glass {
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(16px) saturate(150%);
-  -webkit-backdrop-filter: blur(16px) saturate(150%);
+/* Component wrappers are layout-transparent: each component root is the flex item. */
+.shell > [data-vmz] {
+  display: contents;
 }
-.topbar {
+/* Narrow windows drop the context panel first, matching the layout contract. */
+.shell .detail {
+  min-width: 236px;
+}
+.shell .chat {
+  min-width: 280px;
+}
+@media (max-width: 1000px) {
+  .shell .detail {
+    display: none;
+  }
+}
+.avatar {
   flex: none;
-  height: 40px;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 12px;
-}
-.topbar__search {
-  height: 24px;
-  line-height: 24px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.75);
-  color: #52525b;
+  justify-content: center;
   font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  user-select: none;
 }
-.topbar__ws {
-  margin-left: auto;
-  font-size: 12px;
-  color: #52525b;
+.avatar--md {
+  width: 36px;
+  height: 36px;
+  font-size: 13px;
 }
-.topbar__dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: #0fdc78;
+.avatar--lg {
+  width: 38px;
+  height: 38px;
+  font-size: 13.5px;
 }
-.body {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  gap: 8px;
+.avatar--blue {
+  background: #e3efff;
+  color: #0a6ad6;
 }
-.stage {
-  flex: 1;
-  min-width: 0;
-  display: flex;
+.avatar--violet {
+  background: #efe7ff;
+  color: #6941c6;
+}
+.avatar--green {
+  background: #dcf7e7;
+  color: #067647;
+}
+.avatar--amber {
+  background: #fdf0d5;
+  color: #b54708;
+}
+.avatar--slate {
+  background: #eceff3;
+  color: #475467;
+}
+.avatar--plus {
+  background: var(--soft);
+  color: var(--text-2);
 }
 </style>
 
 <script client>
-import { defaultAccounts, firstAccount } from "../lib/shell.js";
-import { defaultModules } from "../lib/shell.js";
-import type { AccountDef, ModuleDef } from "../lib/shell.js";
-
-const NOTES: Record<string, string> = {
-    messages: "Conversations will appear here once a channel is connected.",
-    mail: "Your inbox will appear here once a mail account is connected.",
-    docs: "Documents live in the local database once the contract lands.",
-    space: "Asset hosting exists in the runtime; the public contract is pending.",
-    calendar: "Events and reminders appear here once the contract lands.",
-    meetings: "Meeting details and minutes appear here once the contract lands.",
-    contacts: "People resolve through contacts once the contract lands.",
-    admin: "Admin console is role-gated and lands with vault/policy (D5).",
-    settings: "Settings (scenario presets, navigation, layout reset) land with D1 polish.",
-};
+import { defaultAccounts, defaultConversations, defaultMessages, defaultModules, firstAccount, moduleNote } from "../lib/shell.js";
 
 export default class IndexPage {
+  modules = defaultModules();
   accounts = defaultAccounts();
+  conversations = defaultConversations();
+  messages = defaultMessages();
   activeId = "assistant";
-  accountId = firstAccount().id;
+  activeConversation = "c1";
   currentAccount = firstAccount();
-  workspaceLabel = firstAccount().workspace;
+  isAssistant = true;
+  detailOpen = true;
   isAdmin = firstAccount().role === "admin";
-  activeTitle = "Assistant";
-  activeGlyph = "A";
-  activeCapability = "mj.llm.complete";
-  activeNote = "";
+  emptyTitle = "Assistant";
+  emptyIcon = "spark";
+  emptyNote = "";
+  emptyCapability = "mj.llm.complete";
 
   selectModule(id: string) {
     this.activeId = id;
-    const mod: ModuleDef | null = defaultModules().find((m) => m.id === id) ?? null;
-    this.activeTitle = mod ? mod.label : id === "admin" ? "Admin" : "Settings";
-    this.activeGlyph = mod ? mod.glyph : id === "admin" ? "G" : "S";
-    this.activeCapability = mod ? mod.capability : "mj.*";
-    this.activeNote = NOTES[id] ?? "Not connected yet.";
+    this.isAssistant = id === "assistant";
+    if (this.isAssistant) return;
+    const found = this.modules.find((m: { id: string }) => m.id === id);
+    if (found) {
+      this.emptyTitle = found.label;
+      this.emptyIcon = found.icon;
+      this.emptyCapability = found.capability;
+      this.emptyNote = moduleNote(id);
+      return;
+    }
+    this.emptyTitle = id === "admin" ? "Admin" : "Settings";
+    this.emptyIcon = id === "admin" ? "panel" : "settings";
+    this.emptyCapability = "mj.*";
+    this.emptyNote = "Not connected yet.";
+  }
+
+  pickConversation(id: string) {
+    this.activeConversation = id;
+  }
+
+  toggleDetail() {
+    this.detailOpen = !this.detailOpen;
+  }
+
+  closeDetail() {
+    this.detailOpen = false;
   }
 
   pickAccount(id: string) {
-    const acc = this.accounts.find((a) => a.id === id);
+    const acc = this.accounts.find((a: { id: string }) => a.id === id);
     if (!acc) return;
-    this.accountId = acc.id;
     this.currentAccount = acc;
-    this.workspaceLabel = acc.workspace;
     this.isAdmin = acc.role === "admin";
   }
 }
