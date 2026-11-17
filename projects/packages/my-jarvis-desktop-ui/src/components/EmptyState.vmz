@@ -1,0 +1,64 @@
+<template>
+  <section class="empty glass">
+    <div class="empty__glyph">{{ glyph }}</div>
+    <h2 class="empty__title">{{ title }}</h2>
+    <p class="empty__note">{{ note }}</p>
+    <p class="empty__cap">Needs <code>{{ capability }}</code> — enable it by upgrading the runtime or connecting a provider.</p>
+  </section>
+</template>
+
+<style>
+.empty {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  text-align: center;
+}
+.empty__glyph {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(23, 23, 26, 0.12);
+  color: #52525b;
+  font-size: 16px;
+  font-weight: 500;
+}
+.empty__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #17171a;
+}
+.empty__note {
+  margin: 0;
+  font-size: 14px;
+  color: #52525b;
+}
+.empty__cap {
+  margin: 0;
+  font-size: 12px;
+  color: #52525b;
+}
+.empty__cap code {
+  font-family: ui-monospace, monospace;
+  color: #17171a;
+}
+</style>
+
+<script client>
+export default class EmptyState {
+  public title = "";
+  public glyph = "";
+  public note = "";
+  public capability = "";
+}
+</script>

@@ -3,9 +3,9 @@
     "version": "0.1.0",
     "private": true,
     "type": "module",
-    "description": "Desktop shell: mounts the three-column surface and bridges Tauri commands to the host runtime",
+    "description": "Desktop shell: scenario rail with account switching, assistant surface and the Tauri bridge to the host runtime",
     "scripts": {
-        "dev": "vmz dev .",
+        "dev": "vmz dev . --port 5178",
         "build:desktop": "vmz build . --release --profile desktop"
     },
     "dependencies": {

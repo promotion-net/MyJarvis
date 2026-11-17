@@ -5,7 +5,7 @@
     "identifier": "app.myjarvis.desktop",
     "build": {
         "beforeDevCommand": "pnpm --filter @my-jarvis/desktop dev",
-        "devUrl": "http://localhost:5173",
+        "devUrl": "http://localhost:5178",
         "beforeBuildCommand": "pnpm --filter @my-jarvis/desktop build:desktop",
         "frontendDist": "../dist/app"
     },

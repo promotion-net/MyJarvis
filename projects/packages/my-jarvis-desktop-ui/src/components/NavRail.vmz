@@ -1,0 +1,220 @@
+<template>
+  <nav class="rail glass">
+    <div
+      v-for="m in visibleModules"
+      :key="m.id"
+      :class="rowClass(m)"
+      @click="select(m.id)"
+    >
+      <span class="rail__glyph">{{ m.glyph }}</span>
+      <span class="rail__label">{{ m.label }}</span>
+      <span v-if="hasBadge(m)" class="rail__badge">{{ m.badge }}</span>
+      <span v-else-if="showTag(m)" class="rail__tag">{{ tag(m) }}</span>
+    </div>
+    <div class="rail__spacer"></div>
+    <AccountSwitcher
+      v-if="menuOpen"
+      :accounts="accounts"
+      :current="accountId"
+      :on-pick="pickAccount"
+      :on-close="closeMenu"
+    />
+    <div class="rail__account" @click="toggleMenu">
+      <span class="rail__avatar">{{ account.initials }}</span>
+      <span class="rail__meta">
+        <b>{{ account.name }}</b>
+        <i>{{ account.plan }} · {{ account.quota }}</i>
+      </span>
+    </div>
+    <div v-if="showAdmin" class="rail__row" @click="select('admin')">
+      <span class="rail__glyph">G</span>
+      <span class="rail__label">Admin</span>
+    </div>
+    <div class="rail__row" @click="select('settings')">
+      <span class="rail__glyph">S</span>
+      <span class="rail__label">Settings</span>
+    </div>
+  </nav>
+</template>
+
+<style>
+.rail {
+  position: relative;
+  flex: none;
+  width: 178px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px;
+}
+.rail__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  color: #17171a;
+  cursor: pointer;
+}
+.rail__row--on {
+  background: #e5fff2;
+  border-color: #0fdc78;
+  color: #004d26;
+}
+.rail__row--off {
+  opacity: 0.62;
+}
+.rail__glyph {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.85);
+  color: #52525b;
+  font-size: 12px;
+  font-weight: 500;
+}
+.rail__row--on .rail__glyph {
+  background: #b4fdd9;
+  color: #004d26;
+}
+.rail__label {
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rail__badge {
+  margin-left: auto;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #b4fdd9;
+  color: #004d26;
+  font-size: 12px;
+  font-weight: 500;
+}
+.rail__tag {
+  margin-left: auto;
+  font-size: 12px;
+  color: #52525b;
+}
+.rail__spacer {
+  flex: 1;
+}
+.rail__account {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+}
+.rail__avatar {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #b4fdd9;
+  color: #004d26;
+  font-size: 12px;
+  font-weight: 500;
+}
+.rail__meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.rail__meta b {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rail__meta i {
+  font-style: normal;
+  font-size: 12px;
+  color: #52525b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+</style>
+
+<script client>
+import { STATUS_TAG, defaultModules } from "../lib/shell.js";
+import type { AccountDef, ModuleDef } from "../lib/shell.js";
+
+export default class NavRail {
+  public modules = defaultModules();
+  public accounts: AccountDef[] = [];
+  public active = "";
+  public accountId = "";
+  /** Scenario is fixed to the work set in D1; scenario presets land with settings. */
+  public visibleModules = defaultModules();
+  public account: AccountDef = {
+      id: "",
+      name: "",
+      initials: "",
+      plan: "",
+      quota: "",
+      lastActive: "",
+      role: "member",
+      workspace: "",
+  };
+  public showAdmin = false;
+  public menuOpen = false;
+  public onSelect: ((id: string) => void) | null = null;
+  public onPickAccount: ((id: string) => void) | null = null;
+
+  tag(m: ModuleDef): string {
+    return STATUS_TAG[m.status];
+  }
+
+  hasBadge(m: ModuleDef): boolean {
+    return m.badge > 0;
+  }
+
+  showTag(m: ModuleDef): boolean {
+    return m.status !== "ready" && m.badge === 0;
+  }
+
+  rowClass(m: ModuleDef): string {
+    let cls = "rail__row";
+    if (m.id === this.active) cls += " rail__row--on";
+    if (m.status === "missing") cls += " rail__row--off";
+    return cls;
+  }
+
+  select(id: string) {
+    this.onSelect?.(id);
+  }
+
+  toggleMenu() {
+    this.menuOpen = !this.menuOpen;
+  }
+
+  closeMenu() {
+    this.menuOpen = false;
+  }
+
+  pickAccount(id: string) {
+    this.onPickAccount?.(id);
+    this.menuOpen = false;
+  }
+}
+</script>

@@ -6,15 +6,10 @@ import { installMjTransport } from "@my-jarvis/sdk";
 
 const APP_ID_KEY = "mj.shell.appId";
 
-interface TauriWindow {
-    core?: {
-        invoke: (command: string, args: Record<string, unknown>) => Promise<unknown>;
-    };
-}
+type TauriInvoke = (command: string, args: Record<string, unknown>) => Promise<unknown>;
 
-declare global {
-    // Provided by the shell when `app.withGlobalTauri` is enabled.
-    var __TAURI__: TauriWindow | undefined;
+interface TauriWindowScope {
+    __TAURI__?: { core?: { invoke?: TauriInvoke } };
 }
 
 /** Shell session identity: stable per install, owned by the front end. */
@@ -28,10 +23,11 @@ export function currentAppId(): string {
 
 export function installShellTransport(): void {
     installMjTransport(async (method, params) => {
-        const invoke = globalThis.__TAURI__?.core?.invoke;
-        if (!invoke) {
+        const invoke = globalThis as TauriWindowScope;
+        const core = invoke.__TAURI__?.core?.invoke;
+        if (!core) {
             throw new Error("desktop shell: Tauri bridge not available; run inside the shell");
         }
-        return invoke("mj_dispatch", { appId: currentAppId(), method, params });
+        return core("mj_dispatch", { appId: currentAppId(), method, params });
     });
 }

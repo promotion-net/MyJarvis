@@ -1,0 +1,137 @@
+<template>
+  <div class="acct">
+    <div class="acct__title">Switch account</div>
+    <div
+      v-for="a in accounts"
+      :key="a.id"
+      :class="rowClass(a.id)"
+      @click="pick(a.id)"
+    >
+      <span class="acct__avatar">{{ a.initials }}</span>
+      <span class="acct__info">
+        <b>{{ a.name }}</b>
+        <i>{{ a.plan }} · {{ a.quota }} · {{ a.lastActive }}</i>
+      </span>
+      <span v-if="isCurrent(a.id)" class="acct__check">✓</span>
+    </div>
+    <div class="acct__divider"></div>
+    <div class="acct__row acct__row--ghost" @click="close">
+      <span class="acct__avatar">+</span>
+      <span class="acct__info"><b>Add account</b></span>
+    </div>
+    <div class="acct__row acct__row--ghost" @click="close">
+      <span class="acct__avatar">⇥</span>
+      <span class="acct__info"><b>Sign out</b></span>
+    </div>
+  </div>
+</template>
+
+<style>
+.acct {
+  position: absolute;
+  left: 10px;
+  bottom: 54px;
+  width: 248px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: 0 12px 32px rgba(23, 23, 26, 0.14);
+}
+.acct__title {
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #52525b;
+}
+.acct__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #17171a;
+}
+.acct__row:hover {
+  background: rgba(255, 255, 255, 0.75);
+}
+.acct__info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.acct__info b {
+  font-size: 14px;
+  font-weight: 500;
+}
+.acct__info i {
+  font-style: normal;
+  font-size: 12px;
+  color: #52525b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.acct__avatar {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #b4fdd9;
+  color: #004d26;
+  font-size: 12px;
+  font-weight: 500;
+}
+.acct__check {
+  margin-left: auto;
+  color: #004d26;
+  font-weight: 600;
+}
+.acct__divider {
+  height: 1px;
+  margin: 4px 8px;
+  background: rgba(23, 23, 26, 0.1);
+}
+.acct__row--ghost .acct__avatar {
+  background: #efeff2;
+  color: #52525b;
+}
+.acct__row--ghost .acct__info b {
+  font-weight: 400;
+  color: #52525b;
+}
+</style>
+
+<script client>
+export default class AccountSwitcher {
+  public accounts: unknown[] = [];
+  public current = "";
+  public onPick: ((id: string) => void) | null = null;
+  public onClose: (() => void) | null = null;
+
+  isCurrent(id: string): boolean {
+    return id === this.current;
+  }
+
+  rowClass(id: string): string {
+    return id === this.current ? "acct__row acct__row--active" : "acct__row";
+  }
+
+  pick(id: string) {
+    this.onPick?.(id);
+  }
+
+  close() {
+    this.onClose?.();
+  }
+}
+</script>
