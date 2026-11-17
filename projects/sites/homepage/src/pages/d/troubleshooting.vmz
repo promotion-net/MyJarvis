@@ -1,0 +1,7 @@
+<template>
+  <DocsPage :pageKey="'troubleshooting'" />
+</template>
+
+<script client>
+export default class DocsTroubleshootingPage {}
+</script>

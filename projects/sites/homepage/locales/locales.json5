@@ -1,0 +1,14 @@
+{
+  schemaVersion: 1,
+  defaultLocale: "zh-hans",
+  // 语言是纯客户端状态（localStorage["mj.locale"]），不参与 URL 路由：同一路径共享一份页面。
+  routing: { strategy: "none" },
+  locales: [
+    { id: "en-us", label: "English", direction: "ltr" },
+    { id: "zh-hans", label: "简体中文", direction: "ltr" },
+  ],
+  fallback: {
+    "en-us": ["zh-hans"],
+  },
+  missing: "warning",
+}

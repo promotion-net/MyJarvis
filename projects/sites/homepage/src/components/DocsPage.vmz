@@ -1,0 +1,129 @@
+<template>
+  <section class="docs-layout">
+    <DocsNav :current="pageKey" />
+    <article class="doc-main">
+      <p class="doc-crumb">{{ copy.crumb }}</p>
+      <h1 class="doc-h1">{{ doc.title }}</h1>
+      <p class="doc-lede">{{ doc.lede }}</p>
+
+      <div v-for="(block, index) in doc.blocks" :key="index">
+        <p v-if="block.kind === 'p'" class="doc-p">{{ block.text }}</p>
+        <Callout v-else-if="block.kind === 'note'" tone="info" :description="block.text" />
+      </div>
+
+      <div class="doc-pager">
+        <a v-if="prev" :href="prev.href">
+          <Icon name="action.arrow-left" size="sm" />
+          {{ prev.label }}
+        </a>
+        <span v-else></span>
+        <a v-if="next" :href="next.href">
+          {{ next.label }}
+          <Icon name="action.arrow-right" size="sm" />
+        </a>
+      </div>
+    </article>
+  </section>
+</template>
+
+<script client>
+import * as t from "#locales/site";
+import * as d from "#locales/docs";
+
+function readLocale() {
+  if (typeof document === "undefined") return "zh-hans";
+  let id = "zh-hans";
+  try {
+    id = localStorage.getItem("mj.locale") || document.documentElement.getAttribute("data-locale") || "zh-hans";
+  } catch (error) {
+    id = document.documentElement.getAttribute("data-locale") || "zh-hans";
+  }
+  document.documentElement.setAttribute("data-locale", id);
+  document.documentElement.setAttribute("lang", id === "en-us" ? "en" : "zh-CN");
+  return id;
+}
+
+const STRUCT = {
+  index: { title: "docIndexTitle", body: ["docIndexB1", "docIndexB2"], note: "docIndexB3" },
+  setup: { title: "docSetupTitle", body: ["docSetupB1", "docSetupB2", "docSetupB4", "docSetupB5", "docSetupB6"], note: "docSetupB3" },
+  start: { title: "docStartTitle", body: ["docStartB1", "docStartB2", "docStartB3", "docStartB4", "docStartB5", "docStartB6"] },
+  uses: { title: "docUsesTitle", body: ["docUsesB1", "docUsesB2", "docUsesB3"] },
+  messages: { title: "docMessagesTitle", body: ["docMessagesB1", "docMessagesB2", "docMessagesB3", "docMessagesB4"], note: "docMessagesB5" },
+  calendar: { title: "docCalendarTitle", body: ["docCalendarB1", "docCalendarB2", "docCalendarB3"], note: "docCalendarB4" },
+  files: { title: "docFilesTitle", body: ["docFilesB1", "docFilesB2", "docFilesB3"], note: "docFilesB4" },
+  tables: { title: "docTablesTitle", body: ["docTablesB1", "docTablesB2", "docTablesB3", "docTablesB4"] },
+  privacy: { title: "docPrivacyTitle", body: ["docPrivacyB1", "docPrivacyB2", "docPrivacyB3"], note: "docPrivacyB4" },
+  billing: { title: "docBillingTitle", body: ["docBillingB1", "docBillingB2", "docBillingB3", "docBillingB4"] },
+  devices: { title: "docDevicesTitle", body: ["docDevicesB1", "docDevicesB2", "docDevicesB3", "docDevicesB4"] },
+  troubleshooting: { title: "docTroubleshootingTitle", body: ["docTroubleshootingB1", "docTroubleshootingB2", "docTroubleshootingB3", "docTroubleshootingB4"], note: "docTroubleshootingB5" },
+  faq: { title: "docFaqTitle", body: ["docFaqB1", "docFaqB2", "docFaqB3", "docFaqB4", "docFaqB5"] },
+};
+
+const ORDER = [
+  ["index", "docsIndex", "/d"],
+  ["setup", "docsSetup", "/d/setup"],
+  ["start", "docsStart", "/d/start"],
+  ["uses", "docsUses", "/d/uses"],
+  ["messages", "docsMessages", "/d/messages"],
+  ["calendar", "docsCalendar", "/d/calendar"],
+  ["files", "docsFiles", "/d/files"],
+  ["tables", "docsTables", "/d/tables"],
+  ["privacy", "docsPrivacy", "/d/privacy"],
+  ["billing", "docsBilling", "/d/billing"],
+  ["devices", "docsDevices", "/d/devices"],
+  ["troubleshooting", "docsTroubleshooting", "/d/troubleshooting"],
+  ["faq", "docsFaq", "/d/faq"],
+];
+
+export default class DocsPage {
+  public pageKey = "index";
+  copy = this.snapshot();
+  doc = this.buildDoc();
+  prev = null;
+  next = null;
+
+  snapshot() {
+    return { crumb: t.docsCrumb() };
+  }
+
+  buildDoc() {
+    const struct = STRUCT[this.pageKey] || STRUCT.index;
+    const blocks = [];
+    struct.body.forEach((key) => {
+      blocks.push({ kind: "p", text: d[key]() });
+    });
+    if (struct.note) {
+      blocks.push({ kind: "note", text: d[struct.note]() });
+    }
+    return {
+      title: d[struct.title](),
+      lede: d[struct.body[0]](),
+      blocks: blocks.slice(1),
+    };
+  }
+
+  buildPager() {
+    const at = ORDER.findIndex((row) => row[0] === this.pageKey);
+    const link = (row) => (row ? { label: t[row[1]](), href: `${row[2]}` } : null);
+    this.prev = link(at > 0 ? ORDER[at - 1] : null);
+    this.next = link(at >= 0 && at < ORDER.length - 1 ? ORDER[at + 1] : null);
+  }
+
+  onMount() {
+    if (typeof window === "undefined") return;
+    if (typeof MutationObserver !== "undefined") {
+      const el = document.documentElement;
+      let last = el.getAttribute("data-locale") || "";
+      new MutationObserver(() => {
+        const next = el.getAttribute("data-locale") || "";
+        if (next === last) return;
+        last = next;
+        this.copy = this.snapshot();
+        this.doc = this.buildDoc();
+        this.buildPager();
+      }).observe(el, { attributes: true, attributeFilter: ["data-locale"] });
+    }
+    this.buildPager();
+  }
+}
+</script>

@@ -1,0 +1,7 @@
+<template>
+  <DocsPage :pageKey="'faq'" />
+</template>
+
+<script client>
+export default class DocsFaqPage {}
+</script>

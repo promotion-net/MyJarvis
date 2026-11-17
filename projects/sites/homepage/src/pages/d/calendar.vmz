@@ -1,0 +1,7 @@
+<template>
+  <DocsPage :pageKey="'calendar'" />
+</template>
+
+<script client>
+export default class DocsCalendarPage {}
+</script>

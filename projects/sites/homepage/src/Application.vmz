@@ -1,0 +1,488 @@
+<template>
+  <div class="site">
+    <header :class="scrolled ? 'topbar is-scrolled' : 'topbar'">
+      <div class="topbar-inner">
+        <a class="brand" :href="copy.href.home">
+          <span class="brand-mark"></span>
+          <span class="brand-text">{{ copy.brand }}</span>
+        </a>
+        <nav class="nav-desktop">
+          <a :href="copy.href.docs">{{ copy.nav.docs }}</a>
+          <a :href="copy.href.membership">{{ copy.nav.membership }}</a>
+          <a :href="copy.href.install">{{ copy.nav.install }}</a>
+          <div class="lang">
+            <Icon name="nav.language" size="sm" />
+            <button type="button" :class="locale === 'en-us' ? 'lang-btn' : 'lang-btn is-on'" @click="() => chooseLocale('zh-hans')">{{ copy.lang.zh }}</button>
+            <span class="lang-sep">/</span>
+            <button type="button" :class="locale === 'en-us' ? 'lang-btn is-on' : 'lang-btn'" @click="() => chooseLocale('en-us')">{{ copy.lang.en }}</button>
+          </div>
+          <Button variant="primary" size="small" :href="copy.href.login">{{ copy.nav.login }}</Button>
+        </nav>
+        <span class="nav-toggle">
+          <Button variant="text" aria-haspopup="menu" :aria-expanded="menuOpen ? 'true' : 'false'" @click="() => toggleMenu()">
+            <Icon name="action.menu" />
+            <span class="sr-only">{{ copy.nav.docs }}</span>
+          </Button>
+        </span>
+      </div>
+      <nav class="nav-mobile" v-if="menuOpen">
+        <a :href="copy.href.docs" @click="() => toggleMenu()">{{ copy.nav.docs }}</a>
+        <a :href="copy.href.membership" @click="() => toggleMenu()">{{ copy.nav.membership }}</a>
+        <a :href="copy.href.install" @click="() => toggleMenu()">{{ copy.nav.install }}</a>
+        <a :href="copy.href.login" @click="() => toggleMenu()">{{ copy.nav.login }}</a>
+        <div class="lang lang-mobile">
+          <button type="button" :class="locale === 'en-us' ? 'lang-btn' : 'lang-btn is-on'" @click="() => chooseLocale('zh-hans')">{{ copy.lang.zh }}</button>
+          <span class="lang-sep">/</span>
+          <button type="button" :class="locale === 'en-us' ? 'lang-btn is-on' : 'lang-btn'" @click="() => chooseLocale('en-us')">{{ copy.lang.en }}</button>
+        </div>
+      </nav>
+    </header>
+    <div class="nav-backdrop" v-if="menuOpen" @click="() => toggleMenu()"></div>
+
+    <main class="main">
+      <slot />
+    </main>
+
+    <footer class="footer">
+      <div class="foot-inner">
+        <div class="foot-cols">
+          <div class="foot-col foot-brand-col">
+            <a class="brand" :href="copy.href.home">
+              <span class="brand-mark"></span>
+              <span class="brand-text">{{ copy.brand }}</span>
+            </a>
+            <p class="foot-tagline">{{ copy.foot.tagline }}</p>
+          </div>
+          <div class="foot-col">
+            <h4>{{ copy.foot.product }}</h4>
+            <a :href="copy.href.install">{{ copy.foot.apply }}</a>
+            <a :href="copy.href.membership">{{ copy.foot.membership }}</a>
+            <a :href="copy.href.login">{{ copy.foot.login }}</a>
+          </div>
+          <div class="foot-col">
+            <h4>{{ copy.foot.usage }}</h4>
+            <a :href="copy.href.docs">{{ copy.foot.guide }}</a>
+            <a :href="copy.href.start">{{ copy.foot.start }}</a>
+            <a :href="copy.href.uses">{{ copy.foot.uses }}</a>
+          </div>
+          <div class="foot-col">
+            <h4>{{ copy.foot.about }}</h4>
+            <a href="https://github.com/promotion-net/MyJarvis">{{ copy.foot.repo }}</a>
+            <a :href="copy.href.docs">{{ copy.foot.terms }}</a>
+            <a :href="copy.href.docs">{{ copy.foot.privacy }}</a>
+          </div>
+        </div>
+        <div class="foot-base">
+          <span>{{ copy.foot.copyright }}</span>
+          <span>{{ copy.foot.meta }}</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+</template>
+
+<style>
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+}
+html.reveal-ready [data-reveal] {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 420ms cubic-bezier(0.22, 1, 0.36, 1), transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+html.reveal-ready [data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  html.reveal-ready [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+.site {
+  --bg: var(--vmz-surface-paper);
+  --bg-sub: var(--vmz-surface-mist);
+  --line: var(--vmz-line-default);
+  --line-strong: var(--vmz-line-strong);
+  --text: var(--vmz-text-ink);
+  --text-2: var(--vmz-text-steel);
+  --muted: var(--vmz-text-tertiary);
+  --muted-dim: var(--vmz-text-muted);
+  --accent: var(--vmz-action-primary-background);
+  --accent-hover: var(--vmz-action-primary-hover);
+  --radius: var(--vmz-radius-lg);
+  --radius-sm: var(--vmz-radius-md);
+  --sans: var(--vmz-font-sans);
+
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background: var(--bg);
+  border-bottom: 1px solid transparent;
+  transition: border-color 200ms ease;
+}
+.topbar.is-scrolled {
+  border-bottom-color: var(--line);
+}
+.nav-backdrop {
+  position: fixed;
+  inset: 64px 0 0;
+  z-index: 35;
+  background: rgba(17, 18, 20, 0.28);
+}
+.topbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(24px, 5vw, 48px);
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--text);
+}
+.brand-mark {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: var(--accent);
+  position: relative;
+}
+.brand-mark::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: 2px;
+  background: #fff;
+}
+.brand-text {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.nav-desktop {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.nav-desktop > a {
+  color: var(--text-2);
+  text-decoration: none;
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  transition: color 160ms ease, background 160ms ease;
+}
+.nav-desktop > a:hover {
+  color: var(--accent);
+}
+.lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 6px;
+  padding-left: 10px;
+  border-left: 1px solid var(--line);
+}
+.lang-btn {
+  border: none;
+  background: none;
+  padding: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--muted);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.lang-btn:hover {
+  color: var(--text);
+}
+.lang-btn.is-on {
+  color: var(--accent);
+  font-weight: 500;
+}
+.lang-sep {
+  color: var(--line-strong);
+  font-size: 12px;
+}
+.nav-toggle {
+  display: none;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.nav-mobile {
+  display: none;
+  flex-direction: column;
+  background: #fff;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 4px 0;
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+}
+.nav-mobile a {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 15px;
+  padding: 13px clamp(24px, 5vw, 48px);
+}
+.nav-mobile a:hover {
+  background: var(--bg-sub);
+}
+.lang-mobile {
+  border-left: none;
+  border-top: 1px solid var(--line);
+  margin: 4px 0 0;
+  padding: 12px clamp(24px, 5vw, 48px);
+  justify-content: flex-start;
+}
+.main {
+  flex: 1;
+}
+
+/* shared page container — single definition so pages cannot drift */
+.inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(24px, 5vw, 48px);
+}
+.inner.narrow {
+  max-width: 880px;
+}
+.inner.wide {
+  max-width: 1320px;
+}
+
+.footer {
+  border-top: 1px solid var(--line);
+  background: var(--bg);
+  padding: 56px clamp(24px, 5vw, 48px) 32px;
+}
+.foot-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.foot-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+  gap: 32px;
+}
+.foot-brand-col .brand {
+  margin-bottom: 12px;
+}
+.foot-tagline {
+  margin: 0;
+  max-width: 26ch;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.foot-col h4 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.foot-col a {
+  display: block;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+  padding: 5px 0;
+}
+.foot-col a:hover {
+  color: var(--accent);
+}
+.foot-base {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 36px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--muted-dim);
+}
+
+@media (max-width: 860px) {
+  .nav-desktop {
+    display: none;
+  }
+  .nav-toggle {
+    display: inline-flex;
+    align-items: center;
+  }
+  .nav-mobile {
+    display: flex;
+  }
+  .foot-cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+}
+</style>
+
+<script client>
+import * as t from "#locales/site";
+
+function readLocale() {
+  if (typeof document === "undefined") return "zh-hans";
+  let id = "zh-hans";
+  try {
+    id = localStorage.getItem("mj.locale") || document.documentElement.getAttribute("data-locale") || "zh-hans";
+  } catch (error) {
+    id = document.documentElement.getAttribute("data-locale") || "zh-hans";
+  }
+  document.documentElement.setAttribute("data-locale", id);
+  document.documentElement.setAttribute("lang", id === "en-us" ? "en" : "zh-CN");
+  return id;
+}
+
+
+export default class Application {
+  menuOpen = false;
+  scrolled = false;
+  locale = readLocale();
+  copy = this.snapshot();
+
+  snapshot() {
+    return {
+      brand: t.brand(),
+      nav: { docs: t.navDocs(), membership: t.navMembership(), install: t.navInstall(), login: t.navLogin() },
+      lang: { zh: t.langZh(), en: t.langEn() },
+      foot: {
+        tagline: t.footTagline(),
+        product: t.footProduct(),
+        apply: t.footApply(),
+        membership: t.footMembership(),
+        login: t.footLogin(),
+        usage: t.footUsage(),
+        guide: t.footGuide(),
+        start: t.footStart(),
+        uses: t.footUses(),
+        about: t.footAbout(),
+        repo: t.footRepo(),
+        terms: t.footTerms(),
+        privacy: t.footPrivacy(),
+        copyright: t.footCopyright(),
+        meta: t.footMeta(),
+      },
+      href: {
+        home: "/",
+        docs: "/d",
+        membership: "/membership",
+        install: "/install",
+        login: "/login",
+        start: "/d/start",
+        uses: "/d/uses",
+      },
+    };
+  }
+
+  onMount() {
+    if (typeof window === "undefined") return;
+    const onScroll = () => {
+      this.scrolled = window.scrollY > 4;
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    if (typeof MutationObserver !== "undefined") {
+      const el = document.documentElement;
+      let last = el.getAttribute("data-locale") || "";
+      new MutationObserver(() => {
+        const next = el.getAttribute("data-locale") || "";
+        if (next === last) return;
+        last = next;
+        this.locale = next;
+        this.copy = this.snapshot();
+      }).observe(el, { attributes: true, attributeFilter: ["data-locale"] });
+    }
+
+    document.documentElement.classList.add("reveal-ready");
+    const targets = Array.from(document.querySelectorAll("[data-reveal]"));
+    if (!("IntersectionObserver" in window)) {
+      targets.forEach((el) => el.classList.add("is-in"));
+      return;
+    }
+    // 首屏内与已经滚过去的区块直接判定为可见，避免进入页面时出现空白。
+    const revealInView = () => {
+      const limit = window.innerHeight * 0.92;
+      targets.forEach((el) => {
+        if (el.classList.contains("is-in")) return;
+        if (el.getBoundingClientRect().top <= limit) el.classList.add("is-in");
+      });
+    };
+    revealInView();
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-in");
+            io.unobserve(entry.target);
+          }
+        });
+      },
+      { rootMargin: "0px 0px -6% 0px", threshold: 0 },
+    );
+    targets.forEach((el) => {
+      if (!el.classList.contains("is-in")) io.observe(el);
+    });
+    // 观察器漏回调（快速滑动、前进后退恢复、整页截图）时的兜底。
+    window.addEventListener("scroll", revealInView, { passive: true });
+  }
+
+  chooseLocale(to) {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem("mj.locale", to);
+    } catch (error) {
+      /* private mode: keep the in-memory switch only */
+    }
+    document.documentElement.setAttribute("data-locale", to);
+    document.documentElement.setAttribute("lang", to === "en-us" ? "en" : "zh-CN");
+    this.locale = to;
+    this.copy = this.snapshot();
+    window.dispatchEvent(new CustomEvent("mj:locale", { detail: to }));
+  }
+
+  toggleMenu() {
+    this.menuOpen = !this.menuOpen;
+    if (typeof document !== "undefined") {
+      document.body.style.overflow = this.menuOpen ? "hidden" : "";
+    }
+  }
+}
+</script>

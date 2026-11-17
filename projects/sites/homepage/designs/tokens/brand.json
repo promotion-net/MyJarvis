@@ -1,0 +1,47 @@
+{
+    "brand": {
+        "primary": "#0B7CF0"
+    },
+    "scale": {
+        "50": "#EEF6FF",
+        "100": "#D9EBFF",
+        "200": "#B6D8FF",
+        "300": "#85BDFF",
+        "400": "#4B9CF7",
+        "500": "#0B7CF0",
+        "600": "#0A6FD8",
+        "700": "#0959B0",
+        "800": "#084A92",
+        "900": "#073B74",
+        "950": "#041F3D"
+    },
+    "surface": {
+        "paper": "#FFFFFF",
+        "mist": "#F7F8FA",
+        "page": "#F5F6F8",
+        "fill": "#FAFBFC",
+        "ink": "#1F2329",
+        "graphite": "#3A3F45",
+        "code": "#0F1115",
+        "inverse": "#1F2329"
+    },
+    "text": {
+        "ink": "#1F2329",
+        "steel": "#51565D",
+        "tertiary": "#646A73",
+        "muted": "#6B7178",
+        "on-brand": "#FFFFFF",
+        "on-ink": "#F7F8FA",
+        "on-inverse": "#F7F8FA"
+    },
+    "line": {
+        "default": "#E5E6EB",
+        "subtle": "#F0F1F3",
+        "strong": "#C9CDD4"
+    },
+    "font": {
+        "sans": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Roboto, \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "ui-monospace, SFMono-Regular, \"SF Mono\", Menlo, Consolas, \"Liberation Mono\", monospace",
+        "display": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Roboto, \"Helvetica Neue\", Arial, sans-serif"
+    }
+}

@@ -1,0 +1,7 @@
+<template>
+  <DocsPage :pageKey="'files'" />
+</template>
+
+<script client>
+export default class DocsFilesPage {}
+</script>
