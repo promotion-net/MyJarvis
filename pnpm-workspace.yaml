@@ -1,3 +1,18 @@
 packages:
   - projects/packages/*
   - projects/sites/*
+minimumReleaseAgeExclude:
+  - '@vmz/commander@0.3.17'
+  - '@vmz/core@0.3.17'
+  - '@vmz/diagnostic@0.3.17'
+  - '@vmz/plugin@0.3.17'
+  - '@vmz/protocol@0.3.17'
+  - '@vmz/ui-icons@0.3.17'
+  - '@vmz/ui@0.3.17'
+  - '@vmz/vmz-darwin-arm64@0.3.17'
+  - '@vmz/vmz-darwin-x64@0.3.17'
+  - '@vmz/vmz-linux-arm64@0.3.17'
+  - '@vmz/vmz-linux-x64@0.3.17'
+  - '@vmz/vmz-win32-x64@0.3.17'
+  - '@vmz/vmz@0.3.17'
+  - '@vmz/vmz-win32-arm64@0.3.17'

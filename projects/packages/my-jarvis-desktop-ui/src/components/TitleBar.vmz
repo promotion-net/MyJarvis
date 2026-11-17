@@ -1,7 +1,7 @@
 <template>
-  <header class="titlebar" data-tauri-drag-region>
-    <span class="titlebar__mark" data-tauri-drag-region>M</span>
-    <span class="titlebar__name" data-tauri-drag-region>MyJarvis</span>
+  <header class="titlebar">
+    <span class="titlebar__mark">M</span>
+    <span class="titlebar__name">MyJarvis</span>
     <button
       type="button"
       :class="runtimeClass()"
@@ -108,17 +108,7 @@
 </style>
 
 <script client>
-import { runtimeHealth } from "../lib/bridge.js";
-
-/**
- * Window handle from the Tauri shell. `withGlobalTauri` is enabled, so the page
- * reaches it through `window.__TAURI__` without bundling the Tauri API package.
- */
-function shellWindow(): any {
-  const tauri: any = (window as any).__TAURI__;
-  const get: any = tauri && tauri.window && tauri.window.getCurrentWindow;
-  return typeof get === "function" ? get.call(tauri.window) : null;
-}
+import { runtimeHealth, windowCommand } from "../lib/bridge.js";
 
 export default class TitleBar {
   static __vmzHostBox = "contents";
@@ -155,20 +145,19 @@ export default class TitleBar {
   }
 
   minimize() {
-    const win = shellWindow();
-    if (win) win.minimize();
+    windowCommand("minimize").catch(() => undefined);
   }
 
   toggleMaximize() {
-    const win = shellWindow();
-    if (!win) return;
-    win.toggleMaximize();
-    this.maximized = !this.maximized;
+    windowCommand("toggleMaximize")
+      .then(() => {
+        this.maximized = !this.maximized;
+      })
+      .catch(() => undefined);
   }
 
   closeWindow() {
-    const win = shellWindow();
-    if (win) win.close();
+    windowCommand("close").catch(() => undefined);
   }
 }
 </script>

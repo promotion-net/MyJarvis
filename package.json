@@ -8,20 +8,13 @@
     "build": "cargo build --workspace && pnpm -r build",
     "build:homepage": "pnpm --filter @my-jarvis/homepage run build",
     "build:napi": "node scripts/build-napi.ts",
-    "build:desktop": "pnpm tauri build --config projects/crates/jarvis-desktop/tauri.conf.json",
-    "dev:desktop": "pnpm tauri dev --config projects/crates/jarvis-desktop/tauri.conf.json",
+    "build:desktop": "pnpm --filter @my-jarvis/desktop build:desktop && cargo build -p jarvis-desktop-shell",
+    "desktop": "cargo run -p jarvis-desktop-shell",
     "test": "cargo test --workspace && pnpm -r test"
   },
   "devDependencies": {
     "@napi-rs/cli": "^3.0.0",
-    "@tauri-apps/cli": "2.12.2",
     "typescript": "^5.6.0",
     "zod": "^3.23.0"
-  },
-  "optionalDependencies": {
-    "@tauri-apps/cli-darwin-arm64": "2.12.2",
-    "@tauri-apps/cli-darwin-x64": "2.12.2",
-    "@tauri-apps/cli-linux-x64-gnu": "2.12.2",
-    "@tauri-apps/cli-win32-x64-msvc": "2.12.2"
   }
 }

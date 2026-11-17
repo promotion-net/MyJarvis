@@ -1,7 +1,7 @@
 //! Mobile shell entry: same workspace, different target.
-//! Mobile goes straight from Tauri commands to the host runtime without napi-rs;
-//! full Tauri dependencies land with shell integration. For now this prints the
-//! `/v0` capability catalog to verify assembly.
+//! Mobile reuses the WAE host bridge of the desktop shell instead of napi-rs;
+//! the platform integration lands with the WAE mobile target. For now this
+//! prints the `/v0` capability catalog to verify assembly.
 
 fn main() {
     let catalog = jarvis_core::capability_catalog();
