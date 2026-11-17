@@ -1,0 +1,406 @@
+<template>
+  <div class="dev">
+    <aside class="dev__list">
+      <div class="dev__head">
+        <span class="dev__title">Capabilities</span>
+        <span class="dev__count">{{ capabilities.length }}</span>
+      </div>
+      <div class="dev__scroll">
+        <div
+          v-for="c in capabilities"
+          :key="c.id"
+          :class="entryClass(c.id)"
+          @click="pick(c.id)"
+        >
+          <span class="dev__meta">
+            <b>{{ c.id }}</b>
+            <i>{{ c.summary }}</i>
+          </span>
+        </div>
+      </div>
+    </aside>
+
+    <section class="dev__main">
+      <header class="dev__main-head">
+        <b>{{ methodName() }}</b>
+        <span class="dev__hint">POST /v0/dispatch · appId is this install</span>
+      </header>
+      <div class="dev__body">
+        <label class="dev__field">
+          <span class="dev__label">params (JSON)</span>
+          <textarea class="dev__params" :value="paramsText" @input="onParams"></textarea>
+        </label>
+        <div class="dev__actions">
+          <button class="dev__run" type="button" :disabled="running" @click="invoke">
+            {{ running ? "Running…" : "Invoke" }}
+          </button>
+          <span :class="statusClass()">{{ statusText }}</span>
+        </div>
+        <div class="dev__field">
+          <span class="dev__label">result</span>
+          <pre class="dev__result">{{ resultText }}</pre>
+        </div>
+      </div>
+    </section>
+
+    <aside class="dev__side">
+      <div class="dev__side-head"><b>Call log</b></div>
+      <div class="dev__side-body">
+        <div class="dev__log" v-for="row in log" :key="row.id">
+          <b>{{ row.method }}</b>
+          <i :class="row.ok ? 'dev__ok' : 'dev__err'">{{ row.ok ? "ok" : "error" }} · {{ row.ms }}ms</i>
+        </div>
+        <p class="dev__empty" v-if="log.length === 0">No calls yet.</p>
+      </div>
+    </aside>
+  </div>
+</template>
+
+<style>
+.dev {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  background: var(--chat);
+}
+.dev__list {
+  flex: none;
+  width: 296px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+}
+.dev__head {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--line);
+}
+.dev__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+.dev__count {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+.dev__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px 8px 10px;
+}
+.dev__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.dev__row:hover {
+  background: var(--hover);
+}
+.dev__row--on {
+  background: var(--accent-soft);
+}
+.dev__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.dev__meta b {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-1);
+}
+.dev__meta i {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--text-3);
+  line-height: 1.4;
+}
+.dev__main {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.dev__main-head {
+  flex: none;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+.dev__main-head b {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+.dev__hint {
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+.dev__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.dev__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.dev__label {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.dev__params {
+  min-height: 120px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text-1);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+}
+.dev__params:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.dev__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dev__run {
+  height: 30px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.dev__run:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.dev__status {
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+.dev__status--ok {
+  color: #12b76a;
+}
+.dev__status--err {
+  color: var(--danger);
+}
+.dev__result {
+  margin: 0;
+  min-height: 120px;
+  max-height: 320px;
+  overflow: auto;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text-1);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.dev__side {
+  flex: 0 1 260px;
+  width: 260px;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--line);
+  background: var(--panel);
+}
+.dev__side-head {
+  flex: none;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+}
+.dev__side-head b {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+.dev__side-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dev__log {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: var(--soft);
+}
+.dev__log b {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-1);
+}
+.dev__log i {
+  font-style: normal;
+  font-size: 10.5px;
+  color: var(--text-3);
+}
+.dev__ok {
+  color: #12b76a;
+}
+.dev__err {
+  color: var(--danger);
+}
+.dev__empty {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+@media (max-width: 1000px) {
+  .dev__side {
+    display: none;
+  }
+}
+</style>
+
+<script client>
+import { invokeDispatch } from "../lib/bridge.js";
+import { CAPABILITIES } from "@my-jarvis/types";
+
+interface CallRow {
+  id: number;
+  method: string;
+  ok: boolean;
+  ms: number;
+}
+
+const TEMPLATES: Record<string, string> = {
+  "backend:provision": '{\n  "name": "demo"\n}',
+  "db:migrate": '{\n  "sql": "CREATE TABLE IF NOT EXISTS t (id INTEGER PRIMARY KEY)"\n}',
+  "db:query": '{\n  "sql": "SELECT 1 AS ok"\n}',
+  "server:route": '{\n  "path": "/demo"\n}',
+  "llm:complete": '{\n  "messages": [{ "role": "user", "content": "ping" }],\n  "profile": "fast"\n}',
+  "sms:send": '{\n  "to": "+8613800000000",\n  "text": "hello"\n}',
+};
+
+let nextLogId = 1;
+
+export default class DevConsole {
+  static __vmzHostBox = "contents";
+  public capabilities: any[] = CAPABILITIES;
+  public activeId = "backend:provision";
+  public paramsText = TEMPLATES["backend:provision"] || "{}";
+  public resultText = "";
+  public statusText = "idle";
+  public statusKind = "idle";
+  public running = false;
+  public log: CallRow[] = [];
+  public onStatus: ((ok: boolean, detail: string) => void) | null = null;
+
+  entryClass(id: string): string {
+    return id === this.activeId ? "dev__row dev__row--on" : "dev__row";
+  }
+
+  statusClass(): string {
+    return "dev__status" + (this.statusKind === "idle" ? "" : " dev__status--" + this.statusKind);
+  }
+
+  methodName(): string {
+    return "mj." + this.activeId.replace(":", ".");
+  }
+
+  pick(id: string) {
+    this.activeId = id;
+    this.paramsText = TEMPLATES[id] || "{}";
+    this.resultText = "";
+    this.statusText = "idle";
+    this.statusKind = "idle";
+  }
+
+  onParams(event: Event) {
+    const target = event.target as HTMLTextAreaElement | null;
+    this.paramsText = target ? target.value : "";
+  }
+
+  async invoke() {
+    if (this.running) return;
+    let params: Record<string, unknown>;
+    try {
+      params = JSON.parse(this.paramsText || "{}");
+    } catch (err) {
+      this.resultText = "";
+      this.statusText = "invalid JSON: " + String(err);
+      this.statusKind = "err";
+      return;
+    }
+    const method = this.methodName();
+    this.running = true;
+    this.statusText = "running…";
+    this.statusKind = "idle";
+    const started = Date.now();
+    try {
+      const result = await invokeDispatch(method, params);
+      this.resultText = JSON.stringify(result, null, 2);
+      this.statusText = "ok";
+      this.statusKind = "ok";
+      this.pushLog(method, true, Date.now() - started);
+      this.report(true, this.resultText);
+    } catch (err) {
+      this.resultText = String(err);
+      this.statusText = "error";
+      this.statusKind = "err";
+      this.pushLog(method, false, Date.now() - started);
+      this.report(false, String(err));
+    } finally {
+      this.running = false;
+    }
+  }
+
+  pushLog(method: string, ok: boolean, ms: number) {
+    this.log = [{ id: nextLogId++, method, ok, ms }, ...this.log].slice(0, 20);
+  }
+
+  report(ok: boolean, detail: string) {
+    this.onStatus?.(ok, detail);
+  }
+}
+</script>

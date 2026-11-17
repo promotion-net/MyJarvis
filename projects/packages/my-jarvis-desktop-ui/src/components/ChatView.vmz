@@ -34,7 +34,7 @@
         :value="draft"
         @input="onDraft"
       />
-      <button class="chat__send" type="button" title="Send" @click="send">
+      <button class="chat__send" type="button" title="Send" :disabled="sending" @click="send">
         <Icon name="action.send" size="md" />
       </button>
     </div>
@@ -196,9 +196,15 @@
 .chat__send:hover {
   background: var(--accent-hover);
 }
+.chat__send:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
 </style>
 
 <script client>
+import { mj } from "@my-jarvis/sdk";
+
 interface ChatMessage {
   id: number;
   role: string;
@@ -212,6 +218,8 @@ export default class ChatView {
   static __vmzHostBox = "contents";
   public messages: ChatMessage[] = [];
   public draft = "";
+  public sending = false;
+  public model = "fast";
   public onToggleDetail: (() => void) | null = null;
 
   messageClass(role: string): string {
@@ -227,15 +235,37 @@ export default class ChatView {
     this.draft = target ? target.value : "";
   }
 
-  send() {
+  /** Conversation history the runtime sees: only user/assistant turns, never UI system lines. */
+  history(): Array<{ role: string; content: string }> {
+    const turns: Array<{ role: string; content: string }> = [];
+    for (const m of this.messages) {
+      if (m.role === "user") turns.push({ role: "user", content: m.text });
+      else if (m.role === "agent") turns.push({ role: "assistant", content: m.text });
+    }
+    return turns;
+  }
+
+  async send() {
     const text = this.draft.trim();
-    if (!text) return;
-    this.messages = [
-      ...this.messages,
-      { id: nextId++, role: "user", text, time: "now" },
-      { id: nextId++, role: "agent", text: "Replies need the runtime connection (D2). This is the D1 surface.", time: "now" },
-    ];
+    if (!text || this.sending) return;
     this.draft = "";
+    this.messages = [...this.messages, { id: nextId++, role: "user", text, time: "now" }];
+    const turns = this.history();
+    this.sending = true;
+    try {
+      const reply = await mj.llm.complete({ messages: turns as any, profile: this.model as any });
+      this.messages = [
+        ...this.messages,
+        { id: nextId++, role: "agent", text: reply.text, time: "now" },
+      ];
+    } catch (err) {
+      this.messages = [
+        ...this.messages,
+        { id: nextId++, role: "system", text: "mj.llm.complete failed · " + String(err), time: "now" },
+      ];
+    } finally {
+      this.sending = false;
+    }
   }
 
   toggleDetail() {

@@ -67,6 +67,7 @@ const MODULES: ModuleDef[] = [
     { id: "calendar", label: "Calendar", icon: "action.calendar", status: "missing", dot: false, capability: "mj.calendar.*" },
     { id: "meetings", label: "Meetings", icon: "media.camera", status: "missing", dot: false, capability: "mj.meeting.*" },
     { id: "contacts", label: "Contacts", icon: "nav.contacts", status: "missing", dot: false, capability: "mj.contact.*" },
+    { id: "dev", label: "Developer", icon: "develop.terminal", status: "ready", dot: false, capability: "mj.*" },
 ];
 
 const ACCOUNTS: AccountDef[] = [
@@ -170,7 +171,7 @@ const AGENTS: AgentDef[] = [
         initials: "C",
         tone: "green",
         isChief: true,
-        models: ["fast", "balanced", "pin:gpt-x"],
+        models: ["fast", "balanced"],
         capabilities: ["mj.llm.complete", "mj.mail.draft", "mj.doc.summarize"],
         space: "Personal",
         spaceId: "7f3ac91d54b84f0a93cd0e21b6a4d5c8",
@@ -198,7 +199,7 @@ const AGENTS: AgentDef[] = [
         initials: "S",
         tone: "blue",
         isChief: false,
-        models: ["balanced", "long-context"],
+        models: ["balanced", "reasoning"],
         capabilities: ["mj.llm.complete", "mj.space.read", "mj.doc.write"],
         space: "Personal",
         spaceId: "7f3ac91d54b84f0a93cd0e21b6a4d5c8",
@@ -208,7 +209,7 @@ const AGENTS: AgentDef[] = [
     },
 ];
 
-const MODEL_CATALOG: string[] = ["fast", "balanced", "pin:gpt-x", "long-context", "vision"];
+const MODEL_CATALOG: string[] = ["fast", "balanced", "reasoning"];
 
 const MESSAGES: MessageDef[] = [
     { id: 1, role: "user", text: "Summarize the quarterly report and draft a reply to Zhang Ming.", time: "10:51" },

@@ -21,6 +21,7 @@
       :on-close-detail="closeDetail"
     />
     <AgentSettings v-if="isAgents" :on-open-messages="showMessages" />
+    <DevConsole v-if="isDev" />
     <EmptyState
       v-if="isEmpty"
       :title="emptyTitle"
@@ -124,6 +125,7 @@ export default class IndexPage {
   currentAccount = firstAccount();
   isMessages = true;
   isAgents = false;
+  isDev = false;
   isEmpty = false;
   detailOpen = true;
   isAdmin = firstAccount().role === "admin";
@@ -137,17 +139,27 @@ export default class IndexPage {
     if (id === "messages") {
       this.isMessages = true;
       this.isAgents = false;
+      this.isDev = false;
       this.isEmpty = false;
       return;
     }
     if (id === "agents") {
       this.isMessages = false;
       this.isAgents = true;
+      this.isDev = false;
+      this.isEmpty = false;
+      return;
+    }
+    if (id === "dev") {
+      this.isMessages = false;
+      this.isAgents = false;
+      this.isDev = true;
       this.isEmpty = false;
       return;
     }
     this.isMessages = false;
     this.isAgents = false;
+    this.isDev = false;
     this.isEmpty = true;
     const found = this.modules.find((m: { id: string }) => m.id === id);
     if (found) {

@@ -2,6 +2,15 @@
   <header class="titlebar" data-tauri-drag-region>
     <span class="titlebar__mark" data-tauri-drag-region>M</span>
     <span class="titlebar__name" data-tauri-drag-region>MyJarvis</span>
+    <button
+      type="button"
+      :class="runtimeClass()"
+      :title="runtimeDetail"
+      @click="probeRuntime"
+    >
+      <span class="titlebar__dot"></span>
+      <span>{{ runtimeLabel }}</span>
+    </button>
     <div class="titlebar__controls">
       <button class="titlebar__btn" type="button" title="Minimize" @click="minimize">
         <Icon name="action.minus" size="sm" />
@@ -47,6 +56,31 @@
   font-weight: 600;
   color: var(--text-1);
 }
+.titlebar__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--text-3);
+}
+.titlebar__runtime {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--text-2);
+  font-size: 11.5px;
+  cursor: pointer;
+}
+.titlebar__runtime--ok .titlebar__dot {
+  background: #12b76a;
+}
+.titlebar__runtime--off .titlebar__dot {
+  background: var(--danger);
+}
 .titlebar__controls {
   margin-left: auto;
   display: flex;
@@ -74,6 +108,8 @@
 </style>
 
 <script client>
+import { runtimeHealth } from "../lib/bridge.js";
+
 /**
  * Window handle from the Tauri shell. `withGlobalTauri` is enabled, so the page
  * reaches it through `window.__TAURI__` without bundling the Tauri API package.
@@ -87,6 +123,36 @@ function shellWindow(): any {
 export default class TitleBar {
   static __vmzHostBox = "contents";
   public maximized = false;
+  public runtimeState = "checking";
+  public runtimeLabel = "Runtime…";
+  public runtimeDetail = "";
+  public pollTimer: any = null;
+
+  onMount() {
+    if (typeof window === "undefined") return;
+    this.probeRuntime();
+    this.pollTimer = window.setInterval(() => this.probeRuntime(), 15000);
+  }
+
+  onDestroy() {
+    if (this.pollTimer != null) {
+      window.clearInterval(this.pollTimer);
+      this.pollTimer = null;
+    }
+  }
+
+  runtimeClass(): string {
+    return "titlebar__runtime titlebar__runtime--" + this.runtimeState;
+  }
+
+  async probeRuntime() {
+    const health = await runtimeHealth();
+    this.runtimeState = health.ok ? "ok" : "off";
+    this.runtimeLabel = health.ok ? "Runtime connected" : "Runtime offline";
+    this.runtimeDetail = health.base
+      ? "base=" + health.base + " status=" + String(health.status) + " " + health.detail
+      : health.detail;
+  }
 
   minimize() {
     const win = shellWindow();

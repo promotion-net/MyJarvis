@@ -13,10 +13,10 @@
         "@my-jarvis/types": "workspace:*"
     },
     "devDependencies": {
-        "@vmz/core": "0.3.16",
-        "@vmz/plugin": "0.3.16",
-        "@vmz/ui": "0.3.16",
-        "@vmz/ui-icons": "0.3.16",
-        "@vmz/vmz": "0.3.16"
+        "@vmz/core": "0.3.17",
+        "@vmz/plugin": "0.3.17",
+        "@vmz/ui": "0.3.17",
+        "@vmz/ui-icons": "0.3.17",
+        "@vmz/vmz": "0.3.17"
     }
 }

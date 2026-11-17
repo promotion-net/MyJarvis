@@ -15,9 +15,9 @@
         <div class="detail__chips">
           <span class="chip chip--on">fast</span>
           <span class="chip">balanced</span>
-          <span class="chip mono">pin:gpt-x</span>
+          <span class="chip mono">reasoning</span>
         </div>
-        <p class="detail__hint">Requests outside this list are rejected until the model is added.</p>
+        <p class="detail__hint">Profiles come from the runtime catalog. Pinned model ids need `llm:pin` authorization and are rejected until the policy is wired.</p>
       </section>
       <section class="detail__block">
         <div class="detail__label">Awaiting approval</div>

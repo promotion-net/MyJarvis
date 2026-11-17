@@ -45,10 +45,35 @@ async fn mj_dispatch(
     Err(body["error"]["message"].as_str().unwrap_or("runtime error").to_owned())
 }
 
+/// Probe the loopback runtime so the shell can show a real connection state.
+/// Always resolves: an unreachable runtime is a reported state, not a crash.
+#[tauri::command]
+async fn mj_health(gateway: State<'_, Gateway>) -> Result<Value, String> {
+    let base = gateway.base.clone();
+    match gateway.client.get(format!("{base}/healthz")).send().await {
+        Ok(response) => {
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
+            Ok(json!({
+                "ok": status.is_success(),
+                "status": status.as_u16(),
+                "base": base,
+                "detail": body,
+            }))
+        }
+        Err(err) => Ok(json!({
+            "ok": false,
+            "status": 0,
+            "base": base,
+            "detail": err.to_string(),
+        })),
+    }
+}
+
 pub fn run() {
     let app = tauri::Builder::default()
         .manage(Gateway::from_env())
-        .invoke_handler(tauri::generate_handler![mj_dispatch])
+        .invoke_handler(tauri::generate_handler![mj_dispatch, mj_health])
         .build(tauri::generate_context!())
         .expect("error while building the MyJarvis desktop shell");
     app.run(|_handle, _event| {});
