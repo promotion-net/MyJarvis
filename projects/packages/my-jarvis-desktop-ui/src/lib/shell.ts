@@ -1,5 +1,7 @@
 // Desktop shell view model: modules, accounts, conversations and messages.
-// Local mock data until the corresponding `mj.*` contracts land.
+// Local mock data until the corresponding `jarvis:*` author capabilities land.
+// Author-facing labels use `jarvis:*` specifiers (03 contract); `mj.*` stays
+// only at the wire/dispatch layer (DevConsole, approval cards, SDK transport).
 
 export type ModuleStatus = "ready" | "partial" | "missing";
 
@@ -150,15 +152,15 @@ export interface AgentDef {
 }
 
 const MODULES: ModuleDef[] = [
-    { id: "messages", label: "Messages", icon: "nav.chat", status: "missing", dot: true, capability: "mj.im.*" },
-    { id: "mail", label: "Mail", icon: "action.mail", status: "missing", dot: false, capability: "mj.mail.*" },
-    { id: "docs", label: "Docs", icon: "file.document", status: "missing", dot: false, capability: "mj.doc.*" },
-    { id: "space", label: "Space", icon: "file.folder", status: "partial", dot: false, capability: "mj.space.*" },
-    { id: "agents", label: "Agents", icon: "feature.assistant", status: "ready", dot: false, capability: "mj.agent.*" },
-    { id: "calendar", label: "Calendar", icon: "action.calendar", status: "missing", dot: false, capability: "mj.calendar.*" },
-    { id: "meetings", label: "Meetings", icon: "media.camera", status: "missing", dot: false, capability: "mj.meeting.*" },
-    { id: "contacts", label: "Contacts", icon: "nav.contacts", status: "missing", dot: false, capability: "mj.contact.*" },
-    { id: "dev", label: "Developer", icon: "develop.terminal", status: "ready", dot: false, capability: "mj.*" },
+    { id: "messages", label: "Messages", icon: "nav.chat", status: "missing", dot: true, capability: "jarvis:im" },
+    { id: "mail", label: "Mail", icon: "action.mail", status: "missing", dot: false, capability: "jarvis:mail" },
+    { id: "docs", label: "Docs", icon: "file.document", status: "missing", dot: false, capability: "jarvis:doc" },
+    { id: "space", label: "Space", icon: "file.folder", status: "partial", dot: false, capability: "jarvis:space" },
+    { id: "agents", label: "Agents", icon: "feature.assistant", status: "ready", dot: false, capability: "jarvis:agent" },
+    { id: "calendar", label: "Calendar", icon: "action.calendar", status: "missing", dot: false, capability: "jarvis:calendar" },
+    { id: "meetings", label: "Meetings", icon: "media.camera", status: "missing", dot: false, capability: "jarvis:meeting" },
+    { id: "contacts", label: "Contacts", icon: "nav.contacts", status: "missing", dot: false, capability: "jarvis:contact" },
+    { id: "dev", label: "Developer", icon: "develop.terminal", status: "ready", dot: false, capability: "jarvis (aggregate)" },
 ];
 
 const ACCOUNTS: AccountDef[] = [
@@ -263,7 +265,7 @@ const AGENTS: AgentDef[] = [
         tone: "green",
         isChief: true,
         models: ["fast", "balanced"],
-        capabilities: ["mj.agent.turn", "mj.mail.draft", "mj.doc.summarize"],
+        capabilities: ["jarvis:agent.turn", "jarvis:mail.draft", "jarvis:doc.summarize"],
         space: "Personal",
         spaceId: "7f3ac91d54b84f0a93cd0e21b6a4d5c8",
         lastUsed: "2 minutes ago",
@@ -277,7 +279,7 @@ const AGENTS: AgentDef[] = [
         tone: "violet",
         isChief: false,
         models: ["balanced"],
-        capabilities: ["mj.agent.turn", "mj.git.read", "mj.doc.write"],
+        capabilities: ["jarvis:agent.turn", "jarvis:git.read", "jarvis:doc.write"],
         space: "Acme workspace",
         spaceId: "b1d0e7a34c6f49a2a8f5c3e70d2194bb",
         lastUsed: "1 hour ago",
@@ -291,7 +293,7 @@ const AGENTS: AgentDef[] = [
         tone: "blue",
         isChief: false,
         models: ["balanced", "reasoning"],
-        capabilities: ["mj.agent.turn", "mj.space.read", "mj.doc.write"],
+        capabilities: ["jarvis:agent.turn", "jarvis:space.read", "jarvis:doc.write"],
         space: "Personal",
         spaceId: "7f3ac91d54b84f0a93cd0e21b6a4d5c8",
         lastUsed: "Yesterday",
@@ -556,7 +558,7 @@ export function defaultContacts(): ContactItem[] {
 }
 
 const ADMIN_SECTIONS: AdminSection[] = [
-    { id: "org", label: "Organization", icon: "nav.contacts", note: "Department tree and members need `mj.org.*` (gap). Data plane is host-owned." },
+    { id: "org", label: "Organization", icon: "nav.contacts", note: "Department tree and members need `jarvis:org` (gap). Data plane is host-owned." },
     { id: "approvals", label: "Approvals", icon: "action.shield", note: "Agent capability approval queue needs the policy plane (not built)." },
     { id: "devices", label: "Devices", icon: "hardware.laptop", note: "Device list shows host-reported sessions; bulk kick requires confirmation." },
     { id: "billing", label: "Billing & quota", icon: "action.credit", note: "Ledger read endpoint is pending; prototype numbers only." },

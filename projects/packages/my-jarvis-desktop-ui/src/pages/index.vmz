@@ -150,7 +150,7 @@ export default class IndexPage {
   emptyTitle = "Messages";
   emptyIcon = "nav.chat";
   emptyNote = "";
-  emptyCapability = "mj.llm.complete";
+  emptyCapability = "jarvis:llm · complete";
   detachNav: (() => void) | null = null;
 
   get isMessages() {
@@ -219,7 +219,7 @@ export default class IndexPage {
       }
       this.emptyTitle = id;
       this.emptyIcon = "action.sidebar";
-      this.emptyCapability = "mj.*";
+      this.emptyCapability = "jarvis:*";
       this.emptyNote = "Not connected yet.";
     }
   }

@@ -486,7 +486,7 @@ export default class AgentSettings {
         tone: "slate",
         isChief: false,
         models: ["balanced"],
-        capabilities: ["mj.llm.complete"],
+        capabilities: ["jarvis:llm.complete"],
         space: this.active().space,
         spaceId: this.active().spaceId,
         lastUsed: "never",

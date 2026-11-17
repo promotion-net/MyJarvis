@@ -262,7 +262,7 @@ export default class ChatView {
     } catch (err) {
       this.messages = [
         ...this.messages,
-        { id: nextId++, role: "system", text: "mj.agent.turn failed · " + String(err), time: "now" },
+        { id: nextId++, role: "system", text: "jarvis:agent · turn failed · " + String(err), time: "now" },
       ];
     } finally {
       this.sending = false;

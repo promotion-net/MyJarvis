@@ -27,7 +27,7 @@
         <li v-for="(a, i) in activeMeeting.agenda" :key="i">{{ a }}</li>
       </ul>
       <h4>Related calendar event</h4>
-      <p class="meet__detail_line">Linked once `mj.calendar.*` lands.</p>
+      <p class="meet__detail_line">Linked once `jarvis:calendar` lands.</p>
     </section>
     <aside v-if="activeMeeting" class="meet__minutes">
       <div class="meet__minutes_head">
@@ -249,7 +249,7 @@ export default class MeetingsPane {
       this.minutes = done.text;
       this.status = "Draft ready — saving into Docs waits for the doc contract.";
     } catch (err) {
-      this.status = "mj.llm.complete failed · " + String(err);
+      this.status = "jarvis:llm · complete failed · " + String(err);
     } finally {
       this.busy = false;
     }

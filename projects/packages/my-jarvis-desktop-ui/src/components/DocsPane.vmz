@@ -18,7 +18,7 @@
           <i>{{ d.updated }}</i>
         </button>
       </template>
-      <p class="docs__tree_note">Editing is local until `mj.doc.*` lands; versions are session-only.</p>
+      <p class="docs__tree_note">Editing is local until `jarvis:doc` lands; versions are session-only.</p>
     </aside>
     <section class="docs__editor">
       <header class="docs__editor_head">
@@ -368,7 +368,7 @@ export default class DocsPane {
       this.docs = this.docs.map((d) => (d.id === doc.id ? { ...d, body: d.body + "\n" + done.text, updated: "now", versions: [{ label: "v· assistant continue", time: "now", author: "Chief" }, ...d.versions] } : d));
       this.status = "Continuation appended (local until the doc contract lands).";
     } catch (err) {
-      this.status = "mj.llm.complete failed · " + String(err);
+      this.status = "jarvis:llm · complete failed · " + String(err);
     } finally {
       this.working = false;
     }
@@ -383,7 +383,7 @@ export default class DocsPane {
       const done = await mj.llm.complete({ messages: [{ role: "user", content: "Summarize in one sentence:\n\n" + doc.body }], profile: "fast" });
       this.status = done.text;
     } catch (err) {
-      this.status = "mj.llm.complete failed · " + String(err);
+      this.status = "jarvis:llm · complete failed · " + String(err);
     } finally {
       this.working = false;
     }

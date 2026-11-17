@@ -7,7 +7,7 @@
         <span :class="'dot dot--' + c.tone"></span>
         <span>{{ c.label }}</span>
       </label>
-      <p class="cal__side_note">Events are local preview until `mj.calendar.*` lands.</p>
+      <p class="cal__side_note">Events are local preview until `jarvis:calendar` lands.</p>
     </aside>
     <section class="cal__week">
       <header class="cal__week_head">

@@ -15,7 +15,7 @@
           @click="pickLetter(l)"
         >{{ l }}</button>
       </div>
-      <p class="contacts__index_note">People directory sync needs `mj.contact.*` (gap).</p>
+      <p class="contacts__index_note">People directory sync needs `jarvis:contact` (gap).</p>
     </aside>
     <section class="contacts__list">
       <button
@@ -49,8 +49,8 @@
         <dd>{{ activeContact.phone }}</dd>
       </dl>
       <div class="contacts__card_actions">
-        <button type="button" disabled title="Direct messaging needs a connected channel (mj.im.* gap)">Message</button>
-        <button type="button" disabled title="Composing mail needs mj.mail.* (gap)">Email</button>
+        <button type="button" disabled title="Direct messaging needs a connected channel (jarvis:im gap)">Message</button>
+        <button type="button" disabled title="Composing mail needs jarvis:mail (gap)">Email</button>
       </div>
       <p class="contacts__card_note">Contact records are local until the directory contract lands.</p>
     </aside>

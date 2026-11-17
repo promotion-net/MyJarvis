@@ -15,7 +15,7 @@
         <span>{{ f.label }}</span>
         <span v-if="f.unread > 0" class="mail__folders_badge">{{ f.unread }}</span>
       </button>
-      <p class="mail__folders_note">Mail account connect needs `mj.mail.*` (gap). Inbox shown is local preview.</p>
+      <p class="mail__folders_note">Mail account connect needs `jarvis:mail` (gap). Inbox shown is local preview.</p>
     </aside>
     <section class="mail__list">
       <header class="mail__list_head">
@@ -61,7 +61,7 @@
         <button type="button" :disabled="drafting" @click="draftWithAssistant">
           {{ drafting ? "Drafting…" : "Draft with assistant" }}
         </button>
-        <button type="button" class="mail__compose_send" disabled title="mj.mail.send not available yet">Send</button>
+        <button type="button" class="mail__compose_send" disabled title="Sending needs jarvis:mail · send (not in the capability catalog yet)">Send</button>
       </div>
       <p v-if="status" class="mail__compose_status">{{ status }}</p>
     </aside>
@@ -422,9 +422,9 @@ export default class MailPane {
       const prompt = "Draft a short professional reply. To: " + this.to + ". Subject: " + this.subject + ". Context: " + this.body;
       const done = await mj.llm.complete({ messages: [{ role: "user", content: prompt }], profile: "fast" });
       this.body = done.text;
-      this.status = "Draft ready — sending stays disabled until `mj.mail.send` lands.";
+      this.status = "Draft ready — sending stays disabled until `jarvis:mail` lands.";
     } catch (err) {
-      this.status = "mj.llm.complete failed · " + String(err);
+      this.status = "jarvis:llm · complete failed · " + String(err);
     } finally {
       this.drafting = false;
     }
