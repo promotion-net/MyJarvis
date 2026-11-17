@@ -63,6 +63,13 @@ const MENUS: Record<string, MenuItem[]> = {
   message: [
     { id: "copy", label: "Copy text" },
     { id: "quote", label: "Quote in reply" },
+    { id: "copy-uri", label: "Copy jarvis:// reference" },
+  ],
+  agent: [
+    { id: "chief", label: "Set as Chief" },
+    { id: "models", label: "Edit model allowlist" },
+    { id: "copy-uri", label: "Copy jarvis:// reference" },
+    { id: "delete-agent", label: "Delete agent", danger: true },
   ],
   default: [
     { id: "reload", label: "Reload view" },

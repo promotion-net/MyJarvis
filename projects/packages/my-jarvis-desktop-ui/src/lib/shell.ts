@@ -43,12 +43,27 @@ export interface MessageDef {
     time: string;
 }
 
+export interface AgentDef {
+    id: string;
+    name: string;
+    initials: string;
+    tone: string;
+    isChief: boolean;
+    models: string[];
+    capabilities: string[];
+    space: string;
+    spaceId: string;
+    lastUsed: string;
+    calls24h: number;
+    pendingApprovals: number;
+}
+
 const MODULES: ModuleDef[] = [
     { id: "messages", label: "Messages", icon: "nav.chat", status: "missing", dot: true, capability: "mj.im.*" },
     { id: "mail", label: "Mail", icon: "action.mail", status: "missing", dot: false, capability: "mj.mail.*" },
     { id: "docs", label: "Docs", icon: "file.document", status: "missing", dot: false, capability: "mj.doc.*" },
     { id: "space", label: "Space", icon: "file.folder", status: "partial", dot: false, capability: "mj.space.*" },
-    { id: "assistant", label: "Assistant", icon: "feature.assistant", status: "ready", dot: false, capability: "mj.llm.complete" },
+    { id: "agents", label: "Agents", icon: "feature.assistant", status: "ready", dot: false, capability: "mj.agent.*" },
     { id: "calendar", label: "Calendar", icon: "action.calendar", status: "missing", dot: false, capability: "mj.calendar.*" },
     { id: "meetings", label: "Meetings", icon: "media.camera", status: "missing", dot: false, capability: "mj.meeting.*" },
     { id: "contacts", label: "Contacts", icon: "nav.contacts", status: "missing", dot: false, capability: "mj.contact.*" },
@@ -148,6 +163,53 @@ const CONVERSATIONS: ConversationDef[] = [
     },
 ];
 
+const AGENTS: AgentDef[] = [
+    {
+        id: "agent-chief",
+        name: "Chief",
+        initials: "C",
+        tone: "green",
+        isChief: true,
+        models: ["fast", "balanced", "pin:gpt-x"],
+        capabilities: ["mj.llm.complete", "mj.mail.draft", "mj.doc.summarize"],
+        space: "Personal",
+        spaceId: "7f3ac91d54b84f0a93cd0e21b6a4d5c8",
+        lastUsed: "2 minutes ago",
+        calls24h: 148,
+        pendingApprovals: 1,
+    },
+    {
+        id: "agent-release",
+        name: "Release notes",
+        initials: "R",
+        tone: "violet",
+        isChief: false,
+        models: ["balanced"],
+        capabilities: ["mj.llm.complete", "mj.git.read", "mj.doc.write"],
+        space: "Acme workspace",
+        spaceId: "b1d0e7a34c6f49a2a8f5c3e70d2194bb",
+        lastUsed: "1 hour ago",
+        calls24h: 23,
+        pendingApprovals: 0,
+    },
+    {
+        id: "agent-research",
+        name: "Research",
+        initials: "S",
+        tone: "blue",
+        isChief: false,
+        models: ["balanced", "long-context"],
+        capabilities: ["mj.llm.complete", "mj.space.read", "mj.doc.write"],
+        space: "Personal",
+        spaceId: "7f3ac91d54b84f0a93cd0e21b6a4d5c8",
+        lastUsed: "Yesterday",
+        calls24h: 6,
+        pendingApprovals: 0,
+    },
+];
+
+const MODEL_CATALOG: string[] = ["fast", "balanced", "pin:gpt-x", "long-context", "vision"];
+
 const MESSAGES: MessageDef[] = [
     { id: 1, role: "user", text: "Summarize the quarterly report and draft a reply to Zhang Ming.", time: "10:51" },
     { id: 2, role: "agent", text: "Summary is ready in Docs. The draft reply is written and attached to a pending mail action.", time: "10:52" },
@@ -181,6 +243,14 @@ export function defaultConversations(): ConversationDef[] {
 
 export function defaultMessages(): MessageDef[] {
     return MESSAGES;
+}
+
+export function defaultAgents(): AgentDef[] {
+    return AGENTS;
+}
+
+export function defaultModelCatalog(): string[] {
+    return MODEL_CATALOG;
 }
 
 export function firstAccount(): AccountDef {

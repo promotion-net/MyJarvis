@@ -1,0 +1,504 @@
+<template>
+  <div class="agents">
+    <aside class="agents__list">
+      <div class="agents__head">
+        <span class="agents__title">Agents</span>
+        <button class="agents__add" type="button" title="New agent" @click="newAgent">
+          <Icon name="action.plus" size="sm" />
+        </button>
+      </div>
+      <div class="agents__scroll">
+        <div
+          v-for="a in agents"
+          :key="a.id"
+          data-ctx="agent"
+          :class="rowClass(a.id)"
+          @click="pick(a.id)"
+        >
+          <span :class="'avatar avatar--md avatar--' + a.tone">{{ a.initials }}</span>
+          <span class="agents__meta">
+            <span class="agents__name">
+              <b>{{ a.name }}</b>
+              <i v-if="a.isChief" class="agents__chief">Chief</i>
+            </span>
+            <i class="agents__sub">{{ a.models.length }} models · {{ a.lastUsed }}</i>
+          </span>
+        </div>
+      </div>
+    </aside>
+
+    <section class="agents__form">
+      <header class="agents__form-head">
+        <span :class="'avatar avatar--lg avatar--' + active().tone">{{ active().initials }}</span>
+        <span class="agents__form-id">
+          <b>{{ active().name }}</b>
+          <i>Configuration only · conversations live in Messages</i>
+        </span>
+        <button class="agents__open" type="button" @click="openConversation">Open conversation</button>
+      </header>
+
+      <div class="agents__body">
+        <label class="agents__field">
+          <span class="agents__label">Name</span>
+          <input class="agents__input" type="text" :value="draftName" @input="onRename" />
+        </label>
+
+        <section class="agents__block">
+          <div class="agents__label">Model allowlist</div>
+          <div class="agents__chips">
+            <span v-for="m in active().models" :key="m" class="chip chip--model">
+              {{ m }}
+              <button class="chip__x" type="button" title="Remove" @click="removeModel(m)">×</button>
+            </span>
+          </div>
+          <div class="agents__add-row">
+            <select class="agents__select" :value="pendingModel" @change="onPickModel">
+              <option value="">Add a model…</option>
+              <option v-for="m in catalog()" :key="m" :value="m">{{ m }}</option>
+            </select>
+            <button class="agents__confirm" type="button" @click="addModel">Add</button>
+          </div>
+          <p class="agents__hint">
+            Requests outside this list are rejected. Adding a model is explicit and leaves an audit entry.
+          </p>
+        </section>
+
+        <section class="agents__block">
+          <div class="agents__label">Capabilities</div>
+          <div class="agents__chips">
+            <span v-for="c in active().capabilities" :key="c" class="chip mono">{{ c }}</span>
+          </div>
+        </section>
+
+        <section class="agents__block">
+          <div class="agents__label">Space</div>
+          <div class="agents__space">
+            <b>{{ active().space }}</b>
+            <code>{{ spaceUri() }}</code>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <aside class="agents__side">
+      <div class="agents__side-head"><b>Audit</b></div>
+      <div class="agents__side-body">
+        <div class="agents__stat"><span>Model calls (24h)</span><b>{{ active().calls24h }}</b></div>
+        <div class="agents__stat"><span>Pending approvals</span><b>{{ active().pendingApprovals }}</b></div>
+        <div class="agents__stat"><span>Last used</span><b>{{ active().lastUsed }}</b></div>
+        <p class="agents__hint">
+          This page never runs a conversation. Chat with an agent from Messages so the transcript, approvals and
+          metering stay on one surface.
+        </p>
+      </div>
+    </aside>
+  </div>
+</template>
+
+<style>
+.agents {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  background: var(--chat);
+}
+.agents__list {
+  flex: none;
+  width: 276px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+}
+.agents__head {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--line);
+}
+.agents__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+.agents__add {
+  margin-left: auto;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 8px;
+  background: var(--field);
+  color: var(--text-2);
+  cursor: pointer;
+}
+.agents__add:hover {
+  background: var(--hover);
+  color: var(--text-1);
+}
+.agents__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px 8px 10px;
+}
+.agents__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.agents__row:hover {
+  background: var(--hover);
+}
+.agents__row--on {
+  background: var(--accent-soft);
+}
+.agents__meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.agents__name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.agents__name b {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-1);
+}
+.agents__chief {
+  flex: none;
+  font-style: normal;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+.agents__sub {
+  font-style: normal;
+  font-size: 11.5px;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.agents__form {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--chat);
+}
+.agents__form-head {
+  flex: none;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+.agents__form-id {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.agents__form-id b {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+.agents__form-id i {
+  font-style: normal;
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+.agents__open {
+  margin-left: auto;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text-2);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.agents__open:hover {
+  background: var(--hover);
+  color: var(--text-1);
+}
+.agents__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.agents__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 360px;
+}
+.agents__label {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.agents__input {
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text-1);
+  font: 400 13px/1 var(--font);
+  outline: none;
+}
+.agents__input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.agents__block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 560px;
+}
+.agents__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip {
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--soft);
+  color: var(--text-2);
+  font-size: 11.5px;
+}
+.chip--model {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.chip__x {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+}
+.agents__add-row {
+  display: flex;
+  gap: 8px;
+}
+.agents__select {
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text-1);
+  font: 400 12.5px/1 var(--font);
+}
+.agents__confirm {
+  height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.agents__confirm:hover {
+  background: var(--accent-hover);
+}
+.agents__hint {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+.agents__space {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+.agents__space b {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-1);
+}
+.agents__space code {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--accent-ink);
+}
+.agents__side {
+  flex: 0 1 280px;
+  width: 280px;
+  min-width: 236px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--line);
+  background: var(--panel);
+}
+.agents__side-head {
+  flex: none;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--line);
+}
+.agents__side-head b {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+.agents__side-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.agents__stat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.agents__stat b {
+  font-weight: 500;
+  color: var(--text-1);
+}
+@media (max-width: 1000px) {
+  .agents__side {
+    display: none;
+  }
+}
+</style>
+
+<script client>
+import { defaultAgents, defaultModelCatalog } from "../lib/shell.js";
+import type { AgentDef } from "../lib/shell.js";
+
+export default class AgentSettings {
+  static __vmzHostBox = "contents";
+  public agents: AgentDef[] = defaultAgents();
+  public activeId = "agent-chief";
+  public draftName = "Chief";
+  public pendingModel = "";
+  public onOpenMessages: (() => void) | null = null;
+
+  active(): AgentDef {
+    const found = this.agents.find((a: AgentDef) => a.id === this.activeId);
+    return found || this.agents[0];
+  }
+
+  rowClass(id: string): string {
+    return id === this.activeId ? "agents__row agents__row--on" : "agents__row";
+  }
+
+  catalog(): string[] {
+    const used = this.active().models;
+    return defaultModelCatalog().filter((m: string) => !used.includes(m));
+  }
+
+  spaceUri(): string {
+    return "jarvis://" + this.active().spaceId;
+  }
+
+  pick(id: string) {
+    this.activeId = id;
+    this.draftName = this.active().name;
+  }
+
+  onRename(event: Event) {
+    const target = event.target as HTMLInputElement | null;
+    this.draftName = target ? target.value : "";
+    const agent = this.active();
+    agent.name = this.draftName;
+  }
+
+  onPickModel(event: Event) {
+    const target = event.target as HTMLSelectElement | null;
+    this.pendingModel = target ? target.value : "";
+  }
+
+  addModel() {
+    const model = this.pendingModel;
+    if (!model) return;
+    const agent = this.active();
+    if (agent.models.includes(model)) return;
+    agent.models = [...agent.models, model];
+    this.pendingModel = "";
+  }
+
+  removeModel(model: string) {
+    const agent = this.active();
+    if (agent.isChief && agent.models.length === 1) return;
+    agent.models = agent.models.filter((m: string) => m !== model);
+  }
+
+  newAgent() {
+    const id = "agent-" + String(this.agents.length + 1);
+    this.agents = [
+      ...this.agents,
+      {
+        id,
+        name: "New agent",
+        initials: "N",
+        tone: "slate",
+        isChief: false,
+        models: ["balanced"],
+        capabilities: ["mj.llm.complete"],
+        space: this.active().space,
+        spaceId: this.active().spaceId,
+        lastUsed: "never",
+        calls24h: 0,
+        pendingApprovals: 0,
+      },
+    ];
+    this.pick(id);
+  }
+
+  openConversation() {
+    this.onOpenMessages?.();
+  }
+}
+</script>

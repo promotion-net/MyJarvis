@@ -11,7 +11,7 @@
       :on-pick-account="pickAccount"
     />
     <AssistantPane
-      v-if="isAssistant"
+      v-if="isMessages"
       :conversations="conversations"
       :messages="messages"
       :active-conversation="activeConversation"
@@ -20,8 +20,9 @@
       :on-toggle-detail="toggleDetail"
       :on-close-detail="closeDetail"
     />
+    <AgentSettings v-if="isAgents" :on-open-messages="showMessages" />
     <EmptyState
-      v-else
+      v-if="isEmpty"
       :title="emptyTitle"
       :icon="emptyIcon"
       :note="emptyNote"
@@ -118,21 +119,36 @@ export default class IndexPage {
   accounts = defaultAccounts();
   conversations = defaultConversations();
   messages = defaultMessages();
-  activeId = "assistant";
+  activeId = "messages";
   activeConversation = "c1";
   currentAccount = firstAccount();
-  isAssistant = true;
+  isMessages = true;
+  isAgents = false;
+  isEmpty = false;
   detailOpen = true;
   isAdmin = firstAccount().role === "admin";
-  emptyTitle = "Assistant";
-  emptyIcon = "feature.assistant";
+  emptyTitle = "Messages";
+  emptyIcon = "nav.chat";
   emptyNote = "";
   emptyCapability = "mj.llm.complete";
 
   selectModule(id: string) {
     this.activeId = id;
-    this.isAssistant = id === "assistant";
-    if (this.isAssistant) return;
+    if (id === "messages") {
+      this.isMessages = true;
+      this.isAgents = false;
+      this.isEmpty = false;
+      return;
+    }
+    if (id === "agents") {
+      this.isMessages = false;
+      this.isAgents = true;
+      this.isEmpty = false;
+      return;
+    }
+    this.isMessages = false;
+    this.isAgents = false;
+    this.isEmpty = true;
     const found = this.modules.find((m: { id: string }) => m.id === id);
     if (found) {
       this.emptyTitle = found.label;
@@ -149,6 +165,10 @@ export default class IndexPage {
 
   pickConversation(id: string) {
     this.activeConversation = id;
+  }
+
+  showMessages() {
+    this.selectModule("messages");
   }
 
   toggleDetail() {
