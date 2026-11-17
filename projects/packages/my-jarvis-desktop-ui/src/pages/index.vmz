@@ -10,21 +10,16 @@
       :on-select="selectModule"
       :on-pick-account="pickAccount"
     />
-    <template v-if="isAssistant">
-      <ConversationList
-        :conversations="conversations"
-        :active-id="activeConversation"
-        :on-select="pickConversation"
-      />
-      <ChatView
-        :messages="messages"
-        :on-toggle-detail="toggleDetail"
-      />
-      <DetailPanel
-        v-if="detailOpen"
-        :on-close="closeDetail"
-      />
-    </template>
+    <AssistantPane
+      v-if="isAssistant"
+      :conversations="conversations"
+      :messages="messages"
+      :active-conversation="activeConversation"
+      :detail-open="detailOpen"
+      :on-select="pickConversation"
+      :on-toggle-detail="toggleDetail"
+      :on-close-detail="closeDetail"
+    />
     <EmptyState
       v-else
       :title="emptyTitle"
@@ -73,6 +68,11 @@ body,
 /* Component wrappers are layout-transparent: each component root is the flex item. */
 .shell > [data-vmz] {
   display: contents;
+}
+/* The shell must inherit the full host height through the application wrapper. */
+[data-vmz="Application"],
+[data-vmz="Application"] > [data-vmz] {
+  height: 100%;
 }
 /* Narrow windows drop the context panel first, matching the layout contract. */
 .shell .detail {
