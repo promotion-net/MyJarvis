@@ -9,3 +9,5 @@ projects/crates/jarvis-napi/index.d.ts
 .DS_Store
 .idea/
 .vscode/
+
+.cache/
