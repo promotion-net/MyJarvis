@@ -204,6 +204,7 @@
 
 <script client>
 import { mj } from "@my-jarvis/sdk";
+import type { LlmMessage, LlmProfile } from "@my-jarvis/types";
 
 interface ChatMessage {
   id: number;
@@ -236,8 +237,8 @@ export default class ChatView {
   }
 
   /** Conversation history the runtime sees: only user/assistant turns, never UI system lines. */
-  history(): Array<{ role: string; content: string }> {
-    const turns: Array<{ role: string; content: string }> = [];
+  history(): LlmMessage[] {
+    const turns: LlmMessage[] = [];
     for (const m of this.messages) {
       if (m.role === "user") turns.push({ role: "user", content: m.text });
       else if (m.role === "agent") turns.push({ role: "assistant", content: m.text });
@@ -253,15 +254,15 @@ export default class ChatView {
     const turns = this.history();
     this.sending = true;
     try {
-      const reply = await mj.llm.complete({ messages: turns as any, profile: this.model as any });
+      const reply = await mj.agent.turn({ messages: turns, profile: this.model as LlmProfile });
       this.messages = [
         ...this.messages,
-        { id: nextId++, role: "agent", text: reply.text, time: "now" },
+        { id: nextId++, role: "agent", text: reply.message.content, time: "now" },
       ];
     } catch (err) {
       this.messages = [
         ...this.messages,
-        { id: nextId++, role: "system", text: "mj.llm.complete failed · " + String(err), time: "now" },
+        { id: nextId++, role: "system", text: "mj.agent.turn failed · " + String(err), time: "now" },
       ];
     } finally {
       this.sending = false;

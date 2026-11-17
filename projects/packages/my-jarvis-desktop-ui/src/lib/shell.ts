@@ -172,7 +172,7 @@ const AGENTS: AgentDef[] = [
         tone: "green",
         isChief: true,
         models: ["fast", "balanced"],
-        capabilities: ["mj.llm.complete", "mj.mail.draft", "mj.doc.summarize"],
+        capabilities: ["mj.agent.turn", "mj.mail.draft", "mj.doc.summarize"],
         space: "Personal",
         spaceId: "7f3ac91d54b84f0a93cd0e21b6a4d5c8",
         lastUsed: "2 minutes ago",
@@ -186,7 +186,7 @@ const AGENTS: AgentDef[] = [
         tone: "violet",
         isChief: false,
         models: ["balanced"],
-        capabilities: ["mj.llm.complete", "mj.git.read", "mj.doc.write"],
+        capabilities: ["mj.agent.turn", "mj.git.read", "mj.doc.write"],
         space: "Acme workspace",
         spaceId: "b1d0e7a34c6f49a2a8f5c3e70d2194bb",
         lastUsed: "1 hour ago",
@@ -200,7 +200,7 @@ const AGENTS: AgentDef[] = [
         tone: "blue",
         isChief: false,
         models: ["balanced", "reasoning"],
-        capabilities: ["mj.llm.complete", "mj.space.read", "mj.doc.write"],
+        capabilities: ["mj.agent.turn", "mj.space.read", "mj.doc.write"],
         space: "Personal",
         spaceId: "7f3ac91d54b84f0a93cd0e21b6a4d5c8",
         lastUsed: "Yesterday",
@@ -214,7 +214,7 @@ const MODEL_CATALOG: string[] = ["fast", "balanced", "reasoning"];
 const MESSAGES: MessageDef[] = [
     { id: 1, role: "user", text: "Summarize the quarterly report and draft a reply to Zhang Ming.", time: "10:51" },
     { id: 2, role: "agent", text: "Summary is ready in Docs. The draft reply is written and attached to a pending mail action.", time: "10:52" },
-    { id: 3, role: "system", text: "mj.llm.complete finished · mj.mail.send awaits approval", time: "10:53" },
+    { id: 3, role: "system", text: "mj.agent.turn finished · mj.mail.send awaits approval", time: "10:53" },
     { id: 4, role: "agent", text: "Approve the mail action on the right and I will send it.", time: "10:53" },
 ];
 

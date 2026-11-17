@@ -116,6 +116,33 @@ pub fn capability_catalog() -> Vec<Capability> {
             metered: true,
         },
         Capability {
+            id: "agent:turn".into(),
+            summary: "Run one agent turn through the runtime agent channel; the client speaks only this protocol".into(),
+            input_schema: json!({
+                "type": "object",
+                "properties": {
+                    "messages": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "role": { "type": "string", "enum": ["system", "user", "assistant"] },
+                                "content": { "type": "string" }
+                            },
+                            "required": ["role", "content"],
+                            "additionalProperties": false
+                        }
+                    },
+                    "profile": { "type": "string", "enum": ["fast", "balanced", "reasoning"] },
+                    "maxTokens": { "type": "integer", "minimum": 1 }
+                },
+                "required": ["messages"],
+                "additionalProperties": false
+            }),
+            metered: true,
+        },
+        Capability {
             id: "sms:send".into(),
             summary: "Send one SMS message through the provider proxy".into(),
             input_schema: json!({

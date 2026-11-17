@@ -45,11 +45,29 @@ export const llmCompleteInputSchema = z
     })
     .strict();
 
+export const agentTurnInputSchema = z
+    .object({
+        messages: z
+            .array(
+                z
+                    .object({
+                        role: z.enum(["system", "user", "assistant"]),
+                        content: z.string(),
+                    })
+                    .strict(),
+            )
+            .min(1),
+        profile: z.enum(["fast", "balanced", "reasoning"]).optional(),
+        maxTokens: z.number().int().min(1).optional(),
+    })
+    .strict();
+
 export const capabilityIdSchema = z.enum([
     "backend:provision",
     "db:migrate",
     "db:query",
     "server:route",
     "llm:complete",
+    "agent:turn",
     "sms:send",
 ]);

@@ -16,6 +16,7 @@ export type CapabilityId =
     | "db:query"
     | "server:route"
     | "llm:complete"
+    | "agent:turn"
     | "sms:send";
 
 /** L1 capability tier: visible to users, the backing vendor is not. */
@@ -120,6 +121,34 @@ export const CAPABILITIES: readonly Capability[] = [
         metered: true,
     },
     {
+        id: "agent:turn",
+        summary:
+            "Run one agent turn through the runtime agent channel; the client speaks only this protocol",
+        inputSchema: {
+            type: "object",
+            properties: {
+                messages: {
+                    type: "array",
+                    minItems: 1,
+                    items: {
+                        type: "object",
+                        properties: {
+                            role: {type: "string", enum: ["system", "user", "assistant"]},
+                            content: {type: "string"},
+                        },
+                        required: ["role", "content"],
+                        additionalProperties: false,
+                    },
+                },
+                profile: {type: "string", enum: ["fast", "balanced", "reasoning"]},
+                maxTokens: {type: "integer", minimum: 1},
+            },
+            required: ["messages"],
+            additionalProperties: false,
+        },
+        metered: true,
+    },
+    {
         id: "sms:send",
         summary: "Send one SMS message through the provider proxy",
         inputSchema: {
@@ -200,8 +229,29 @@ export interface LlmCompleteResult {
     usage: { input: number; output: number };
 }
 
+/**
+ * `mj.agent.turn` input: one agent turn in the Jarvis protocol. The upstream
+ * encoding (vendor paths, model ids, key handling) is a server-side concern and
+ * never appears on this surface.
+ */
+export interface AgentTurnInput {
+    messages: LlmMessage[];
+    profile?: LlmProfile;
+    maxTokens?: number;
+}
+
+export interface AgentTurnResult {
+    /** Runtime-issued turn identifier for log correlation only, not a conversation key. */
+    turnId: string;
+    message: { role: "assistant"; content: string };
+    usage: { input: number; output: number };
+}
+
 /** The full `mj.*` surface visible inside the sandbox. */
 export interface MjApi {
+    agent: {
+        turn(input: AgentTurnInput): Promise<AgentTurnResult>;
+    };
     backend: {
         provision(input: ProvisionInput): Promise<ProvisionResult>;
     };

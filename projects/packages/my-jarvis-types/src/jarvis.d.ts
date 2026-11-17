@@ -27,6 +27,15 @@ declare module "jarvis:db" {
     export default _default;
 }
 
+declare module "jarvis:agent" {
+    export function turn(
+        input: import("./index.js").AgentTurnInput,
+    ): Promise<import("./index.js").AgentTurnResult>;
+
+    const _default: { turn: typeof turn };
+    export default _default;
+}
+
 declare module "jarvis:llm" {
     export function complete(
         input: import("./index.js").LlmCompleteInput,
