@@ -1,12 +1,12 @@
 <template>
   <div class="pane">
-    <aside class="tree">
-      <div class="tree__head">
+    <aside class="docs__tree">
+      <div class="docs__tree_head">
         <b>Docs</b>
-        <button class="tree__new" type="button" @click="createDoc">＋ New</button>
+        <button class="docs__tree_new" type="button" @click="createDoc">＋ New</button>
       </div>
       <template v-for="group in groups" :key="group">
-        <p class="tree__group">{{ group }}</p>
+        <p class="docs__tree_group">{{ group }}</p>
         <button
           v-for="d in docsOf(group)"
           :key="d.id"
@@ -18,47 +18,47 @@
           <i>{{ d.updated }}</i>
         </button>
       </template>
-      <p class="tree__note">Editing is local until `mj.doc.*` lands; versions are session-only.</p>
+      <p class="docs__tree_note">Editing is local until `mj.doc.*` lands; versions are session-only.</p>
     </aside>
-    <section class="editor">
-      <header class="editor__head">
+    <section class="docs__editor">
+      <header class="docs__editor_head">
         <input
-          class="editor__title"
+          class="docs__editor_title"
           type="text"
           :value="activeDoc ? activeDoc.title : ''"
           :disabled="!activeDoc"
           @input="rename"
         />
-        <div class="editor__modes">
+        <div class="docs__editor_modes">
           <button type="button" :class="modeClass('edit')" @click="mode = 'edit'">Edit</button>
           <button type="button" :class="modeClass('preview')" @click="mode = 'preview'">Preview</button>
         </div>
       </header>
       <textarea
         v-if="mode === 'edit'"
-        class="editor__area"
+        class="docs__editor_area"
         :value="activeDoc ? activeDoc.body : ''"
         :disabled="!activeDoc"
         @input="editBody"
       ></textarea>
-      <div v-else class="editor__preview">
+      <div v-else class="docs__editor_preview">
         <p v-for="(line, i) in previewLines" :key="i" :class="previewClass(line)">{{ plainLine(line) }}</p>
       </div>
-      <footer class="editor__foot">
+      <footer class="docs__editor_foot">
         <button type="button" :disabled="!activeDoc || working" @click="continueDoc">
           {{ working ? "Assistant…" : "Continue with assistant" }}
         </button>
         <button type="button" :disabled="!activeDoc || working" @click="summarizeDoc">Summarize</button>
-        <span v-if="status" class="editor__status">{{ status }}</span>
+        <span v-if="status" class="docs__editor_status">{{ status }}</span>
       </footer>
     </section>
-    <aside v-if="activeDoc" class="versions">
+    <aside v-if="activeDoc" class="docs__versions">
       <b>Versions</b>
-      <div v-for="v in activeDoc.versions" :key="v.label" class="versions__row">
+      <div v-for="v in activeDoc.versions" :key="v.label" class="docs__versions_row">
         <span>{{ v.label }}</span>
         <i>{{ v.time }} · {{ v.author }}</i>
       </div>
-      <p class="versions__note">Rollback needs the doc contract.</p>
+      <p class="docs__versions_note">Rollback needs the doc contract.</p>
     </aside>
   </div>
 </template>
@@ -69,7 +69,7 @@
   min-width: 0;
   display: flex;
 }
-.tree {
+.docs__tree {
   flex: none;
   width: 240px;
   display: flex;
@@ -79,16 +79,16 @@
   border-right: 1px solid var(--line);
   overflow-y: auto;
 }
-.tree__head {
+.docs__tree_head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 8px 10px;
 }
-.tree__head b {
+.docs__tree_head b {
   font-size: 15px;
 }
-.tree__new {
+.docs__tree_new {
   border: 0;
   background: var(--accent-soft);
   color: var(--accent-ink);
@@ -97,14 +97,14 @@
   font-size: 12px;
   cursor: pointer;
 }
-.tree__group {
+.docs__tree_group {
   margin: 10px 8px 4px;
   font-size: 11px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--text-3);
 }
-.tree__item {
+.docs__tree_item {
   display: flex;
   flex-direction: column;
   gap: 1px;
@@ -115,38 +115,38 @@
   cursor: pointer;
   text-align: left;
 }
-.tree__item:hover {
+.docs__tree_item:hover {
   background: var(--hover);
 }
-.tree__item--on {
+.docs__tree_item--on {
   background: var(--accent-soft);
 }
-.tree__item span {
+.docs__tree_item span {
   font-size: 13px;
   color: var(--text-1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.tree__item i {
+.docs__tree_item i {
   font-style: normal;
   font-size: 11px;
   color: var(--text-3);
 }
-.tree__note {
+.docs__tree_note {
   margin: auto 8px 4px;
   font-size: 11px;
   line-height: 1.45;
   color: var(--text-3);
 }
-.editor {
+.docs__editor {
   flex: 1 1 0;
   min-width: 0;
   display: flex;
   flex-direction: column;
   background: var(--panel);
 }
-.editor__head {
+.docs__editor_head {
   flex: none;
   display: flex;
   align-items: center;
@@ -154,7 +154,7 @@
   padding: 12px 20px;
   border-bottom: 1px solid var(--line);
 }
-.editor__title {
+.docs__editor_title {
   flex: 1;
   min-width: 0;
   border: 0;
@@ -163,14 +163,14 @@
   color: var(--text-1);
   outline: none;
 }
-.editor__modes {
+.docs__editor_modes {
   display: flex;
   gap: 2px;
   background: var(--soft);
   border-radius: 8px;
   padding: 2px;
 }
-.editor__modes button {
+.docs__editor_modes button {
   border: 0;
   background: transparent;
   border-radius: 6px;
@@ -179,13 +179,13 @@
   color: var(--text-2);
   cursor: pointer;
 }
-.editor__modes button.on {
+.docs__editor_modes button.on {
   background: var(--panel);
   color: var(--text-1);
   font-weight: 600;
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
 }
-.editor__area {
+.docs__editor_area {
   flex: 1;
   min-height: 0;
   border: 0;
@@ -196,27 +196,27 @@
   color: var(--text-1);
   background: var(--panel);
 }
-.editor__preview {
+.docs__editor_preview {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   padding: 18px 22px;
 }
-.editor__preview p {
+.docs__editor_preview p {
   margin: 0 0 10px;
   font-size: 14px;
   line-height: 1.65;
   color: var(--text-1);
 }
-.editor__preview .pv--h {
+.docs__editor_preview .pv--h {
   font-size: 17px;
   font-weight: 700;
 }
-.editor__preview .pv--li {
+.docs__editor_preview .pv--li {
   padding-left: 18px;
   list-style: disc;
 }
-.editor__foot {
+.docs__editor_foot {
   flex: none;
   display: flex;
   align-items: center;
@@ -224,7 +224,7 @@
   padding: 10px 20px;
   border-top: 1px solid var(--line);
 }
-.editor__foot button {
+.docs__editor_foot button {
   border: 1px solid var(--line);
   background: var(--panel);
   border-radius: 8px;
@@ -233,19 +233,19 @@
   color: var(--text-2);
   cursor: pointer;
 }
-.editor__foot button:hover:not(:disabled) {
+.docs__editor_foot button:hover:not(:disabled) {
   border-color: var(--accent);
   color: var(--accent-ink);
 }
-.editor__foot button:disabled {
+.docs__editor_foot button:disabled {
   opacity: 0.55;
   cursor: default;
 }
-.editor__status {
+.docs__editor_status {
   font-size: 11.5px;
   color: var(--text-3);
 }
-.versions {
+.docs__versions {
   flex: none;
   width: 260px;
   display: flex;
@@ -256,7 +256,7 @@
   border-left: 1px solid var(--line);
   overflow-y: auto;
 }
-.versions__row {
+.docs__versions_row {
   display: flex;
   flex-direction: column;
   gap: 1px;
@@ -264,16 +264,16 @@
   border: 1px solid var(--line);
   border-radius: 8px;
 }
-.versions__row span {
+.docs__versions_row span {
   font-size: 12.5px;
   color: var(--text-1);
 }
-.versions__row i {
+.docs__versions_row i {
   font-style: normal;
   font-size: 11px;
   color: var(--text-3);
 }
-.versions__note {
+.docs__versions_note {
   margin-top: auto;
   font-size: 11px;
   color: var(--text-3);
@@ -314,7 +314,7 @@ export default class DocsPane {
   }
 
   docClass(id: string): string {
-    return id === this.active ? "tree__item tree__item--on" : "tree__item";
+    return id === this.active ? "docs__tree_item docs__tree_item--on" : "docs__tree_item";
   }
 
   modeClass(mode: string): string {

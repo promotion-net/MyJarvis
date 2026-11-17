@@ -1,7 +1,7 @@
 <template>
   <div class="pane">
-    <aside class="tree">
-      <div class="tree__head"><b>Admin</b></div>
+    <aside class="admin__tree">
+      <div class="admin__tree_head"><b>Admin</b></div>
       <button
         v-for="s in sections"
         :key="s.id"
@@ -12,44 +12,44 @@
         <Icon :name="s.icon" size="md" />
         <span>{{ s.label }}</span>
       </button>
-      <div class="tree__spacer"></div>
-      <button type="button" class="tree__dev" @click="openDev">
+      <div class="admin__tree_spacer"></div>
+      <button type="button" class="admin__tree_dev" @click="openDev">
         <Icon name="develop.terminal" size="md" />
         <span>Developer mode</span>
       </button>
     </aside>
-    <section class="body">
-      <header class="body__head">
+    <section class="admin__body">
+      <header class="admin__body_head">
         <h3>{{ activeSection ? activeSection.label : "" }}</h3>
-        <p class="body__gate">Prototype console — mutating admin actions are disabled by the safety gate.</p>
+        <p class="admin__body_gate">Prototype console — mutating admin actions are disabled by the safety gate.</p>
       </header>
 
-      <p v-if="activeSection" class="body__note">{{ activeSection.note }}</p>
+      <p v-if="activeSection" class="admin__body_note">{{ activeSection.note }}</p>
 
-      <div v-if="section === 'devices'" class="table">
-        <div class="table__head">
+      <div v-if="section === 'devices'" class="admin__table">
+        <div class="admin__table_head">
           <span></span>
           <span>Device</span>
           <span>Last active</span>
           <span>Quota</span>
           <span>Today</span>
         </div>
-        <label v-for="d in devices" :key="d.id" class="table__row">
+        <label v-for="d in devices" :key="d.id" class="admin__table_row">
           <input type="checkbox" :checked="selected.includes(d.id)" @change="toggleDevice(d.id)" />
-          <span :class="d.flagged ? 'table__flag' : ''">{{ d.name }}</span>
+          <span :class="d.flagged ? 'admin__table_flag' : ''">{{ d.name }}</span>
           <span>{{ d.lastActive }}</span>
           <span>{{ d.points }}</span>
           <span>{{ d.today }}</span>
         </label>
-        <div class="table__foot">
-          <p v-if="selected.length" class="table__confirm">Kick list: {{ selectedNames }} — confirmation dialog would appear here.</p>
-          <p v-else class="table__confirm">Select devices to prepare a bulk kick.</p>
+        <div class="admin__table_foot">
+          <p v-if="selected.length" class="admin__table_confirm">Kick list: {{ selectedNames }} — confirmation dialog would appear here.</p>
+          <p v-else class="admin__table_confirm">Select devices to prepare a bulk kick.</p>
           <button type="button" disabled title="D5 safety gate: admin mutations stay behind the policy plane (not built)">Bulk kick</button>
         </div>
       </div>
 
-      <div v-else-if="section === 'billing'" class="cards">
-        <div v-for="a in accounts" :key="a.id" class="cards__item">
+      <div v-else-if="section === 'billing'" class="admin__cards">
+        <div v-for="a in accounts" :key="a.id" class="admin__cards_item">
           <b>{{ a.name }}</b>
           <i>{{ a.plan }}</i>
           <span>{{ a.quota }}</span>
@@ -57,29 +57,29 @@
         </div>
       </div>
 
-      <div v-else-if="section === 'approvals'" class="rows">
-        <div v-for="a in approvalAgents" :key="a.id" class="rows__item">
+      <div v-else-if="section === 'approvals'" class="admin__rows">
+        <div v-for="a in approvalAgents" :key="a.id" class="admin__rows_item">
           <span :class="'avatar avatar--md avatar--' + a.tone">{{ a.initials }}</span>
-          <span class="rows__who">
+          <span class="admin__rows_who">
             <b>{{ a.name }}</b>
             <i>{{ a.pendingApprovals }} capability request(s) awaiting review</i>
           </span>
           <button type="button" disabled title="Approval writes need the policy plane (not built)">Review</button>
         </div>
-        <p v-if="approvalAgents.length === 0" class="rows__empty">No pending approvals in the local view.</p>
+        <p v-if="approvalAgents.length === 0" class="admin__rows_empty">No pending approvals in the local view.</p>
       </div>
 
-      <div v-else-if="section === 'org'" class="rows">
-        <div v-for="d in depts" :key="d" class="rows__item">
+      <div v-else-if="section === 'org'" class="admin__rows">
+        <div v-for="d in depts" :key="d" class="admin__rows_item">
           <Icon name="nav.contacts" size="md" />
-          <span class="rows__who">
+          <span class="admin__rows_who">
             <b>{{ d }}</b>
             <i>{{ countDept(d) }} member(s) in the local view</i>
           </span>
         </div>
       </div>
 
-      <div v-else class="placeholder">
+      <div v-else class="admin__placeholder">
         <Icon :name="activeSection ? activeSection.icon : 'action.sidebar'" size="lg" />
         <p>{{ activeSection ? activeSection.note : "" }}</p>
       </div>
@@ -93,7 +93,7 @@
   min-width: 0;
   display: flex;
 }
-.tree {
+.admin__tree {
   flex: none;
   width: 210px;
   display: flex;
@@ -103,11 +103,11 @@
   background: var(--panel);
   border-right: 1px solid var(--line);
 }
-.tree__head b {
+.admin__tree_head b {
   font-size: 15px;
   padding: 0 8px 10px;
 }
-.tree__row {
+.admin__tree_row {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -120,17 +120,17 @@
   color: var(--text-2);
   cursor: pointer;
 }
-.tree__row:hover {
+.admin__tree_row:hover {
   background: var(--hover);
 }
-.tree__row--on {
+.admin__tree_row--on {
   background: var(--accent-soft);
   color: var(--accent-ink);
 }
-.tree__spacer {
+.admin__tree_spacer {
   flex: 1;
 }
-.tree__dev {
+.admin__tree_dev {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -143,42 +143,42 @@
   color: var(--text-2);
   cursor: pointer;
 }
-.tree__dev:hover {
+.admin__tree_dev:hover {
   background: var(--hover);
 }
-.body {
+.admin__body {
   flex: 1 1 0;
   min-width: 0;
   overflow-y: auto;
   padding: 18px 22px;
   background: var(--chat);
 }
-.body__head {
+.admin__body_head {
   display: flex;
   align-items: baseline;
   gap: 12px;
 }
-.body__head h3 {
+.admin__body_head h3 {
   margin: 0;
   font-size: 16px;
 }
-.body__gate {
+.admin__body_gate {
   margin: 0;
   font-size: 11.5px;
   color: var(--danger);
 }
-.body__note {
+.admin__body_note {
   margin: 8px 0 16px;
   font-size: 12.5px;
   color: var(--text-2);
 }
-.table {
+.admin__table {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 12px;
   overflow: hidden;
 }
-.table__head {
+.admin__table_head {
   display: grid;
   grid-template-columns: 26px 1.4fr 1fr 1fr 0.8fr;
   gap: 10px;
@@ -189,7 +189,7 @@
   text-transform: uppercase;
   color: var(--text-3);
 }
-.table__row {
+.admin__table_row {
   display: grid;
   grid-template-columns: 26px 1.4fr 1fr 1fr 0.8fr;
   gap: 10px;
@@ -200,26 +200,26 @@
   color: var(--text-1);
   cursor: pointer;
 }
-.table__row:hover {
+.admin__table_row:hover {
   background: var(--hover);
 }
-.table__flag {
+.admin__table_flag {
   color: var(--danger);
   font-weight: 600;
 }
-.table__foot {
+.admin__table_foot {
   display: flex;
   align-items: center;
   gap: 14px;
   padding: 12px 14px;
 }
-.table__confirm {
+.admin__table_confirm {
   margin: 0;
   flex: 1;
   font-size: 12px;
   color: var(--text-3);
 }
-.table__foot button {
+.admin__table_foot button {
   border: 1px solid var(--line);
   background: var(--soft);
   border-radius: 8px;
@@ -228,12 +228,12 @@
   color: var(--text-3);
   cursor: default;
 }
-.cards {
+.admin__cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 12px;
 }
-.cards__item {
+.admin__cards_item {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -242,29 +242,29 @@
   border-radius: 12px;
   padding: 14px 16px;
 }
-.cards__item b {
+.admin__cards_item b {
   font-size: 13.5px;
 }
-.cards__item i {
+.admin__cards_item i {
   font-style: normal;
   font-size: 11px;
   color: var(--accent-ink);
 }
-.cards__item span {
+.admin__cards_item span {
   font-size: 12.5px;
   color: var(--text-2);
 }
-.cards__item em {
+.admin__cards_item em {
   font-style: normal;
   font-size: 11px;
   color: var(--text-3);
 }
-.rows {
+.admin__rows {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-.rows__item {
+.admin__rows_item {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -273,22 +273,22 @@
   border-radius: 10px;
   padding: 10px 14px;
 }
-.rows__who {
+.admin__rows_who {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
 }
-.rows__who b {
+.admin__rows_who b {
   font-size: 13px;
 }
-.rows__who i {
+.admin__rows_who i {
   font-style: normal;
   font-size: 11.5px;
   color: var(--text-3);
 }
-.rows__item button {
+.admin__rows_item button {
   border: 1px solid var(--line);
   background: var(--soft);
   border-radius: 8px;
@@ -297,11 +297,11 @@
   color: var(--text-3);
   cursor: default;
 }
-.rows__empty {
+.admin__rows_empty {
   font-size: 12.5px;
   color: var(--text-3);
 }
-.placeholder {
+.admin__placeholder {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -309,7 +309,7 @@
   padding: 60px 20px;
   color: var(--text-3);
 }
-.placeholder p {
+.admin__placeholder p {
   margin: 0;
   max-width: 420px;
   text-align: center;
@@ -370,7 +370,7 @@ export default class AdminPane {
   }
 
   rowClass(id: string): string {
-    return id === this.section ? "tree__row tree__row--on" : "tree__row";
+    return id === this.section ? "admin__tree_row admin__tree_row--on" : "admin__tree_row";
   }
 
   pick(id: string) {

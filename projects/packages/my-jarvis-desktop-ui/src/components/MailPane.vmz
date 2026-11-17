@@ -1,9 +1,9 @@
 <template>
   <div class="pane">
-    <aside class="folders">
-      <div class="folders__head">
+    <aside class="mail__folders">
+      <div class="mail__folders_head">
         <b>Mail</b>
-        <button class="folders__new" type="button" @click="compose">＋ New</button>
+        <button class="mail__folders_new" type="button" @click="compose">＋ New</button>
       </div>
       <button
         v-for="f in folders"
@@ -13,16 +13,16 @@
         @click="pickFolder(f.id)"
       >
         <span>{{ f.label }}</span>
-        <span v-if="f.unread > 0" class="folders__badge">{{ f.unread }}</span>
+        <span v-if="f.unread > 0" class="mail__folders_badge">{{ f.unread }}</span>
       </button>
-      <p class="folders__note">Mail account connect needs `mj.mail.*` (gap). Inbox shown is local preview.</p>
+      <p class="mail__folders_note">Mail account connect needs `mj.mail.*` (gap). Inbox shown is local preview.</p>
     </aside>
-    <section class="list">
-      <header class="list__head">
+    <section class="mail__list">
+      <header class="mail__list_head">
         <b>{{ folderLabel }}</b>
-        <span class="list__count">{{ visible.length }} items</span>
+        <span class="mail__list_count">{{ visible.length }} items</span>
       </header>
-      <div class="list__scroll">
+      <div class="mail__list_scroll">
         <button
           v-for="m in visible"
           :key="m.id"
@@ -31,39 +31,39 @@
           @click="pickMail(m.id)"
         >
           <span :class="'avatar avatar--md avatar--' + m.tone">{{ m.initials }}</span>
-          <span class="list__body">
-            <span class="list__top"><b>{{ m.sender }}</b><i>{{ m.time }}</i></span>
-            <span class="list__subject">{{ m.subject }}</span>
-            <span class="list__preview">{{ m.preview }}</span>
+          <span class="mail__list_body">
+            <span class="mail__list_top"><b>{{ m.sender }}</b><i>{{ m.time }}</i></span>
+            <span class="mail__list_subject">{{ m.subject }}</span>
+            <span class="mail__list_preview">{{ m.preview }}</span>
           </span>
         </button>
-        <p v-if="visible.length === 0" class="list__empty">Nothing here yet.</p>
+        <p v-if="visible.length === 0" class="mail__list_empty">Nothing here yet.</p>
       </div>
-      <article v-if="activeMail" class="read">
+      <article v-if="activeMail" class="mail__read">
         <h3>{{ activeMail.subject }}</h3>
-        <p class="read__meta">From {{ activeMail.sender }} · {{ activeMail.time }}</p>
-        <p v-for="(line, i) in activeMail.body" :key="i" class="read__line">{{ line }}</p>
-        <div class="read__actions">
+        <p class="mail__read_meta">From {{ activeMail.sender }} · {{ activeMail.time }}</p>
+        <p v-for="(line, i) in activeMail.body" :key="i" class="mail__read_line">{{ line }}</p>
+        <div class="mail__read_actions">
           <button type="button" @click="reply">Reply</button>
           <button type="button" @click="archive">Archive</button>
         </div>
       </article>
     </section>
-    <aside v-if="composing" class="compose">
-      <div class="compose__head">
+    <aside v-if="composing" class="mail__compose">
+      <div class="mail__compose_head">
         <b>New mail</b>
-        <button type="button" class="compose__x" @click="composing = false">✕</button>
+        <button type="button" class="mail__compose_x" @click="composing = false">✕</button>
       </div>
-      <input class="compose__to" type="text" placeholder="To" :value="to" @input="onTo" />
-      <input class="compose__subject" type="text" placeholder="Subject" :value="subject" @input="onSubject" />
-      <textarea class="compose__body" placeholder="Message…" :value="body" @input="onBody"></textarea>
-      <div class="compose__tools">
+      <input class="mail__compose_to" type="text" placeholder="To" :value="to" @input="onTo" />
+      <input class="mail__compose_subject" type="text" placeholder="Subject" :value="subject" @input="onSubject" />
+      <textarea class="mail__compose_body" placeholder="Message…" :value="body" @input="onBody"></textarea>
+      <div class="mail__compose_tools">
         <button type="button" :disabled="drafting" @click="draftWithAssistant">
           {{ drafting ? "Drafting…" : "Draft with assistant" }}
         </button>
-        <button type="button" class="compose__send" disabled title="mj.mail.send not available yet">Send</button>
+        <button type="button" class="mail__compose_send" disabled title="mj.mail.send not available yet">Send</button>
       </div>
-      <p v-if="status" class="compose__status">{{ status }}</p>
+      <p v-if="status" class="mail__compose_status">{{ status }}</p>
     </aside>
   </div>
 </template>
@@ -74,7 +74,7 @@
   min-width: 0;
   display: flex;
 }
-.folders {
+.mail__folders {
   flex: none;
   width: 220px;
   display: flex;
@@ -84,16 +84,16 @@
   background: var(--panel);
   border-right: 1px solid var(--line);
 }
-.folders__head {
+.mail__folders_head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 8px 10px;
 }
-.folders__head b {
+.mail__folders_head b {
   font-size: 15px;
 }
-.folders__new {
+.mail__folders_new {
   border: 0;
   background: var(--accent-soft);
   color: var(--accent-ink);
@@ -102,7 +102,7 @@
   font-size: 12px;
   cursor: pointer;
 }
-.folders__item {
+.mail__folders_item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -115,15 +115,15 @@
   cursor: pointer;
   text-align: left;
 }
-.folders__item:hover {
+.mail__folders_item:hover {
   background: var(--hover);
 }
-.folders__item--on {
+.mail__folders_item--on {
   background: var(--accent-soft);
   color: var(--accent-ink);
   font-weight: 600;
 }
-.folders__badge {
+.mail__folders_badge {
   min-width: 18px;
   border-radius: 999px;
   background: var(--danger);
@@ -132,20 +132,20 @@
   text-align: center;
   padding: 1px 5px;
 }
-.folders__note {
+.mail__folders_note {
   margin: auto 6px 4px;
   font-size: 11px;
   line-height: 1.45;
   color: var(--text-3);
 }
-.list {
+.mail__list {
   flex: 1 1 0;
   min-width: 0;
   display: flex;
   flex-direction: column;
   background: var(--chat);
 }
-.list__head {
+.mail__list_head {
   flex: none;
   height: 52px;
   display: flex;
@@ -155,17 +155,17 @@
   border-bottom: 1px solid var(--line);
   background: var(--panel);
 }
-.list__count {
+.mail__list_count {
   color: var(--text-3);
   font-size: 12px;
 }
-.list__scroll {
+.mail__list_scroll {
   flex: none;
   max-height: 46%;
   overflow-y: auto;
   border-bottom: 1px solid var(--line);
 }
-.list__row {
+.mail__list_row {
   width: 100%;
   display: flex;
   gap: 10px;
@@ -177,79 +177,79 @@
   cursor: pointer;
   text-align: left;
 }
-.list__row:hover {
+.mail__list_row:hover {
   background: var(--soft);
 }
-.list__row--on {
+.mail__list_row--on {
   background: var(--accent-soft);
 }
-.list__body {
+.mail__list_body {
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
   flex: 1;
 }
-.list__top {
+.mail__list_top {
   display: flex;
   justify-content: space-between;
   gap: 8px;
 }
-.list__top b {
+.mail__list_top b {
   font-size: 13px;
 }
-.list__top i {
+.mail__list_top i {
   font-style: normal;
   font-size: 11px;
   color: var(--text-3);
 }
-.list__subject {
+.mail__list_subject {
   font-size: 12.5px;
   color: var(--text-1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.list__preview {
+.mail__list_preview {
   font-size: 11.5px;
   color: var(--text-3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.list__empty {
+.mail__list_empty {
   padding: 20px;
   color: var(--text-3);
   font-size: 12.5px;
 }
-.read {
+.mail__read {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   padding: 18px 22px;
   background: var(--panel);
 }
-.read h3 {
+.mail__read h3 {
   margin: 0 0 4px;
   font-size: 16px;
 }
-.read__meta {
+.mail__read_meta {
   color: var(--text-3);
   font-size: 12px;
   margin: 0 0 14px;
 }
-.read__line {
+.mail__read_line {
   margin: 0 0 10px;
   font-size: 13.5px;
   line-height: 1.6;
   color: var(--text-1);
 }
-.read__actions {
+.mail__read_actions {
   display: flex;
   gap: 8px;
   margin-top: 12px;
 }
-.read__actions button {
+.mail__read_actions button {
   border: 1px solid var(--line);
   background: var(--panel);
   border-radius: 8px;
@@ -258,11 +258,11 @@
   color: var(--text-2);
   cursor: pointer;
 }
-.read__actions button:hover {
+.mail__read_actions button:hover {
   border-color: var(--accent);
   color: var(--accent-ink);
 }
-.compose {
+.mail__compose {
   flex: none;
   width: 320px;
   display: flex;
@@ -272,19 +272,19 @@
   background: var(--panel);
   border-left: 1px solid var(--line);
 }
-.compose__head {
+.mail__compose_head {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-.compose__x {
+.mail__compose_x {
   border: 0;
   background: transparent;
   color: var(--text-3);
   cursor: pointer;
 }
-.compose input,
-.compose textarea {
+.mail__compose input,
+.mail__compose textarea {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--field);
@@ -293,21 +293,21 @@
   color: var(--text-1);
   outline: none;
 }
-.compose textarea {
+.mail__compose textarea {
   flex: 1;
   min-height: 120px;
   resize: none;
 }
-.compose input:focus,
-.compose textarea:focus {
+.mail__compose input:focus,
+.mail__compose textarea:focus {
   border-color: var(--accent);
 }
-.compose__tools {
+.mail__compose_tools {
   display: flex;
   justify-content: space-between;
   gap: 8px;
 }
-.compose__tools button {
+.mail__compose_tools button {
   border: 1px solid var(--line);
   background: var(--panel);
   border-radius: 8px;
@@ -316,15 +316,15 @@
   cursor: pointer;
   color: var(--text-2);
 }
-.compose__tools button:disabled {
+.mail__compose_tools button:disabled {
   opacity: 0.55;
   cursor: default;
 }
-.compose__send {
+.mail__compose_send {
   background: var(--accent) !important;
   color: #fff;
 }
-.compose__status {
+.mail__compose_status {
   margin: 0;
   font-size: 11.5px;
   color: var(--text-3);
@@ -362,11 +362,11 @@ export default class MailPane {
   }
 
   folderClass(id: string): string {
-    return id === this.folder ? "folders__item folders__item--on" : "folders__item";
+    return id === this.folder ? "mail__folders_item mail__folders_item--on" : "mail__folders_item";
   }
 
   rowClass(id: string): string {
-    return id === this.active ? "list__row list__row--on" : "list__row";
+    return id === this.active ? "mail__list_row mail__list_row--on" : "mail__list_row";
   }
 
   pickFolder(id: string) {

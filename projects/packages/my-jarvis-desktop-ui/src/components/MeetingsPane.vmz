@@ -1,7 +1,7 @@
 <template>
   <div class="pane">
-    <aside class="meetings">
-      <div class="meetings__head"><b>Meetings</b></div>
+    <aside class="meet__list">
+      <div class="meet__list_head"><b>Meetings</b></div>
       <button
         v-for="m in meetings"
         :key="m.id"
@@ -12,33 +12,33 @@
         <span>{{ m.title }}</span>
         <i>{{ m.when }}</i>
       </button>
-      <p class="meetings__note">Real-time AV is out of first scope; the join slot is reserved.</p>
+      <p class="meet__list_note">Real-time AV is out of first scope; the join slot is reserved.</p>
     </aside>
-    <section v-if="activeMeeting" class="detail">
-      <header class="detail__head">
+    <section v-if="activeMeeting" class="meet__detail">
+      <header class="meet__detail_head">
         <div>
           <h3>{{ activeMeeting.title }}</h3>
           <p>{{ activeMeeting.when }} · hosted by {{ activeMeeting.organizer }} · {{ activeMeeting.attendees }} people</p>
         </div>
-        <button type="button" class="detail__join" disabled title="RTC provider contract is not built yet">Join</button>
+        <button type="button" class="meet__detail_join" disabled title="RTC provider contract is not built yet">Join</button>
       </header>
       <h4>Agenda</h4>
-      <ul class="detail__agenda">
+      <ul class="meet__detail_agenda">
         <li v-for="(a, i) in activeMeeting.agenda" :key="i">{{ a }}</li>
       </ul>
       <h4>Related calendar event</h4>
-      <p class="detail__line">Linked once `mj.calendar.*` lands.</p>
+      <p class="meet__detail_line">Linked once `mj.calendar.*` lands.</p>
     </section>
-    <aside v-if="activeMeeting" class="minutes">
-      <div class="minutes__head">
+    <aside v-if="activeMeeting" class="meet__minutes">
+      <div class="meet__minutes_head">
         <b>Minutes</b>
         <button type="button" :disabled="busy" @click="draftMinutes">
           {{ busy ? "Drafting…" : "Draft with assistant" }}
         </button>
       </div>
-      <textarea class="minutes__area" :value="minutes" @input="onMinutes" placeholder="Minutes appear here; the assistant can draft from the agenda."></textarea>
-      <p v-if="status" class="minutes__status">{{ status }}</p>
-      <p class="minutes__note">Minutes save into Docs when the doc contract lands.</p>
+      <textarea class="meet__minutes_area" :value="minutes" @input="onMinutes" placeholder="Minutes appear here; the assistant can draft from the agenda."></textarea>
+      <p v-if="status" class="meet__minutes_status">{{ status }}</p>
+      <p class="meet__minutes_note">Minutes save into Docs when the doc contract lands.</p>
     </aside>
   </div>
 </template>
@@ -49,7 +49,7 @@
   min-width: 0;
   display: flex;
 }
-.meetings {
+.meet__list {
   flex: none;
   width: 240px;
   display: flex;
@@ -59,11 +59,11 @@
   background: var(--panel);
   border-right: 1px solid var(--line);
 }
-.meetings__head b {
+.meet__list_head b {
   font-size: 15px;
   padding: 0 8px 10px;
 }
-.meetings__row {
+.meet__list_row {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -74,35 +74,35 @@
   cursor: pointer;
   text-align: left;
 }
-.meetings__row:hover {
+.meet__list_row:hover {
   background: var(--hover);
 }
-.meetings__row--on {
+.meet__list_row--on {
   background: var(--accent-soft);
 }
-.meetings__row span {
+.meet__list_row span {
   font-size: 13px;
   color: var(--text-1);
 }
-.meetings__row i {
+.meet__list_row i {
   font-style: normal;
   font-size: 11px;
   color: var(--text-3);
 }
-.meetings__note {
+.meet__list_note {
   margin: auto 8px 4px;
   font-size: 11px;
   line-height: 1.45;
   color: var(--text-3);
 }
-.detail {
+.meet__detail {
   flex: 1 1 0;
   min-width: 0;
   overflow-y: auto;
   padding: 18px 22px;
   background: var(--chat);
 }
-.detail__head {
+.meet__detail_head {
   display: flex;
   align-items: flex-start;
   gap: 14px;
@@ -111,16 +111,16 @@
   border-radius: 12px;
   padding: 14px 16px;
 }
-.detail__head h3 {
+.meet__detail_head h3 {
   margin: 0 0 4px;
   font-size: 16px;
 }
-.detail__head p {
+.meet__detail_head p {
   margin: 0;
   font-size: 12px;
   color: var(--text-3);
 }
-.detail__join {
+.meet__detail_join {
   margin-left: auto;
   border: 1px solid var(--line);
   background: var(--soft);
@@ -130,25 +130,25 @@
   color: var(--text-3);
   cursor: default;
 }
-.detail h4 {
+.meet__detail h4 {
   margin: 18px 0 6px;
   font-size: 12px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--text-3);
 }
-.detail__agenda {
+.meet__detail_agenda {
   margin: 0;
   padding-left: 20px;
   font-size: 13.5px;
   line-height: 1.7;
   color: var(--text-1);
 }
-.detail__line {
+.meet__detail_line {
   font-size: 13px;
   color: var(--text-2);
 }
-.minutes {
+.meet__minutes {
   flex: none;
   width: 320px;
   display: flex;
@@ -158,12 +158,12 @@
   background: var(--panel);
   border-left: 1px solid var(--line);
 }
-.minutes__head {
+.meet__minutes_head {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.minutes__head button {
+.meet__minutes_head button {
   border: 1px solid var(--line);
   background: var(--panel);
   border-radius: 8px;
@@ -172,11 +172,11 @@
   color: var(--text-2);
   cursor: pointer;
 }
-.minutes__head button:disabled {
+.meet__minutes_head button:disabled {
   opacity: 0.55;
   cursor: default;
 }
-.minutes__area {
+.meet__minutes_area {
   flex: 1;
   min-height: 140px;
   border: 1px solid var(--line);
@@ -188,15 +188,15 @@
   resize: none;
   outline: none;
 }
-.minutes__area:focus {
+.meet__minutes_area:focus {
   border-color: var(--accent);
 }
-.minutes__status {
+.meet__minutes_status {
   margin: 0;
   font-size: 11.5px;
   color: var(--text-3);
 }
-.minutes__note {
+.meet__minutes_note {
   margin-top: auto;
   font-size: 11px;
   color: var(--text-3);
@@ -221,7 +221,7 @@ export default class MeetingsPane {
   }
 
   rowClass(id: string): string {
-    return id === this.active ? "meetings__row meetings__row--on" : "meetings__row";
+    return id === this.active ? "meet__list_row meet__list_row--on" : "meet__list_row";
   }
 
   pick(id: string) {

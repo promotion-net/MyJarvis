@@ -1,15 +1,15 @@
 <template>
-  <div class="pane">
-    <section class="form">
+  <div class="settings__pane">
+    <section class="settings__form">
       <header class="form__head">
         <h3>Settings</h3>
         <p>Shell preferences are stored locally on this device.</p>
       </header>
 
-      <div class="group">
+      <div class="settings__group">
         <h4>Scenario</h4>
-        <p class="group__hint">Switching a scenario changes which modules the rail shows.</p>
-        <div class="choices">
+        <p class="settings__group_hint">Switching a scenario changes which modules the rail shows.</p>
+        <div class="settings__choices">
           <label v-for="s in scenarios" :key="s.id" :class="choiceClass(s.id)">
             <input type="radio" name="scenario" :value="s.id" :checked="scenario === s.id" @change="pickScenario(s.id)" />
             <span>
@@ -20,17 +20,17 @@
         </div>
       </div>
 
-      <div class="group">
+      <div class="settings__group">
         <h4>Navigation</h4>
-        <p class="group__hint">Show or hide modules and set their rail order.</p>
-        <div class="nav">
-          <div v-for="(m, i) in sortedModules" :key="m.id" class="nav__row">
-            <label class="nav__pick">
+        <p class="settings__group_hint">Show or hide modules and set their rail order.</p>
+        <div class="settings__nav">
+          <div v-for="(m, i) in sortedModules" :key="m.id" class="settings__nav_row">
+            <label class="settings__nav_pick">
               <input type="checkbox" :checked="!hidden.includes(m.id)" @change="toggle(m.id)" />
               <span>{{ m.label }}</span>
             </label>
-            <span class="nav__cap">{{ m.capability }}</span>
-            <span class="nav__move">
+            <span class="settings__nav_cap">{{ m.capability }}</span>
+            <span class="settings__nav_move">
               <button type="button" :disabled="i === 0" title="Move up" @click="move(m.id, -1)">↑</button>
               <button type="button" :disabled="i === sortedModules.length - 1" title="Move down" @click="move(m.id, 1)">↓</button>
             </span>
@@ -38,25 +38,25 @@
         </div>
       </div>
 
-      <div class="group">
+      <div class="settings__group">
         <h4>Appearance</h4>
-        <div class="choices">
-          <label class="choices__item" :class="{ 'choices__item--on': theme === 'light' }">
+        <div class="settings__choices">
+          <label :class="theme === 'light' ? 'settings__choices_on' : ''">
             <input type="radio" name="theme" value="light" :checked="theme === 'light'" @change="setTheme('light')" />
             <span>Light</span>
           </label>
-          <label class="choices__item" :class="{ 'choices__item--on': theme === 'dark' }">
+          <label :class="theme === 'dark' ? 'settings__choices_on' : ''">
             <input type="radio" name="theme" value="dark" :checked="theme === 'dark'" @change="setTheme('dark')" />
             <span>Dark</span>
           </label>
         </div>
       </div>
 
-      <div class="group">
+      <div class="settings__group">
         <h4>Layout</h4>
-        <div class="group__row">
-          <button type="button" class="group__danger" @click="resetAll">Reset navigation and scenario</button>
-          <p v-if="status" class="group__status">{{ status }}</p>
+        <div class="settings__group_row">
+          <button type="button" class="settings__group_danger" @click="resetAll">Reset navigation and scenario</button>
+          <p v-if="status" class="settings__group_status">{{ status }}</p>
         </div>
       </div>
     </section>
@@ -64,13 +64,13 @@
 </template>
 
 <style>
-.pane {
+.settings__pane {
   flex: 1 1 auto;
   min-width: 0;
   overflow-y: auto;
   background: var(--chat);
 }
-.form {
+.settings__form {
   max-width: 640px;
   margin: 0 auto;
   padding: 26px 24px 40px;
@@ -87,24 +87,24 @@
   font-size: 12.5px;
   color: var(--text-3);
 }
-.group h4 {
+.settings__group h4 {
   margin: 0 0 4px;
   font-size: 13px;
   letter-spacing: 0.03em;
   text-transform: uppercase;
   color: var(--text-2);
 }
-.group__hint {
+.settings__group_hint {
   margin: 0 0 10px;
   font-size: 12px;
   color: var(--text-3);
 }
-.choices {
+.settings__choices {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
 }
-.choices label {
+.settings__choices label {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -116,24 +116,24 @@
   color: var(--text-1);
   cursor: pointer;
 }
-.choices label:hover {
+.settings__choices label:hover {
   background: var(--hover);
 }
-.choices__on {
+.settings__choices_on {
   border-color: var(--accent);
   background: var(--accent-soft);
 }
-.choices label span {
+.settings__choices label span {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-.choices label i {
+.settings__choices label i {
   font-style: normal;
   font-size: 11px;
   color: var(--text-3);
 }
-.nav {
+.settings__nav {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -142,13 +142,13 @@
   border-radius: 12px;
   padding: 10px 14px;
 }
-.nav__row {
+.settings__nav_row {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 4px 0;
 }
-.nav__pick {
+.settings__nav_pick {
   flex: 1;
   display: flex;
   align-items: center;
@@ -157,15 +157,15 @@
   color: var(--text-1);
   cursor: pointer;
 }
-.nav__cap {
+.settings__nav_cap {
   font: 400 11px var(--font-mono);
   color: var(--text-3);
 }
-.nav__move {
+.settings__nav_move {
   display: flex;
   gap: 4px;
 }
-.nav__move button {
+.settings__nav_move button {
   width: 24px;
   height: 24px;
   border: 1px solid var(--line);
@@ -175,19 +175,19 @@
   font-size: 11px;
   cursor: pointer;
 }
-.nav__move button:hover {
+.settings__nav_move button:hover {
   background: var(--hover);
 }
-.nav__move button:disabled {
+.settings__nav_move button:disabled {
   opacity: 0.4;
   cursor: default;
 }
-.group__row {
+.settings__group_row {
   display: flex;
   align-items: center;
   gap: 14px;
 }
-.group__danger {
+.settings__group_danger {
   border: 1px solid var(--danger);
   background: transparent;
   border-radius: 8px;
@@ -196,10 +196,10 @@
   color: var(--danger);
   cursor: pointer;
 }
-.group__danger:hover {
+.settings__group_danger:hover {
   background: var(--hover);
 }
-.group__status {
+.settings__group_status {
   margin: 0;
   font-size: 12px;
   color: var(--text-3);
@@ -250,7 +250,7 @@ export default class SettingsPane {
   }
 
   choiceClass(id: string): string {
-    return id === this.scenario ? "choices__on" : "";
+    return id === this.scenario ? "settings__choices_on" : "";
   }
 
   pickScenario(id: string) {
