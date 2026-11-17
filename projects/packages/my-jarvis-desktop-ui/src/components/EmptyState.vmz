@@ -1,9 +1,9 @@
 <template>
-  <section class="empty glass">
-    <div class="empty__glyph">{{ glyph }}</div>
-    <h2 class="empty__title">{{ title }}</h2>
+  <section class="empty">
+    <span class="empty__icon"><AppIcon :name="icon" /></span>
+    <b class="empty__title">{{ title }}</b>
     <p class="empty__note">{{ note }}</p>
-    <p class="empty__cap">Needs <code>{{ capability }}</code> — enable it by upgrading the runtime or connecting a provider.</p>
+    <span class="empty__cap">{{ capability }}</span>
   </section>
 </template>
 
@@ -15,49 +15,49 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 24px;
+  gap: 10px;
+  padding: 32px;
+  background: var(--chat);
   text-align: center;
 }
-.empty__glyph {
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
+.empty__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(23, 23, 26, 0.12);
-  color: #52525b;
-  font-size: 16px;
-  font-weight: 500;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--text-3);
 }
 .empty__title {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 500;
-  color: #17171a;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-1);
 }
 .empty__note {
   margin: 0;
-  font-size: 14px;
-  color: #52525b;
+  max-width: 320px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text-3);
 }
 .empty__cap {
-  margin: 0;
-  font-size: 12px;
-  color: #52525b;
-}
-.empty__cap code {
-  font-family: ui-monospace, monospace;
-  color: #17171a;
+  margin-top: 2px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
 }
 </style>
 
 <script client>
 export default class EmptyState {
   public title = "";
-  public glyph = "";
+  public icon = "doc";
   public note = "";
   public capability = "";
 }

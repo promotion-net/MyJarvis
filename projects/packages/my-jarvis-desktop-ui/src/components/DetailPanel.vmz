@@ -1,0 +1,211 @@
+<template>
+  <aside class="detail">
+    <div class="detail__head">
+      <b>Details</b>
+      <button class="detail__close" type="button" title="Hide" @click="close">×</button>
+    </div>
+    <div class="detail__scroll">
+      <section class="detail__block">
+        <div class="detail__label">This reply</div>
+        <div class="detail__kv"><span>Agent</span><b>Chief</b></div>
+        <div class="detail__kv"><span>Model</span><b class="mono">fast</b></div>
+      </section>
+      <section class="detail__block">
+        <div class="detail__label">Allowed models</div>
+        <div class="detail__chips">
+          <span class="chip chip--on">fast</span>
+          <span class="chip">balanced</span>
+          <span class="chip mono">pin:gpt-x</span>
+        </div>
+        <p class="detail__hint">Requests outside this list are rejected until the model is added.</p>
+      </section>
+      <section class="detail__block">
+        <div class="detail__label">Awaiting approval</div>
+        <div class="approve">
+          <div class="approve__title">Send mail to Zhang Ming</div>
+          <div class="approve__method">mj.mail.send</div>
+          <div class="approve__meta">1 attachment · meter event will be recorded</div>
+          <div class="approve__actions">
+            <button class="approve__decline" type="button" @click="decline">Decline</button>
+            <button class="approve__ok" type="button" @click="approve">Approve</button>
+          </div>
+          <p v-if="decision" class="approve__decision">{{ decision }}</p>
+        </div>
+      </section>
+    </div>
+  </aside>
+</template>
+
+<style>
+.detail {
+  flex: 0 1 280px;
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--line);
+  background: var(--panel);
+}
+.detail__head {
+  flex: none;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px 0 18px;
+  border-bottom: 1px solid var(--line);
+}
+.detail__head b {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+.detail__close {
+  margin-left: auto;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-3);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.detail__close:hover {
+  background: var(--hover);
+  color: var(--text-1);
+}
+.detail__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.detail__label {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 8px;
+}
+.detail__kv {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 0;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.detail__kv b {
+  font-weight: 500;
+  color: var(--text-1);
+}
+.mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.detail__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip {
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--soft);
+  color: var(--text-2);
+  font-size: 11.5px;
+}
+.chip--on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+.detail__hint {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+.approve {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+  background: var(--soft);
+}
+.approve__title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-1);
+}
+.approve__method {
+  margin-top: 3px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--accent-ink);
+}
+.approve__meta {
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+.approve__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.approve__decline {
+  flex: 1;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text-2);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.approve__decline:hover {
+  background: var(--hover);
+}
+.approve__ok {
+  flex: 1;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.approve__ok:hover {
+  background: var(--accent-hover);
+}
+.approve__decision {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  color: var(--text-2);
+}
+</style>
+
+<script client>
+export default class DetailPanel {
+  public decision = "";
+  public onClose: (() => void) | null = null;
+
+  approve() {
+    this.decision = "Approved — mock surface, runtime lands in D2.";
+  }
+
+  decline() {
+    this.decision = "Declined.";
+  }
+
+  close() {
+    this.onClose?.();
+  }
+}
+</script>
