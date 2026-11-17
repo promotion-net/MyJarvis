@@ -1,0 +1,7 @@
+<template>
+  <DocsPage :pageKey="'tables'" />
+</template>
+
+<script client>
+export default class DocsTablesPage {}
+</script>

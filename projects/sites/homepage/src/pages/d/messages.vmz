@@ -1,0 +1,7 @@
+<template>
+  <DocsPage :pageKey="'messages'" />
+</template>
+
+<script client>
+export default class DocsMessagesPage {}
+</script>

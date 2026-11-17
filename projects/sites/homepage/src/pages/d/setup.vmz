@@ -1,0 +1,7 @@
+<template>
+  <DocsPage :pageKey="'setup'" />
+</template>
+
+<script client>
+export default class DocsSetupPage {}
+</script>

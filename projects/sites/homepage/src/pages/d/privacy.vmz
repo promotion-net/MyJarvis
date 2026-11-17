@@ -1,0 +1,7 @@
+<template>
+  <DocsPage :pageKey="'privacy'" />
+</template>
+
+<script client>
+export default class DocsPrivacyPage {}
+</script>

@@ -1,0 +1,228 @@
+<template>
+  <section class="page">
+    <div class="inner">
+      <h1>{{ copy.membership.title }}</h1>
+      <p class="lede">{{ copy.membership.lede }}</p>
+
+      <div class="tiers">
+        <div v-for="tier in copy.membership.tiers" :key="tier.name" :class="tier.featured ? 'tier tier-main' : 'tier'">
+          <span class="tier-name">{{ tier.name }}</span>
+          <p class="tier-line">{{ tier.line }}</p>
+          <p class="tier-price">{{ tier.price }}</p>
+          <span class="tier-cta">
+            <Button
+              block
+              :variant="tier.featured ? 'primary' : 'default'"
+              :href="tier.href === 'install' ? copy.href.install : copy.href.login"
+            >{{ tier.cta }}</Button>
+          </span>
+          <ul>
+            <li v-for="item in tier.items" :key="item">{{ item }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2 class="h2">{{ copy.membership.feeTitle }}</h2>
+      <ul class="notes">
+        <li v-for="line in copy.membership.fees" :key="line">{{ line }}</li>
+      </ul>
+    </div>
+  </section>
+</template>
+
+<style>
+.page {
+  padding: 104px 0 clamp(56px, 8vh, 84px);
+}
+h1 {
+  margin: 0 0 14px;
+  font-size: clamp(26px, 3vw, 34px);
+  line-height: 1.4;
+  letter-spacing: -0.015em;
+  font-weight: 600;
+}
+.lede {
+  margin: 0 0 34px;
+  max-width: 46em;
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--text-2);
+}
+.tiers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.tier {
+  background: #fff;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+}
+.tier-main {
+  background: #fbfcfe;
+}
+.tier-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+.tier-line {
+  margin: 10px 0 20px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.tier-price {
+  margin: 0 0 20px;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.tier-cta {
+  display: block;
+  margin-bottom: 22px;
+}
+.tier ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+.tier li {
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-2);
+}
+.tier li:last-child {
+  border-bottom: none;
+}
+.h2 {
+  margin: 46px 0 16px;
+  font-size: 18px;
+  font-weight: 600;
+}
+.compare {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  border-top: 1px solid var(--line-strong);
+}
+.compare th,
+.compare td {
+  text-align: left;
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.compare thead th {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.compare tbody th {
+  font-weight: 400;
+  color: var(--text-2);
+}
+.compare td {
+  color: var(--muted);
+}
+.notes {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.95;
+}
+@media (max-width: 820px) {
+  .page {
+    padding-top: 92px;
+  }
+  .tiers {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .compare {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+</style>
+
+<script client>
+import * as t from "#locales/site";
+
+function readLocale() {
+  if (typeof document === "undefined") return "zh-hans";
+  let id = "zh-hans";
+  try {
+    id = localStorage.getItem("mj.locale") || document.documentElement.getAttribute("data-locale") || "zh-hans";
+  } catch (error) {
+    id = document.documentElement.getAttribute("data-locale") || "zh-hans";
+  }
+  document.documentElement.setAttribute("data-locale", id);
+  document.documentElement.setAttribute("lang", id === "en-us" ? "en" : "zh-CN");
+  return id;
+}
+
+
+export default class MembershipPage {
+  copy = this.snapshot();
+
+  snapshot() {
+    return {
+      membership: {
+        title: t.memberTitle(),
+        lede: t.memberLede(),
+        feeTitle: t.memberFeeTitle(),
+        fees: [t.memberFee1(), t.memberFee2(), t.memberFee3()],
+        tiers: [
+          {
+            name: t.member1Name(),
+            line: t.member1Line(),
+            price: t.member1Price(),
+            cta: t.member1Cta(),
+            href: "install",
+            items: [t.member1Item1(), t.member1Item2(), t.member1Item3()],
+          },
+          {
+            name: t.member2Name(),
+            line: t.member2Line(),
+            price: t.member2Price(),
+            cta: t.member2Cta(),
+            href: "login",
+            featured: true,
+            items: [t.member2Item1(), t.member2Item2(), t.member2Item3(), t.member2Item4()],
+          },
+          {
+            name: t.member3Name(),
+            line: t.member3Line(),
+            price: t.member3Price(),
+            cta: t.member3Cta(),
+            href: "login",
+            items: [t.member3Item1(), t.member3Item2(), t.member3Item3(), t.member3Item4()],
+          },
+        ],
+      },
+      href: { install: "/install", login: "/login" },
+    };
+  }
+
+  onMount() {
+    if (typeof window === "undefined" || typeof MutationObserver === "undefined") return;
+    const el = document.documentElement;
+    let last = el.getAttribute("data-locale") || "";
+    new MutationObserver(() => {
+      const next = el.getAttribute("data-locale") || "";
+      if (next === last) return;
+      last = next;
+      this.copy = this.snapshot();
+    }).observe(el, { attributes: true, attributeFilter: ["data-locale"] });
+  }
+}
+</script>

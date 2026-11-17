@@ -1,0 +1,7 @@
+<template>
+  <DocsPage :pageKey="'index'" />
+</template>
+
+<script client>
+export default class DocsIndexPage {}
+</script>

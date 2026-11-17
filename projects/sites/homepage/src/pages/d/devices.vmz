@@ -1,0 +1,7 @@
+<template>
+  <DocsPage :pageKey="'devices'" />
+</template>
+
+<script client>
+export default class DocsDevicesPage {}
+</script>

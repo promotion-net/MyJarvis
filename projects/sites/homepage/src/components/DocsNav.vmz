@@ -1,0 +1,209 @@
+<template>
+  <aside class="dnav">
+    <div class="dnav-group" v-for="group in copy.groups" :key="group.title">
+      <p class="dnav-title">{{ group.title }}</p>
+      <a
+        v-for="item in group.items"
+        :key="item.key"
+        :href="item.href"
+        :class="current === item.key ? 'dnav-link is-active' : 'dnav-link'"
+      >{{ item.label }}</a>
+    </div>
+  </aside>
+</template>
+
+<style>
+.docs-layout {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 104px clamp(24px, 5vw, 48px) 96px;
+  display: grid;
+  grid-template-columns: 216px minmax(0, 1fr);
+  gap: clamp(40px, 5vw, 72px);
+  align-items: start;
+}
+.dnav {
+  position: sticky;
+  top: 92px;
+  align-self: start;
+}
+.dnav-group {
+  margin-bottom: 26px;
+}
+.dnav-title {
+  margin: 0 0 8px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted-dim);
+  letter-spacing: 0.02em;
+}
+.dnav-link {
+  display: block;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-2);
+  text-decoration: none;
+  transition: background 150ms ease, color 150ms ease;
+}
+.dnav-link:hover {
+  background: var(--bg-sub);
+  color: var(--text);
+}
+.dnav-link.is-active {
+  background: #eef5ff;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.doc-main {
+  min-width: 0;
+  max-width: 760px;
+}
+.doc-crumb {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.doc-h1 {
+  margin: 0 0 14px;
+  font-size: clamp(28px, 2.6vw, 34px);
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+  font-weight: 600;
+}
+.doc-lede {
+  margin: 0 0 32px;
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--text-2);
+}
+.doc-h2 {
+  margin: 40px 0 12px;
+  font-size: 19px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+.doc-p {
+  margin: 0 0 16px;
+  font-size: 15.5px;
+  line-height: 1.95;
+  color: var(--text-2);
+}
+.doc-pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 44px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+}
+.doc-pager a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--accent);
+  text-decoration: none;
+}
+.doc-pager a:hover {
+  text-decoration: underline;
+}
+.doc-pager span {
+  color: var(--muted-dim);
+}
+
+@media (max-width: 900px) {
+  .docs-layout {
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: 92px;
+    gap: 28px;
+  }
+  .dnav {
+    position: static;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 0;
+  }
+  .dnav-group {
+    margin-bottom: 14px;
+  }
+}
+</style>
+
+<script client>
+import * as t from "#locales/site";
+
+function readLocale() {
+  if (typeof document === "undefined") return "zh-hans";
+  let id = "zh-hans";
+  try {
+    id = localStorage.getItem("mj.locale") || document.documentElement.getAttribute("data-locale") || "zh-hans";
+  } catch (error) {
+    id = document.documentElement.getAttribute("data-locale") || "zh-hans";
+  }
+  document.documentElement.setAttribute("data-locale", id);
+  document.documentElement.setAttribute("lang", id === "en-us" ? "en" : "zh-CN");
+  return id;
+}
+
+export default class DocsNav {
+  public current = "";
+  copy = this.snapshot();
+
+  snapshot() {
+    const at = (path) => `${path}`;
+    return {
+      groups: [
+        {
+          title: t.docsGroupStart(),
+          items: [
+            { key: "index", label: t.docsIndex(), href: at("/d") },
+            { key: "setup", label: t.docsSetup(), href: at("/d/setup") },
+            { key: "start", label: t.docsStart(), href: at("/d/start") },
+            { key: "uses", label: t.docsUses(), href: at("/d/uses") },
+          ],
+        },
+        {
+          title: t.docsGroupDaily(),
+          items: [
+            { key: "messages", label: t.docsMessages(), href: at("/d/messages") },
+            { key: "calendar", label: t.docsCalendar(), href: at("/d/calendar") },
+            { key: "files", label: t.docsFiles(), href: at("/d/files") },
+            { key: "tables", label: t.docsTables(), href: at("/d/tables") },
+          ],
+        },
+        {
+          title: t.docsGroupSafety(),
+          items: [
+            { key: "privacy", label: t.docsPrivacy(), href: at("/d/privacy") },
+            { key: "billing", label: t.docsBilling(), href: at("/d/billing") },
+            { key: "devices", label: t.docsDevices(), href: at("/d/devices") },
+          ],
+        },
+        {
+          title: t.docsGroupHelp(),
+          items: [
+            { key: "troubleshooting", label: t.docsTroubleshooting(), href: at("/d/troubleshooting") },
+            { key: "faq", label: t.docsFaq(), href: at("/d/faq") },
+          ],
+        },
+      ],
+    };
+  }
+
+  onMount() {
+    if (typeof window === "undefined" || typeof MutationObserver === "undefined") return;
+    const el = document.documentElement;
+    let last = el.getAttribute("data-locale") || "";
+    new MutationObserver(() => {
+      const next = el.getAttribute("data-locale") || "";
+      if (next === last) return;
+      last = next;
+      this.copy = this.snapshot();
+    }).observe(el, { attributes: true, attributeFilter: ["data-locale"] });
+  }
+}
+</script>

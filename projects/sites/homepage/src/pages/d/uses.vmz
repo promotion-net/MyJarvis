@@ -1,0 +1,7 @@
+<template>
+  <DocsPage :pageKey="'uses'" />
+</template>
+
+<script client>
+export default class DocsUsesPage {}
+</script>

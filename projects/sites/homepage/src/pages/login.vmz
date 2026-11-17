@@ -1,0 +1,181 @@
+<template>
+  <section class="page login-page">
+    <div class="login-box">
+      <h1>{{ copy.login.title }}</h1>
+      <p class="sub">{{ copy.login.sub }}</p>
+
+      <label class="field">
+        <span>{{ copy.login.phone }}</span>
+        <input type="tel" :placeholder="copy.login.phonePlaceholder" />
+      </label>
+
+      <label class="field">
+        <span>{{ copy.login.code }}</span>
+        <div class="row">
+          <input type="text" inputmode="numeric" :placeholder="copy.login.codePlaceholder" />
+          <Button variant="default" @click="() => sendCode()">
+            {{ countdown > 0 ? countdown + " " + copy.login.resend : copy.login.getCode }}
+          </Button>
+        </div>
+      </label>
+
+      <span class="submit-slot">
+        <Button block size="large" @click="() => submit()">{{ copy.login.submit }}</Button>
+      </span>
+      <p class="notice" v-if="notice">{{ notice }}</p>
+      <p class="terms">{{ copy.login.terms }}</p>
+    </div>
+  </section>
+</template>
+
+<style>
+.login-page {
+  min-height: calc(100vh - 220px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 104px clamp(24px, 5vw, 48px) 60px;
+}
+.login-box {
+  width: 100%;
+  max-width: 380px;
+}
+h1 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.sub {
+  margin: 0 0 30px;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--muted);
+}
+.field {
+  display: block;
+  margin-bottom: 20px;
+}
+.field > span {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13.5px;
+  color: var(--text-2);
+}
+input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--text);
+  background: #fff;
+}
+input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.row {
+  display: flex;
+  gap: 8px;
+}
+.row input {
+  flex: 1;
+}
+.submit-slot {
+  display: block;
+  margin-top: 6px;
+}
+.notice {
+  margin: 14px 0 0;
+  padding: 11px 13px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-sub);
+  border: 1px solid var(--line);
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-2);
+}
+.terms {
+  margin: 16px 0 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted-dim);
+}
+</style>
+
+<script client>
+import * as t from "#locales/site";
+
+function readLocale() {
+  if (typeof document === "undefined") return "zh-hans";
+  let id = "zh-hans";
+  try {
+    id = localStorage.getItem("mj.locale") || document.documentElement.getAttribute("data-locale") || "zh-hans";
+  } catch (error) {
+    id = document.documentElement.getAttribute("data-locale") || "zh-hans";
+  }
+  document.documentElement.setAttribute("data-locale", id);
+  document.documentElement.setAttribute("lang", id === "en-us" ? "en" : "zh-CN");
+  return id;
+}
+
+export default class LoginPage {
+  copy = this.snapshot();
+  countdown = 0;
+  notice = "";
+  timer = 0;
+
+  snapshot() {
+    return {
+      login: {
+        title: t.loginTitle(),
+        sub: t.loginSub(),
+        phone: t.loginPhone(),
+        phonePlaceholder: t.loginPhonePlaceholder(),
+        code: t.loginCode(),
+        codePlaceholder: t.loginCodePlaceholder(),
+        getCode: t.loginGetCode(),
+        resend: t.loginResend(),
+        submit: t.loginSubmit(),
+        codeNotice: t.loginCodeNotice(),
+        submitNotice: t.loginSubmitNotice(),
+        terms: t.loginTerms(),
+      },
+    };
+  }
+
+  onMount() {
+    if (typeof window === "undefined" || typeof MutationObserver === "undefined") return;
+    const el = document.documentElement;
+    let last = el.getAttribute("data-locale") || "";
+    new MutationObserver(() => {
+      const next = el.getAttribute("data-locale") || "";
+      if (next === last) return;
+      last = next;
+      this.copy = this.snapshot();
+    }).observe(el, { attributes: true, attributeFilter: ["data-locale"] });
+  }
+
+  sendCode() {
+    if (this.countdown > 0) return;
+    this.countdown = 60;
+    this.notice = this.copy.login.codeNotice;
+    clearInterval(this.timer);
+    this.timer = setInterval(() => {
+      this.countdown -= 1;
+      if (this.countdown <= 0) {
+        clearInterval(this.timer);
+        this.countdown = 0;
+      }
+    }, 1000);
+  }
+
+  submit() {
+    this.notice = this.copy.login.submitNotice;
+  }
+}
+</script>

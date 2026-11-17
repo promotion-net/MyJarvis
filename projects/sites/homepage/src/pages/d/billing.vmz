@@ -1,0 +1,7 @@
+<template>
+  <DocsPage :pageKey="'billing'" />
+</template>
+
+<script client>
+export default class DocsBillingPage {}
+</script>
