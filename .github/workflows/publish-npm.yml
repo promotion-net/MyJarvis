@@ -36,7 +36,7 @@ jobs:
             shard: my-jarvis-darwin-arm64
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
@@ -58,7 +58,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
