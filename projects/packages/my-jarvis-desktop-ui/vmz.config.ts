@@ -1,5 +1,6 @@
-// Plain default export: `defineConfig` is not part of the published `@vmz/*` 0.3.16 surface yet.
-export default {
+import { defineConfig } from "@vmz/vmz";
+
+export default defineConfig({
     application: { id: "my-jarvis-desktop" },
     delivery: {
         default: "desktop",
@@ -7,4 +8,4 @@ export default {
             desktop: { host: "browser", assembly: "local-static", name: "app" },
         },
     },
-};
+});
