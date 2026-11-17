@@ -145,6 +145,8 @@ fn resolve_content_dir() -> Result<PathBuf, String> {
         && let Some(dir) = exe.parent()
     {
         candidates.push(dir.join("ui"));
+        // `cargo run` lands in `target/<profile>/`; release bundles sit one level deeper.
+        candidates.push(dir.join("../../projects/packages/my-jarvis-desktop-ui/dist/app"));
         candidates.push(dir.join("../../../projects/packages/my-jarvis-desktop-ui/dist/app"));
     }
     for candidate in &candidates {
