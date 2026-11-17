@@ -22,6 +22,10 @@
         </div>
       </div>
       <p class="dl-note">{{ copy.install.dlNote }}</p>
+      <p class="svc" v-if="serviceState !== 'unconfigured'">
+        <span class="svc-dot" :data-state="serviceState"></span>
+        <span>{{ copy.install.svcLabel }}：{{ serviceText }}</span>
+      </p>
 
       <h2 class="h2">{{ copy.install.reqTitle }}</h2>
       <ul class="req">
@@ -93,9 +97,29 @@ h1 {
   color: var(--muted);
 }
 .dl-note {
-  margin: 0 0 36px;
+  margin: 0 0 12px;
   font-size: 13px;
   color: var(--muted-dim);
+}
+.svc {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 36px;
+  font-size: 13.5px;
+  color: var(--text-2);
+}
+.svc-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted-dim);
+}
+.svc-dot[data-state="online"] {
+  background: var(--vmz-status-success-accent);
+}
+.svc-dot[data-state="offline"] {
+  background: var(--vmz-status-danger-accent);
 }
 .h2 {
   margin: 38px 0 14px;
@@ -176,6 +200,8 @@ function readLocale() {
 
 export default class InstallPage {
   copy = this.snapshot();
+  serviceState = "checking";
+  serviceText = this.textFor("checking");
 
   snapshot() {
     return {
@@ -189,6 +215,10 @@ export default class InstallPage {
         macMeta: t.installMacMeta(),
         soon: t.installSoon(),
         dlNote: t.installDlNote(),
+        svcLabel: t.installSvcLabel(),
+        svcOnline: t.installSvcOnline(),
+        svcOffline: t.installSvcOffline(),
+        svcChecking: t.installSvcChecking(),
         reqTitle: t.installReqTitle(),
         reqs: [
           { k: t.installReq1K(), v: t.installReq1V() },
@@ -217,7 +247,47 @@ export default class InstallPage {
       if (next === last) return;
       last = next;
       this.copy = this.snapshot();
+      this.serviceText = this.textFor(this.serviceState);
     }).observe(el, { attributes: true, attributeFilter: ["data-locale"] });
+    this.checkService();
+  }
+
+  textFor(state) {
+    if (state === "online") return this.copy.install.svcOnline;
+    if (state === "offline") return this.copy.install.svcOffline;
+    return this.copy.install.svcChecking;
+  }
+
+  /** `runtime.json` 的 `apiBase` 为空表示与站点同源，由 CDN 把 `/v0/*` 转到后端。 */
+  async readApiBase() {
+    try {
+      const res = await fetch(`${location.origin}/runtime.json`, { cache: "no-store" });
+      if (!res.ok) return "";
+      const cfg = await res.json();
+      return typeof cfg.apiBase === "string" ? cfg.apiBase.trim() : "";
+    } catch (error) {
+      return "";
+    }
+  }
+
+  async checkService() {
+    const base = await this.readApiBase();
+    this.serviceState = "checking";
+    this.serviceText = this.textFor("checking");
+    const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    const timer = setTimeout(() => controller && controller.abort(), 4000);
+    try {
+      const res = await fetch(`${base.replace(/\/$/, "")}/v0/public/status`, {
+        signal: controller ? controller.signal : undefined,
+        headers: { accept: "application/json" },
+        cache: "no-store",
+      });
+      this.serviceState = res.ok ? "online" : "offline";
+    } catch (error) {
+      this.serviceState = "offline";
+    }
+    clearTimeout(timer);
+    this.serviceText = this.textFor(this.serviceState);
   }
 }
 </script>

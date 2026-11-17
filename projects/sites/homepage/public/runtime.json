@@ -1,0 +1,4 @@
+{
+  "apiBase": "",
+  "note": "空字符串表示与站点同源（由 CDN 把 /v0/* 转发到后端）。后端在独立域名时填完整 origin，例如 https://api.example.com。"
+}
