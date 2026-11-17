@@ -1,4 +1,4 @@
 {
-  "apiBase": "",
-  "note": "空字符串表示与站点同源（由 CDN 把 /v0/* 转发到后端）。后端在独立域名时填完整 origin，例如 https://api.example.com。"
+  "apiBase": "https://api.wxtoken.work",
+  "note": "站点在 CDN 上与 API 不同源，这里填后端 origin。若 CDN 把 /v0/* 转发到同一域名，留空即可。"
 }
