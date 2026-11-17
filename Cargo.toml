@@ -31,4 +31,4 @@ thiserror = "2"
 tokio = { version = "1", features = ["full"] }
 
 # WAE platform（桌面壳的 WebView 宿主与自动化 harness）；pin 远端 dev rev（工作区硬规则 11）
-wae = { git = "https://github.com/doki-land/wae-framework", rev = "dd74edd56a78a4fb53d7ad4fc51b205374e22c5e", default-features = false, features = ["webview", "harness"] }
+wae = { git = "https://github.com/doki-land/wae-framework", rev = "0401425f10ea2cf90b4790add464e604095a9a22", default-features = false, features = ["webview", "harness"] }
