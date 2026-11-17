@@ -51,23 +51,5 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![mj_dispatch])
         .build(tauri::generate_context!())
         .expect("error while building the MyJarvis desktop shell");
-    app.run(|handle, event| {
-        // The window and the WebView2 child can disagree on pixel vs logical units on
-        // scaled displays, which makes the page wider than the window. Once the app is
-        // ready, size the window from the logical design size and the real scale factor.
-        if let tauri::RunEvent::Ready = event {
-            let handle = handle.clone();
-            std::thread::spawn(move || {
-                std::thread::sleep(std::time::Duration::from_millis(1500));
-                if let Some(window) = tauri::Manager::get_webview_window(&handle, "main") {
-                    // WebView2 can lay the page out wider than the window on scaled
-                    // displays. Scale the document down only when that happens.
-                    let _ = window.eval(
-                        "try{const r=window.outerWidth/window.innerWidth;\
-                         if(r>0&&r<1){document.documentElement.style.zoom=String(r);}}catch(e){}",
-                    );
-                }
-            });
-        }
-    });
+    app.run(|_handle, _event| {});
 }

@@ -274,6 +274,25 @@ importers:
 
   projects/packages/my-jarvis-win32-x64: {}
 
+  projects/sites/homepage:
+    dependencies:
+      '@vmz/ui':
+        specifier: 0.3.16
+        version: 0.3.16(@vmz/ui-icons@0.3.16)
+      '@vmz/ui-icons':
+        specifier: 0.3.16
+        version: 0.3.16(@vmz/ui@0.3.16)
+    devDependencies:
+      '@vmz/core':
+        specifier: 0.3.16
+        version: 0.3.16
+      '@vmz/plugin':
+        specifier: 0.3.16
+        version: 0.3.16
+      '@vmz/vmz':
+        specifier: 0.3.16
+        version: 0.3.16(typescript@5.9.3)
+
 packages:
 
   '@emnapi/core@2.0.0-beta.3':
@@ -940,6 +959,19 @@ packages:
   '@vmz/protocol@0.3.16':
     resolution: {integrity: sha512-s8T3PQSMEk/tz1VnITNIW6gXrGXaYlt+QUZzzhZTRv30jgh7e/brqJGDo7b4VWZyg6i2Gw8TPj33m7vpM525MA==}
     engines: {node: '>=20'}
+
+  '@vmz/ui-icons@0.3.16':
+    resolution: {integrity: sha512-w788txBhGYZeVXfo7aEAvwszRtd+ADoxmNKc+tQhlA+lipKISeMcnp/WjKgun3xz/8RQrcFGE3OtzfwRIwIwGw==}
+    peerDependencies:
+      '@vmz/ui': 0.3.16
+
+  '@vmz/ui@0.3.16':
+    resolution: {integrity: sha512-IumRz3pOCI1WqlrA8t6iX1UHCHdLpfF8B/a7DXEYO5xX7rb5G/mGWkBYyiWST9tS7NSfgZ+xgWd19JTngfyMgQ==}
+    peerDependencies:
+      '@vmz/ui-icons': 0.3.16
+    peerDependenciesMeta:
+      '@vmz/ui-icons':
+        optional: true
 
   '@vmz/vmz-darwin-arm64@0.3.16':
     resolution: {integrity: sha512-6GH7F1suhyiw4u69I4Zn++v1dgjnzaZ/yPcw3FNupQcVun5SQzch12Os4TXfqZSAhcfq/4HGYcwkJ8uJY15o7w==}
@@ -1708,6 +1740,14 @@ snapshots:
       '@vmz/protocol': 0.3.16
 
   '@vmz/protocol@0.3.16': {}
+
+  '@vmz/ui-icons@0.3.16(@vmz/ui@0.3.16)':
+    dependencies:
+      '@vmz/ui': 0.3.16(@vmz/ui-icons@0.3.16)
+
+  '@vmz/ui@0.3.16(@vmz/ui-icons@0.3.16)':
+    optionalDependencies:
+      '@vmz/ui-icons': 0.3.16(@vmz/ui@0.3.16)
 
   '@vmz/vmz-darwin-arm64@0.3.16':
     optional: true
