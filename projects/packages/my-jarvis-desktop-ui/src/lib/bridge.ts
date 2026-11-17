@@ -149,6 +149,18 @@ export function windowCommand(command: "minimize" | "toggleMaximize" | "close"):
     return send("window." + command);
 }
 
+export interface DragRegion {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
+/** Frameless window: hand the host the draggable rects of the custom title bar. */
+export function windowDragRegions(rects: DragRegion[]): Promise<unknown> {
+    return send("window.dragRegions", { rects });
+}
+
 export function installShellTransport(): void {
     installMjTransport((method, params) => invokeDispatch(method, params));
 }

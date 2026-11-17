@@ -12,7 +12,10 @@ use std::time::Duration;
 
 use serde_json::{json, Value};
 use wae::harness::{self, PlatformHarness};
-use wae::webview::{IpcHandler, IpcOutcome, IpcSink, OpenOptions};
+use wae::webview::{DragRect, IpcHandler, IpcOutcome, IpcSink, OpenOptions};
+
+/// Latest drag-region list queued by the page; the window thread applies it.
+type DragQueue = Arc<Mutex<Option<Vec<DragRect>>>>;
 
 const WINDOW_TITLE: &str = "MyJarvis";
 const WINDOW_WIDTH: i32 = 1240;
@@ -85,6 +88,7 @@ impl Gateway {
 struct ShellIpc {
     gateway: Gateway,
     window: WindowQueue,
+    regions: DragQueue,
 }
 
 impl IpcHandler for ShellIpc {
@@ -114,6 +118,22 @@ impl IpcHandler for ShellIpc {
             }
             "window.toggleMaximize" => {
                 self.window.lock().expect("window queue").push(WindowCommand::ToggleMaximize);
+                IpcOutcome::ReplyToPage(reply(id, json!({ "ok": true, "result": true })))
+            }
+            "window.dragRegions" => {
+                let rects = request.get("rects").and_then(Value::as_array).cloned().unwrap_or_default();
+                let parsed: Vec<DragRect> = rects
+                    .iter()
+                    .filter_map(|rect| {
+                        Some(DragRect {
+                            x: rect.get("x")?.as_i64()? as i32,
+                            y: rect.get("y")?.as_i64()? as i32,
+                            width: rect.get("width")?.as_i64()? as i32,
+                            height: rect.get("height")?.as_i64()? as i32,
+                        })
+                    })
+                    .collect();
+                *self.regions.lock().expect("drag queue") = Some(parsed);
                 IpcOutcome::ReplyToPage(reply(id, json!({ "ok": true, "result": true })))
             }
             "window.close" => IpcOutcome::CloseWindow,
@@ -184,13 +204,25 @@ pub fn run() {
     }
 }
 
+fn drain_drag_regions(host: &mut PlatformHarness, queue: &DragQueue) {
+    let latest = queue.lock().expect("drag queue").take();
+    if let Some(rects) = latest
+        && let Err(error) = host.host_mut().set_drag_regions(&rects)
+    {
+        eprintln!("desktop shell: drag regions failed: {error}");
+    }
+}
+
 fn run_inner() -> Result<(), Box<dyn std::error::Error>> {
     let content_dir = resolve_content_dir()?;
     let window: WindowQueue = Arc::new(Mutex::new(Vec::new()));
-    let handler = ShellIpc { gateway: Gateway::from_env(), window: Arc::clone(&window) };
+    let regions: DragQueue = Arc::new(Mutex::new(None));
+    let handler = ShellIpc { gateway: Gateway::from_env(), window: Arc::clone(&window), regions: Arc::clone(&regions) };
     let mut options = OpenOptions::from_content_dir(content_dir.display().to_string(), WINDOW_TITLE);
     options.width = WINDOW_WIDTH;
     options.height = WINDOW_HEIGHT;
+    // The page draws its own title bar; the native caption would only duplicate it.
+    options.decorations = false;
     // Harness runs stay off the desktop unless explicitly asked to show.
     options.hidden = std::env::var("WAE_HARNESS_HIDDEN").is_ok_and(|value| value == "1");
     let mut host = PlatformHarness::open(options, Box::new(handler))?;
@@ -204,6 +236,7 @@ fn run_inner() -> Result<(), Box<dyn std::error::Error>> {
 
     while host.host_mut().pump() {
         drain_window_commands(&mut host, &window);
+        drain_drag_regions(&mut host, &regions);
         std::thread::sleep(Duration::from_millis(2));
     }
     Ok(())
