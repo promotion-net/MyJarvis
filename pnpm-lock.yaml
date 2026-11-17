@@ -192,12 +192,6 @@ importers:
         specifier: 2.12.2
         version: 2.12.2
 
-  projects/homepage:
-    dependencies:
-      '@my-jarvis/types':
-        specifier: workspace:*
-        version: link:../packages/my-jarvis-types
-
   projects/packages/my-jarvis:
     dependencies:
       '@vmz/commander':
@@ -231,7 +225,7 @@ importers:
 
   projects/packages/my-jarvis-darwin-x64: {}
 
-  projects/packages/my-jarvis-desktop:
+  projects/packages/my-jarvis-desktop-ui:
     dependencies:
       '@my-jarvis/sdk':
         specifier: workspace:*
@@ -260,7 +254,7 @@ importers:
 
   projects/packages/my-jarvis-linux-x64: {}
 
-  projects/packages/my-jarvis-mobile:
+  projects/packages/my-jarvis-mobile-ui:
     dependencies:
       '@my-jarvis/sdk':
         specifier: workspace:*
