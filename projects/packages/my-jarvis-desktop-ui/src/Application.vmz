@@ -1,13 +1,135 @@
 <template>
-  <slot />
+  <div class="app-frame">
+    <TitleBar />
+    <slot />
+    <ContextMenu
+      v-if="menuOpen"
+      :items="menuItems"
+      :x="menuX"
+      :y="menuY"
+      :on-pick="pickMenuItem"
+    />
+  </div>
 </template>
+
+<style>
+/* App-wide surface tokens: the shell chrome and every page read them from here. */
+.app-frame {
+  --font: "Segoe UI", "PingFang SC", system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, "JetBrains Mono", "SF Mono", Consolas, monospace;
+  --panel: #ffffff;
+  --chat: #f6f7f9;
+  --soft: #f2f4f7;
+  --field: #eef1f5;
+  --hover: rgba(15, 23, 42, 0.05);
+  --line: #e8eaef;
+  --text-1: #101828;
+  --text-2: #475467;
+  --text-3: #98a2b3;
+  --accent: #0a84ff;
+  --accent-hover: #0071e3;
+  --accent-soft: #e8f2ff;
+  --accent-ink: #0a6ad6;
+  --danger: #ff3b30;
+
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: #eef1f5;
+}
+</style>
 
 <script client>
 import { installShellTransport } from "./lib/bridge.js";
 
+interface MenuItem {
+  id: string;
+  label: string;
+  danger?: boolean;
+}
+
+/**
+ * Right-click menus are owned by the app, never by the WebView default menu.
+ * Rows opt in by carrying `data-ctx="conversation|message"`.
+ */
+const MENUS: Record<string, MenuItem[]> = {
+  conversation: [
+    { id: "pin", label: "Pin conversation" },
+    { id: "mute", label: "Mute notifications" },
+    { id: "read", label: "Mark as read" },
+    { id: "delete", label: "Delete conversation", danger: true },
+  ],
+  message: [
+    { id: "copy", label: "Copy text" },
+    { id: "quote", label: "Quote in reply" },
+  ],
+  default: [
+    { id: "reload", label: "Reload view" },
+    { id: "dismiss", label: "Dismiss menu" },
+  ],
+};
+
+function menuFor(target: EventTarget | null): MenuItem[] {
+  const node = target as Element | null;
+  const owner = node && typeof node.closest === "function" ? node.closest("[data-ctx]") : null;
+  const kind = owner && owner.getAttribute ? owner.getAttribute("data-ctx") : null;
+  return MENUS[kind || "default"] ?? MENUS.default;
+}
+
 export default class Application {
+  public menuOpen = false;
+  public menuItems: MenuItem[] = [];
+  public menuX = 0;
+  public menuY = 0;
+  public detachMenu: (() => void) | null = null;
+
   onMount() {
     installShellTransport();
+    // `onMount` also runs during SSR (server render has no window).
+    if (typeof window === "undefined") return;
+    // DOM listeners need bound closures: class methods are not auto-bound here.
+    const onContextMenu = (event: Event) => this.openMenu(event);
+    const onPointerDown = (event: Event) => this.dismissOnOutside(event);
+    const onKeyDown = (event: Event) => this.dismissOnEscape(event);
+    window.addEventListener("contextmenu", onContextMenu);
+    window.addEventListener("mousedown", onPointerDown);
+    window.addEventListener("keydown", onKeyDown);
+    this.detachMenu = () => {
+      window.removeEventListener("contextmenu", onContextMenu);
+      window.removeEventListener("mousedown", onPointerDown);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }
+
+  onDestroy() {
+    if (this.detachMenu) this.detachMenu();
+    this.detachMenu = null;
+  }
+
+  openMenu(event: Event) {
+    const mouse = event as MouseEvent;
+    mouse.preventDefault();
+    this.menuItems = menuFor(mouse.target);
+    this.menuX = mouse.clientX;
+    this.menuY = mouse.clientY;
+    this.menuOpen = true;
+  }
+
+  dismissOnOutside(event: Event) {
+    if (!this.menuOpen) return;
+    const node = event.target as Element | null;
+    if (node && typeof node.closest === "function" && node.closest(".ctx")) return;
+    this.menuOpen = false;
+  }
+
+  dismissOnEscape(event: Event) {
+    if (!this.menuOpen) return;
+    if ((event as KeyboardEvent).key === "Escape") this.menuOpen = false;
+  }
+
+  pickMenuItem(_id: string) {
+    this.menuOpen = false;
   }
 }
 </script>

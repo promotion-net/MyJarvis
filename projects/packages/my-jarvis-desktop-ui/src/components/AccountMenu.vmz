@@ -12,7 +12,7 @@
         <b>{{ a.name }}</b>
         <i>{{ a.plan }} · {{ a.quota }}</i>
       </span>
-      <span v-if="isCurrent(a.id)" class="menu__check"><AppIcon name="check" /></span>
+      <span v-if="isCurrent(a.id)" class="menu__check"><Icon name="action.check" size="sm" /></span>
     </div>
     <div class="menu__line"></div>
     <div class="menu__action" @click="close">
@@ -99,6 +99,7 @@
 
 <script client>
 export default class AccountMenu {
+  static __vmzHostBox = "contents";
   public accounts: unknown[] = [];
   public current = "";
   public onPick: ((id: string) => void) | null = null;

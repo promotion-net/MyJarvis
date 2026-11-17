@@ -1,6 +1,6 @@
 <template>
   <section class="empty">
-    <span class="empty__icon"><AppIcon :name="icon" /></span>
+    <span class="empty__icon"><Icon :name="icon" size="lg" /></span>
     <b class="empty__title">{{ title }}</b>
     <p class="empty__note">{{ note }}</p>
     <span class="empty__cap">{{ capability }}</span>
@@ -56,8 +56,9 @@
 
 <script client>
 export default class EmptyState {
+  static __vmzHostBox = "contents";
   public title = "";
-  public icon = "doc";
+  public icon = "file.document";
   public note = "";
   public capability = "";
 }

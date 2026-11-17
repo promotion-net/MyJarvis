@@ -193,6 +193,7 @@
 
 <script client>
 export default class DetailPanel {
+  static __vmzHostBox = "contents";
   public decision = "";
   public onClose: (() => void) | null = null;
 

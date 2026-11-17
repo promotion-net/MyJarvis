@@ -1,0 +1,78 @@
+<template>
+  <div class="ctx" :style="position()">
+    <button
+      v-for="item in items"
+      :key="item.id"
+      type="button"
+      :class="itemClass(item)"
+      @click="pick(item)"
+    >
+      {{ item.label }}
+    </button>
+  </div>
+</template>
+
+<style>
+.ctx {
+  position: fixed;
+  z-index: 60;
+  min-width: 172px;
+  padding: 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(20, 24, 32, 0.08);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18), 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+.ctx__item {
+  display: block;
+  width: 100%;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-1);
+  font: 400 12.5px/1.2 var(--font);
+  text-align: left;
+  cursor: pointer;
+}
+.ctx__item:hover {
+  background: var(--hover);
+}
+.ctx__item--danger {
+  color: var(--danger);
+}
+</style>
+
+<script client>
+interface MenuItem {
+  id: string;
+  label: string;
+  danger?: boolean;
+}
+
+export default class ContextMenu {
+  static __vmzHostBox = "contents";
+  public items: MenuItem[] = [];
+  public x = 0;
+  public y = 0;
+  public onPick: ((id: string) => void) | null = null;
+
+  position(): string {
+    const width = 180;
+    const height = this.items.length * 31 + 12;
+    const left = Math.min(this.x, Math.max(8, window.innerWidth - width - 8));
+    const top = Math.min(this.y, Math.max(8, window.innerHeight - height - 8));
+    return `left:${left}px;top:${top}px`;
+  }
+
+  itemClass(item: MenuItem): string {
+    return item.danger ? "ctx__item ctx__item--danger" : "ctx__item";
+  }
+
+  pick(item: MenuItem) {
+    this.onPick?.(item.id);
+  }
+}
+</script>

@@ -2,17 +2,18 @@
   <aside class="list">
     <div class="list__head">
       <label class="list__search">
-        <AppIcon name="search" />
+        <Icon name="action.search" size="sm" />
         <input class="list__input" type="text" placeholder="Search" readonly />
       </label>
       <button class="list__add" type="button" title="New conversation">
-        <AppIcon name="plus" />
+        <Icon name="action.plus" size="md" />
       </button>
     </div>
     <div class="list__scroll">
       <div
         v-for="c in conversations"
         :key="c.id"
+        data-ctx="conversation"
         :class="rowClass(c.id)"
         @click="choose(c.id)"
       >
@@ -167,6 +168,7 @@
 
 <script client>
 export default class ConversationList {
+  static __vmzHostBox = "contents";
   public conversations: unknown[] = [];
   public activeId = "";
   public onSelect: ((id: string) => void) | null = null;

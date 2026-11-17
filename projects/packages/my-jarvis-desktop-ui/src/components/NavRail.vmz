@@ -12,16 +12,16 @@
         :title="m.label"
         @click="select(m.id)"
       >
-        <AppIcon :name="m.icon" />
+        <Icon :name="m.icon" size="lg" />
         <span v-if="m.dot" class="rail__dot"></span>
       </button>
     </div>
     <div class="rail__spacer"></div>
     <button v-if="showAdmin" type="button" class="rail__item" title="Admin" @click="select('admin')">
-      <AppIcon name="panel" />
+      <Icon name="action.sidebar" size="lg" />
     </button>
     <button type="button" class="rail__item" title="Settings" @click="select('settings')">
-      <AppIcon name="settings" />
+      <Icon name="action.settings" size="lg" />
     </button>
     <button type="button" class="rail__account" :title="account.name" @click="toggleMenu">
       <span :class="'avatar avatar--' + account.tone">{{ account.initials }}</span>
@@ -138,6 +138,7 @@
 
 <script client>
 export default class NavRail {
+  static __vmzHostBox = "contents";
   public modules: unknown[] = [];
   public accounts: unknown[] = [];
   public active = "assistant";

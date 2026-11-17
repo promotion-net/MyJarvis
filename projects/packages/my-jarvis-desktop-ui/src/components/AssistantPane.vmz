@@ -26,6 +26,7 @@
 
 <script client>
 export default class AssistantPane {
+  static __vmzHostBox = "contents";
   public conversations: unknown[] = [];
   public messages: unknown[] = [];
   public activeConversation = "";

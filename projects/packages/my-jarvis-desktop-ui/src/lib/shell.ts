@@ -44,14 +44,14 @@ export interface MessageDef {
 }
 
 const MODULES: ModuleDef[] = [
-    { id: "messages", label: "Messages", icon: "message", status: "missing", dot: true, capability: "mj.im.*" },
-    { id: "mail", label: "Mail", icon: "mail", status: "missing", dot: false, capability: "mj.mail.*" },
-    { id: "docs", label: "Docs", icon: "doc", status: "missing", dot: false, capability: "mj.doc.*" },
-    { id: "space", label: "Space", icon: "space", status: "partial", dot: false, capability: "mj.space.*" },
-    { id: "assistant", label: "Assistant", icon: "spark", status: "ready", dot: false, capability: "mj.llm.complete" },
-    { id: "calendar", label: "Calendar", icon: "calendar", status: "missing", dot: false, capability: "mj.calendar.*" },
-    { id: "meetings", label: "Meetings", icon: "meeting", status: "missing", dot: false, capability: "mj.meeting.*" },
-    { id: "contacts", label: "Contacts", icon: "contacts", status: "missing", dot: false, capability: "mj.contact.*" },
+    { id: "messages", label: "Messages", icon: "nav.chat", status: "missing", dot: true, capability: "mj.im.*" },
+    { id: "mail", label: "Mail", icon: "action.mail", status: "missing", dot: false, capability: "mj.mail.*" },
+    { id: "docs", label: "Docs", icon: "file.document", status: "missing", dot: false, capability: "mj.doc.*" },
+    { id: "space", label: "Space", icon: "file.folder", status: "partial", dot: false, capability: "mj.space.*" },
+    { id: "assistant", label: "Assistant", icon: "feature.assistant", status: "ready", dot: false, capability: "mj.llm.complete" },
+    { id: "calendar", label: "Calendar", icon: "action.calendar", status: "missing", dot: false, capability: "mj.calendar.*" },
+    { id: "meetings", label: "Meetings", icon: "media.camera", status: "missing", dot: false, capability: "mj.meeting.*" },
+    { id: "contacts", label: "Contacts", icon: "nav.contacts", status: "missing", dot: false, capability: "mj.contact.*" },
 ];
 
 const ACCOUNTS: AccountDef[] = [
