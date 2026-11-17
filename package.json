@@ -6,6 +6,7 @@
   "version": "0.1.0",
   "scripts": {
     "build": "cargo build --workspace && pnpm -r build",
+    "build:homepage": "pnpm --filter @my-jarvis/homepage run build",
     "build:napi": "node scripts/build-napi.ts",
     "build:desktop": "pnpm tauri build --config projects/crates/jarvis-desktop/tauri.conf.json",
     "dev:desktop": "pnpm tauri dev --config projects/crates/jarvis-desktop/tauri.conf.json",
